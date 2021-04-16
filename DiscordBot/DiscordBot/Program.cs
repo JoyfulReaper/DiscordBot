@@ -2,17 +2,22 @@
 using Discord.WebSocket;
 using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot
 {
     class Program
     {
-        private static DiscordSocketClient _client;
+        private DiscordSocketClient _client;
 
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
+            => new Program().MainAsync().GetAwaiter().GetResult();
+
+        public async Task MainAsync()
         {
             _client = new DiscordSocketClient();
+            _client.MessageReceived += CommandHandler;
             _client.Log += Log;
 
             //var token = "tokenHere";
@@ -27,6 +32,49 @@ namespace DiscordBot
         private static Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
+            return Task.CompletedTask;
+        }
+
+        private Task CommandHandler(SocketMessage message)
+        {
+            Console.WriteLine($"{message.Author} : {message.Channel} : {message.Content}");
+
+            string command = String.Empty;
+            
+            if(!message.Content.StartsWith('~') || message.Author.IsBot)
+            {
+                return Task.CompletedTask;
+            }
+
+            int lengthOfCommand = -1;
+
+            if (message.Content.Contains(' '))
+            {
+                lengthOfCommand = message.Content.IndexOf(' ');
+            }
+            else
+            {
+                lengthOfCommand = message.Content.Length;
+            }
+
+            string trailing;
+            var split = message.Content.Split(' ');
+            StringBuilder sb = new StringBuilder();
+            for(int i = 1; i < split.Length; i++)
+            {
+                sb.Append($"{split[i]} ");
+            }
+
+            command = message.Content.Substring(1, lengthOfCommand - 1);
+
+            Console.WriteLine($"Command: {command} sb: {sb.ToString()}");
+            message.Channel.SendMessageAsync($"Command: {command} sb: {sb.ToString()}");
+
+            if(command.Equals("echo"))
+            {
+                message.Channel.SendMessageAsync(sb.ToString());
+            }
+
             return Task.CompletedTask;
         }
     }
