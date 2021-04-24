@@ -10,9 +10,16 @@ using System.Threading.Tasks;
 namespace DiscordBot.Commands
 {
     // TODO add logging
+    // TODO the bot doesn't seem to know about users until they have used a command, look into that
 
     public class General : ModuleBase
     {
+        [Command("echo")]
+        public async Task Echo(params string[] message)
+        {
+            await ReplyAsync(string.Join(" ", message));
+        }
+
         [Command("ping")]
         public async Task Ping()
         {
