@@ -1,7 +1,7 @@
 ﻿/*
 MIT License
 
-Copyright(c) 2020 Kyle Givler
+Copyright(c) 2021 Kyle Givler
 https://github.com/JoyfulReaper
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
