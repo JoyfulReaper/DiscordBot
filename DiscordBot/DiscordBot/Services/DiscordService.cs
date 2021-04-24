@@ -24,12 +24,14 @@ SOFTWARE.
 */
 
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,24 +39,40 @@ namespace DiscordBot.Services
 {
     public class DiscordService : IChatService
     {
+        private readonly IServiceProvider _serviceProvider;
+        private readonly DiscordSocketClient _client;
         private readonly IConfiguration _configuration;
+        private readonly CommandService _commands;
 
-        private readonly DiscordSocketClient _socketClient = new DiscordSocketClient();
 
-        public DiscordService(IConfiguration configuration)
+        public DiscordService(IServiceProvider serviceProvider,
+            DiscordSocketClient client,
+            IConfiguration configuration,
+            CommandService commands)
         {
+            _serviceProvider = serviceProvider;
+            _client = client;
             _configuration = configuration;
+            _commands = commands;
 
-            _socketClient.Ready += SocketClient_Ready;
-            _socketClient.MessageReceived += SocketClient_MessageReceived;
-            _socketClient.Disconnected += SocketClient_Disconnected;
-            _socketClient.Log += SocketClient_Log;
+            _client.Ready += SocketClient_Ready;
+            _client.MessageReceived += SocketClient_MessageReceived;
+            _client.Disconnected += SocketClient_Disconnected;
+            _client.Log += SocketClient_Log;
         }
 
         private Task SocketClient_MessageReceived(SocketMessage arg)
         {
+            //TODO replace this with logging / Possibly keep a database of all messages received
             Console.WriteLine("Message received: ");
             Console.WriteLine($"{arg.Author.Username} : {arg.Channel.Name} : {arg.Content}");
+
+            // Don't let other bots trigger us
+            // TODO make this configurable
+            if(arg.Author.IsBot)
+            {
+                return Task.CompletedTask;
+            }
 
             return Task.CompletedTask;
         }
@@ -70,6 +88,7 @@ namespace DiscordBot.Services
         private Task SocketClient_Ready()
         {
             Console.WriteLine("SocketClient is ready");
+            Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
             return Task.CompletedTask;
         }
 
@@ -81,9 +100,18 @@ namespace DiscordBot.Services
 
         public async Task Start()
         {
+            //TODO Figure out a better place to store the token Maybe in a DB
             var token = File.ReadAllText(@"C:\token.txt");
-            await _socketClient.LoginAsync(TokenType.Bot, token);
-            await _socketClient.StartAsync();
+
+            if(string.IsNullOrEmpty(token))
+            {
+                throw new InvalidOperationException("Token is null or empty");
+            }
+
+            await _client.LoginAsync(TokenType.Bot, token);
+            await _client.StartAsync();
+
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
         }
     }
 }

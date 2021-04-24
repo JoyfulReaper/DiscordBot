@@ -23,42 +23,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace DiscordBot
+namespace DiscordBot.Services
 {
-    internal static class Bootstrap
+    public class CommandHandler
     {
-        internal static ServiceProvider Initialize(string[] args)
+        private readonly DiscordSocketClient _client;
+        private readonly CommandService _commands;
+        private readonly IConfiguration _config;
+        private readonly IServiceProvider _serviceProvider;
+
+        public CommandHandler(DiscordSocketClient client,
+            CommandService commands,
+            IConfiguration config,
+            IServiceProvider serviceProvider)
         {
-            IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
-            CommandService commandService = new CommandService(new CommandServiceConfig
-            {
-                LogLevel = LogSeverity.Verbose,
-                DefaultRunMode = RunMode.Async,
-                CaseSensitiveCommands = false,
-            });
-
-            DiscordSocketClient socketClient = new DiscordSocketClient(new DiscordSocketConfig
-            {
-                LogLevel = LogSeverity.Verbose,
-                MessageCacheSize = 1000
-            });
-
-            var serviceCollection = new ServiceCollection();
-            serviceCollection
-                .AddSingleton(Configuration)
-                .AddSingleton(socketClient)
-                .AddSingleton<IChatService, DiscordService>()
-                .AddSingleton(commandService)
-                .AddSingleton<CommandHandler>();
-
-            return serviceCollection.BuildServiceProvider();
+            _client = client;
+            _commands = commands;
+            _config = config;
+            _serviceProvider = serviceProvider;
         }
     }
 }
