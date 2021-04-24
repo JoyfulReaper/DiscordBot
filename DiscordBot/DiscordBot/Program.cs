@@ -1,81 +1,94 @@
-﻿using Discord;
+﻿/*
+MIT License
+
+Copyright(c) 2020 Kyle Givler
+https://github.com/JoyfulReaper
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using Discord;
 using Discord.WebSocket;
+using DiscordBot.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DiscordBot
 {
     class Program
     {
-        private DiscordSocketClient _client;
-
-        public static void Main(string[] args)
-            => new Program().MainAsync().GetAwaiter().GetResult();
-
-        public async Task MainAsync()
+        static async Task Main(string[] args)
         {
-            _client = new DiscordSocketClient();
-            _client.MessageReceived += CommandHandler;
-            _client.Log += Log;
+            var serviceProvider = Bootstrap.Initialize(args);
+            var cts = new CancellationTokenSource();
+            var chatService = serviceProvider.GetRequiredService<IChatService>();
 
-            //var token = "tokenHere";
-            var token = File.ReadAllText(@"C:\token.txt");
-
-            await _client.LoginAsync(TokenType.Bot, token);
-            await _client.StartAsync();
-
-            await Task.Delay(-1);
-        }
-
-        private static Task Log(LogMessage msg)
-        {
-            Console.WriteLine(msg.ToString());
-            return Task.CompletedTask;
-        }
-
-        private Task CommandHandler(SocketMessage message)
-        {
-            Console.WriteLine($"{message.Author} : {message.Channel} : {message.Content}");
-
-            string command = String.Empty;
-            
-            if(!message.Content.StartsWith('~') || message.Author.IsBot)
+            if (chatService != null)
             {
-                return Task.CompletedTask;
-            }
+                try
+                {
+                    await Task.Run(chatService.Start, cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine("Cancelation was requested");
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("Unhandeled Exception Caught!");
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e.StackTrace);
 
-            int lengthOfCommand = -1;
-
-            if (message.Content.Contains(' '))
-            {
-                lengthOfCommand = message.Content.IndexOf(' ');
+                    while(e.InnerException != null)
+                    {
+                        e = e.InnerException;
+                        Console.WriteLine(e.Message);
+                        Console.WriteLine(e.StackTrace);
+                    }
+                }
             }
             else
             {
-                lengthOfCommand = message.Content.Length;
+                Console.WriteLine("Failed to retrieve ChatService!");
+                Environment.Exit(1);
             }
 
-            string trailing;
-            var split = message.Content.Split(' ');
-            StringBuilder sb = new StringBuilder();
-            for(int i = 1; i < split.Length; i++)
+            while(true)
             {
-                sb.Append($"{split[i]} ");
+                QuitOnQPress(cts);
             }
+        }
 
-            command = message.Content.Substring(1, lengthOfCommand - 1);
+        private static void QuitOnQPress(CancellationTokenSource cts)
+        {
+            var key = Console.ReadKey(true).KeyChar;
 
-            Console.WriteLine($"Command: {command} sb: {sb.ToString()}");
-            message.Channel.SendMessageAsync($"Command: {command} sb: {sb.ToString()}");
-
-            if(command.Equals("echo"))
+            if(char.ToLowerInvariant(key) == 'q')
             {
-                message.Channel.SendMessageAsync(sb.ToString());
+                Console.WriteLine("Quiting!");
+                cts.Cancel();
+                Environment.Exit(0);
             }
-
-            return Task.CompletedTask;
         }
     }
 }
