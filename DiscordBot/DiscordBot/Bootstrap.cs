@@ -23,10 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 
 namespace DiscordBot
 {
@@ -35,13 +37,35 @@ namespace DiscordBot
         internal static ServiceProvider Initialize(string[] args)
         {
             IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
+            CommandService commandService = new CommandService(new CommandServiceConfig
+            {
+                LogLevel = LogSeverity.Verbose,
+                DefaultRunMode = RunMode.Async,
+                CaseSensitiveCommands = false,
+            });
+
+            DiscordSocketClient socketClient = new DiscordSocketClient(new DiscordSocketConfig
+            {
+                LogLevel = LogSeverity.Verbose,
+                MessageCacheSize = 1000
+            });
 
             var serviceCollection = new ServiceCollection();
             serviceCollection
-                .AddSingleton(_ => Configuration)
-                .AddSingleton<IChatService, DiscordService>();
+                .AddSingleton(Configuration)
+                .AddSingleton(socketClient)
+                .AddSingleton<IChatService, DiscordService>()
+                .AddSingleton(commandService)
+                .AddSingleton<CommandHandler>();
 
-            return serviceCollection.BuildServiceProvider();
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            //TODO I hate this... Fix it
+            // We need this so the ctor gets called and the commandHandler actually gets instantiated
+            // I really think is a horrible place to do this..
+            serviceProvider.GetRequiredService<CommandHandler>();
+
+            return serviceProvider;
         }
     }
 }
