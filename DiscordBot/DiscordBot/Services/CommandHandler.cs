@@ -41,6 +41,8 @@ namespace DiscordBot.Services
         private readonly IConfiguration _config;
         private readonly IServiceProvider _serviceProvider;
 
+        private readonly string _prefix;
+
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
             IConfiguration config,
@@ -50,6 +52,34 @@ namespace DiscordBot.Services
             _commands = commands;
             _config = config;
             _serviceProvider = serviceProvider;
+
+            _prefix = _config.GetSection("Prefix").Value;
+
+            _client.MessageReceived += MessageReceived;
+        }
+
+        private async Task MessageReceived(SocketMessage arg)
+        {
+            var message = arg as SocketUserMessage;
+
+            if(message.Author.IsBot)
+            {
+                return;
+            }
+
+            var context = new SocketCommandContext(_client, message);
+
+            int position = 0;
+
+            if(message.HasStringPrefix(_prefix, ref position) || message.HasMentionPrefix(_client.CurrentUser, ref position))
+            {
+                var result = await _commands.ExecuteAsync(context, position, _serviceProvider);
+
+                if(!result.IsSuccess)
+                {
+                    Console.WriteLine($"The following error occured: \n{result.Error}");
+                }
+            }
         }
     }
 }
