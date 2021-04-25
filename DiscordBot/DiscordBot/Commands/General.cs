@@ -134,7 +134,6 @@ namespace DiscordBot.Commands
                 }
 
                 await _client.StopAsync(); // Allow the client to cleanup
-                Environment.Exit(0);
             }
         }
     }
