@@ -23,13 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
-using Discord.WebSocket;
+
 using DiscordBot.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System;
-using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,22 +37,37 @@ namespace DiscordBot
     {
         static async Task Main(string[] args)
         {
+            // Initial Logging for before the Dependency Injection is setup
+            Bootstrap.SetupLogging();
+
+            // Set up Dependency Injection
             var serviceProvider = Bootstrap.Initialize(args);
-            var cts = new CancellationTokenSource();
             var chatService = serviceProvider.GetRequiredService<IChatService>();
+
+            // Static logger
+            ILogger logger = Log.ForContext<Program>();
+            
+            var cts = new CancellationTokenSource();
 
             if (chatService != null)
             {
                 try
                 {
+                    // Start the DiscordBot
+                    logger.Information("Starting chatService");
                     await Task.Run(chatService.Start, cts.Token);
                 }
                 catch (OperationCanceledException)
                 {
+                    logger.Warning("Cancelation Requested");
                     Console.WriteLine("Cancelation was requested");
                 }
                 catch(Exception e)
                 {
+                    // Catch all exceptions if they aren't handeled anywhere else, log and exit.
+
+                    logger.Error(e, "Unhandeled Exception Caught!");
+
                     Console.WriteLine("Unhandeled Exception Caught!");
                     Console.WriteLine(e.Message);
                     Console.WriteLine(e.StackTrace);
@@ -65,10 +78,13 @@ namespace DiscordBot
                         Console.WriteLine(e.Message);
                         Console.WriteLine(e.StackTrace);
                     }
+
+                    Environment.Exit(1);
                 }
             }
             else
             {
+                logger.Fatal("Failed to retrieve ChatService!");
                 Console.WriteLine("Failed to retrieve ChatService!");
                 Environment.Exit(1);
             }
@@ -81,6 +97,7 @@ namespace DiscordBot
 
         private static void QuitOnQPress(CancellationTokenSource cts)
         {
+            // If the "Q" key is pressed quit the bot!
             var key = Console.ReadKey(true).KeyChar;
 
             if(char.ToLowerInvariant(key) == 'q')

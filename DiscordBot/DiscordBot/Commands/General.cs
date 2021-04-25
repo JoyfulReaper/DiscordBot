@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace DiscordBot.Commands
 {
     // TODO add logging
+    // TODO how do we get the DI container here? Need to pull the logger out of it!
     // TODO the bot doesn't seem to know about users until they have used a command, look into that
 
     public class General : ModuleBase

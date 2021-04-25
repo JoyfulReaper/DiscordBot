@@ -29,14 +29,49 @@ using Discord.WebSocket;
 using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using System;
+using System.IO;
 
 namespace DiscordBot
 {
     internal static class Bootstrap
     {
+        /// <summary>
+        /// Setup logging outsite of DI incase we need if before DI is setup
+        /// </summary>
+        internal static void SetupLogging()
+        {
+            var configBuilder = new ConfigurationBuilder();
+            configBuilder.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true);
+            //.AddEnvironmentVariables(); // Don't think we need this at the moment, avoids installing another nuget package
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configBuilder.Build())
+                .Enrich.FromLogContext()
+                .CreateLogger();
+            Log.Logger.Information("DiscordBot starting");
+
+        }
+
+        /// <summary>
+        /// Setup Dependency Injection
+        /// </summary>
+        /// <param name="args">Command Line arguments</param>
+        /// <returns>The DI Container</returns>
         internal static ServiceProvider Initialize(string[] args)
         {
-            IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
+            //IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
+
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true);
+                //.AddEnvironmentVariables();
+            IConfiguration config = configBuilder.Build();
+
             CommandService commandService = new CommandService(new CommandServiceConfig
             {
                 LogLevel = LogSeverity.Verbose,
@@ -52,7 +87,9 @@ namespace DiscordBot
 
             var serviceCollection = new ServiceCollection();
             serviceCollection
-                .AddSingleton(Configuration)
+                .AddLogging(loggingBuilder =>
+                    loggingBuilder.AddSerilog(dispose: true))
+                .AddSingleton(config)
                 .AddSingleton(socketClient)
                 .AddSingleton<IChatService, DiscordService>()
                 .AddSingleton(commandService)

@@ -27,12 +27,10 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Services
@@ -43,18 +41,19 @@ namespace DiscordBot.Services
         private readonly DiscordSocketClient _client;
         private readonly IConfiguration _configuration;
         private readonly CommandService _commands;
-
+        private readonly ILogger _logger;
 
         public DiscordService(IServiceProvider serviceProvider,
             DiscordSocketClient client,
             IConfiguration configuration,
-            CommandService commands)
+            CommandService commands,
+            ILogger<DiscordService> logger)
         {
             _serviceProvider = serviceProvider;
             _client = client;
             _configuration = configuration;
             _commands = commands;
-
+            _logger = logger;
             _client.Ready += SocketClient_Ready;
             _client.MessageReceived += SocketClient_MessageReceived;
             _client.Disconnected += SocketClient_Disconnected;
@@ -66,19 +65,22 @@ namespace DiscordBot.Services
             //TODO replace this with logging / Possibly keep a database of all messages received
             Console.WriteLine("Message received: ");
             Console.WriteLine($"{arg.Author.Username} : {arg.Channel.Name} : {arg.Content}");
+            _logger.LogInformation("Message Received: {author} : {channel} : {message}", arg.Author.Username, arg.Channel.Name, arg.Content);
 
             // Don't let other bots trigger us
             // TODO make this configurable
-            if(arg.Author.IsBot)
-            {
-                return Task.CompletedTask;
-            }
+            //if(arg.Author.IsBot)
+            //{
+            //    return Task.CompletedTask;
+            //}
 
             return Task.CompletedTask;
         }
 
         private Task SocketClient_Disconnected(Exception arg)
         {
+            _logger.LogError(arg, "SocketClient disconnected!");
+
             Console.WriteLine("SocketClient disconnected!");
             Environment.Exit(1);
 
@@ -87,6 +89,8 @@ namespace DiscordBot.Services
 
         private Task SocketClient_Ready()
         {
+            _logger.LogInformation("Connected as {username}#{discriminator}", _client.CurrentUser.Username, _client.CurrentUser.Discriminator);
+
             Console.WriteLine("SocketClient is ready");
             Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
             return Task.CompletedTask;
@@ -94,6 +98,8 @@ namespace DiscordBot.Services
 
         private Task SocketClient_Log(LogMessage arg)
         {
+            _logger.LogInformation("Discord.NET: {message}", arg.Message);
+
             Console.WriteLine(arg.Message);
             return Task.CompletedTask;
         }
@@ -101,10 +107,12 @@ namespace DiscordBot.Services
         public async Task Start()
         {
             //TODO Figure out a better place to store the token Maybe in a DB
+            _logger.LogInformation("Reading token from config file");
             var token = File.ReadAllText(@"C:\token.txt");
 
             if(string.IsNullOrEmpty(token))
             {
+                _logger.LogCritical("Token is null or empty");
                 throw new InvalidOperationException("Token is null or empty");
             }
 
