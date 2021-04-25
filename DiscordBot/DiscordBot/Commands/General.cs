@@ -22,6 +22,14 @@ namespace DiscordBot.Commands
             _client = client;
         }
 
+        [Command("owner")]
+        [Summary("Retreive the server owner")]
+        public async Task Owner()
+        {
+            _logger.LogInformation("{username}#{discriminator} invoked owner on: {server}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
+            await ReplyAsync(Context?.Guild?.Owner.Username);
+        }
+
         [Command("echo")]
         [Summary("Echoes a message")]
         // The remainder attribute parses until the end of a command
