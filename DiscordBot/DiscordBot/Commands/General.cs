@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
-    // TODO add logging
-    // TODO how do we get the DI container here? Need to pull the logger out of it!
-    // TODO the bot doesn't seem to know about users until they have used a command, look into that
+    // So it turns out that the bot needs the Presence and Server member intent inorder for
+    // All of the members of a channel to be "in scope"
 
     public class General : ModuleBase<SocketCommandContext>
     {
