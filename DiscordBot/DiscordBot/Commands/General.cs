@@ -63,9 +63,6 @@ namespace DiscordBot.Commands
         [Command("server")]
         public async Task Server()
         {
-            //var test = Context.Guild as SocketGuild;
-            //var active = test.Users.Where(x => x.Status == UserStatus.Online);
-
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(Context.Guild.IconUrl)
                 .WithDescription("Server information:")

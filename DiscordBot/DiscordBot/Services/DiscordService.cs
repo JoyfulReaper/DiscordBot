@@ -63,8 +63,7 @@ namespace DiscordBot.Services
         private Task SocketClient_MessageReceived(SocketMessage arg)
         {
             //TODO replace this with logging / Possibly keep a database of all messages received
-            Console.WriteLine("Message received: ");
-            Console.WriteLine($"{arg.Author.Username} : {arg.Channel.Name} : {arg.Content}");
+            Console.WriteLine($"Message received: {arg.Author.Username} : {arg.Channel.Name} : {arg.Content}");
             _logger.LogInformation("Message Received: {author} : {channel} : {message}", arg.Author.Username, arg.Channel.Name, arg.Content);
 
             // Don't let other bots trigger us
