@@ -100,7 +100,7 @@ namespace DiscordBot.Services
         {
             _logger.LogInformation("Discord.NET: {message}", arg.Message);
 
-            Console.WriteLine(arg.Message);
+            Console.WriteLine(arg.Message); // We can probably remove this so it isn't logged to the console twice (Assuming console sink is used)
             return Task.CompletedTask;
         }
 
