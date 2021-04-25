@@ -90,6 +90,7 @@ namespace DiscordBot
                 .AddLogging(loggingBuilder =>
                     loggingBuilder.AddSerilog(dispose: true))
                 .AddSingleton(config)
+                .AddSingleton<LoggingService>()
                 .AddSingleton(socketClient)
                 .AddSingleton<IChatService, DiscordService>()
                 .AddSingleton(commandService)
@@ -101,6 +102,7 @@ namespace DiscordBot
             // We need this so the ctor gets called and the commandHandler actually gets instantiated
             // I really think is a horrible place to do this..
             serviceProvider.GetRequiredService<CommandHandler>();
+            serviceProvider.GetRequiredService<LoggingService>();
 
             return serviceProvider;
         }
