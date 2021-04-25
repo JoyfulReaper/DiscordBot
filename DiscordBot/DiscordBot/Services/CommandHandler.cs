@@ -54,8 +54,8 @@ namespace DiscordBot.Services
             _serviceProvider = serviceProvider;
             _logger = logger;
 
-            _logger.LogInformation("Setting prefix to {prefix}", _prefix);
             _prefix = _config.GetSection("Prefix").Value;
+            _logger.LogInformation("Prefix set to {prefix}", _prefix);
 
             _client.MessageReceived += MessageReceived;
         }
