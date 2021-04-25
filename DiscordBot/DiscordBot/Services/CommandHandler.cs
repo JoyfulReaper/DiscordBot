@@ -88,7 +88,7 @@ namespace DiscordBot.Services
                 if(!result.IsSuccess)
                 {
                     _logger.LogError("Error Occured for command {command}: {error}", message.Content, result.Error);
-                    Console.WriteLine($"The following error occured: \n{result.Error}");
+                    Console.WriteLine($"The following error occured: {result.Error}");
                 }
             }
         }

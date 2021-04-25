@@ -54,10 +54,11 @@ namespace DiscordBot.Services
             _configuration = configuration;
             _commands = commands;
             _logger = logger;
+
             _client.Ready += SocketClient_Ready;
             _client.MessageReceived += SocketClient_MessageReceived;
             _client.Disconnected += SocketClient_Disconnected;
-            _client.Log += SocketClient_Log;
+            //_client.Log += SocketClient_Log;
         }
 
         private Task SocketClient_MessageReceived(SocketMessage arg)
@@ -86,22 +87,35 @@ namespace DiscordBot.Services
             return Task.CompletedTask;
         }
 
-        private Task SocketClient_Ready()
+        private async Task SocketClient_Ready()
         {
             _logger.LogInformation("Connected as {username}#{discriminator}", _client.CurrentUser.Username, _client.CurrentUser.Discriminator);
 
             Console.WriteLine("SocketClient is ready");
             Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
-            return Task.CompletedTask;
+
+            foreach(var guild in _client.Guilds)
+            {
+                foreach(var channel in guild.Channels)
+                {
+                    if(channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
+                    {
+                        if(channel != null && channel is SocketTextChannel textChannel)
+                        {
+                            await textChannel.SendMessageAsync("Beep boop! I'm alive!");
+                        }
+                    }
+                }
+            }
         }
 
-        private Task SocketClient_Log(LogMessage arg)
-        {
-            _logger.LogInformation("Discord.NET: {message}", arg.Message);
+        //private Task SocketClient_Log(LogMessage arg)
+        //{
+        //    _logger.LogInformation("Discord.NET: {message}", arg.Message);
 
-            Console.WriteLine(arg.Message); // We can probably remove this so it isn't logged to the console twice (Assuming console sink is used)
-            return Task.CompletedTask;
-        }
+        //    Console.WriteLine(arg.Message); // We can probably remove this so it isn't logged to the console twice (Assuming console sink is used)
+        //    return Task.CompletedTask;
+        //}
 
         public async Task Start()
         {
