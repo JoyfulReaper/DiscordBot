@@ -31,6 +31,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+// See https://docs.stillu.cc/guides/concepts/logging.html for some information about logging
+// It's advised to wrap logging in a Task.Run so Discord.NET's gateway thread is not blocked
+// while waiting for logging data to be written
+// TODO: Write a logging helper than can be used with Task.Run and replace all logger calls with
+// this, or look into other solutions.
+
 namespace DiscordBot
 {
     class Program
@@ -59,7 +65,7 @@ namespace DiscordBot
                 }
                 catch (OperationCanceledException)
                 {
-                    logger.Warning("Cancelation Requested");
+                    logger.Warning("Cancelation was Requested");
                     Console.WriteLine("Cancelation was requested");
                 }
                 catch(Exception e)
