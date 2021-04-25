@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -99,6 +100,25 @@ namespace DiscordBot.Commands
             var embed = builder.Build();
             //await Context.Channel.SendMessageAsync(null, false, embed);
             await ReplyAsync(null, false, embed);
+        }
+
+        [Command("quit")]
+        //[RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("Make the bot quit!")]
+        public async Task Quit()
+        {
+            _logger.LogInformation("{username}#{discriminator} invoked quit on {target}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
+
+            if (Context.User.Username != "JoyfulReaper" || Context.User.Discriminator != "7485")
+            {
+                await ReplyAsync("Sorry, only the bot's progammer can make the bot quit!");
+            }
+            else
+            {
+                //await ReplyAsync("Quiting...");
+                await ReplyAsync("Please, no! I want to live! Noooo.....");
+                Environment.Exit(0);
+            }
         }
     }
 }
