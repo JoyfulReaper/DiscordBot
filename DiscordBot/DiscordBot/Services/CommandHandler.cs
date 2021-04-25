@@ -26,10 +26,8 @@ SOFTWARE.
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Services
@@ -40,43 +38,56 @@ namespace DiscordBot.Services
         private readonly CommandService _commands;
         private readonly IConfiguration _config;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<CommandHandler> _logger;
 
         private readonly string _prefix;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
             IConfiguration config,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            ILogger<CommandHandler> logger)
         {
             _client = client;
             _commands = commands;
             _config = config;
             _serviceProvider = serviceProvider;
+            _logger = logger;
 
             _prefix = _config.GetSection("Prefix").Value;
+            _logger.LogInformation("Prefix set to {prefix}", _prefix);
 
             _client.MessageReceived += MessageReceived;
         }
 
-        private async Task MessageReceived(SocketMessage arg)
+        private async Task MessageReceived(SocketMessage messageParam)
         {
-            var message = arg as SocketUserMessage;
+            var message = messageParam as SocketUserMessage;
 
-            if(message.Author.IsBot)
+            if(message == null)
             {
+                _logger.LogDebug("message was null");
                 return;
             }
 
             var context = new SocketCommandContext(_client, message);
-
             int position = 0;
 
             if(message.HasStringPrefix(_prefix, ref position) || message.HasMentionPrefix(_client.CurrentUser, ref position))
             {
+                _logger.LogInformation("Command received: {command}", message.Content);
+
+                if (message.Author.IsBot)
+                {
+                    _logger.LogDebug("Command ({command}) was sent by another bot, ignoring", message.Content);
+                    return;
+                }
+
                 var result = await _commands.ExecuteAsync(context, position, _serviceProvider);
 
                 if(!result.IsSuccess)
                 {
+                    _logger.LogError("Error Occured for command {command}: {error}", message.Content, result.Error);
                     Console.WriteLine($"The following error occured: \n{result.Error}");
                 }
             }

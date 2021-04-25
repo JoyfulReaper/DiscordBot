@@ -1,15 +1,13 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
     // TODO add logging
+    // TODO how do we get the DI container here? Need to pull the logger out of it!
     // TODO the bot doesn't seem to know about users until they have used a command, look into that
 
     public class General : ModuleBase
@@ -65,9 +63,6 @@ namespace DiscordBot.Commands
         [Command("server")]
         public async Task Server()
         {
-            //var test = Context.Guild as SocketGuild;
-            //var active = test.Users.Where(x => x.Status == UserStatus.Online);
-
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(Context.Guild.IconUrl)
                 .WithDescription("Server information:")
