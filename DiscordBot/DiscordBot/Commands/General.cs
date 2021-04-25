@@ -8,16 +8,18 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
-    // So it turns out that the bot needs the Presence and Server member intent inorder for
+    // So it turns out that the bot needs the Presence and Server member intent in order for
     // All of the members of a channel to be "in scope"
 
     public class General : ModuleBase<SocketCommandContext>
     {
         private readonly ILogger<General> _logger;
+        private readonly DiscordSocketClient _client;
 
-        public General(ILogger<General> logger)
+        public General(ILogger<General> logger, DiscordSocketClient client)
         {
             _logger = logger;
+            _client = client;
         }
 
         [Command("echo")]
@@ -115,8 +117,22 @@ namespace DiscordBot.Commands
             }
             else
             {
-                //await ReplyAsync("Quiting...");
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
+
+                foreach (var guild in _client.Guilds)
+                {
+                    foreach (var channel in guild.Channels)
+                    {
+                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
+                        {
+                            if (channel != null && channel is SocketTextChannel textChannel)
+                            {
+                                await textChannel.SendMessageAsync($"{Context.User.Username} has killed me :(");
+                            }
+                        }
+                    }
+                }
+
                 Environment.Exit(0);
             }
         }
