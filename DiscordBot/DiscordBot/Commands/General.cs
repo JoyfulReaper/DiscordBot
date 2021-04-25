@@ -10,12 +10,13 @@ namespace DiscordBot.Commands
     // TODO how do we get the DI container here? Need to pull the logger out of it!
     // TODO the bot doesn't seem to know about users until they have used a command, look into that
 
-    public class General : ModuleBase
+    public class General : ModuleBase<SocketCommandContext>
     {
         [Command("echo")]
-        public async Task Echo(params string[] message)
+        // The remainder attribute parses until the end of a command
+        public async Task Echo([Remainder] string message)
         {
-            await ReplyAsync(string.Join(" ", message));
+            await ReplyAsync(message);
         }
 
         [Command("ping")]
