@@ -13,8 +13,9 @@ namespace DiscordBot.Commands
     public class General : ModuleBase<SocketCommandContext>
     {
         [Command("echo")]
+        [Summary("Echoes a message")]
         // The remainder attribute parses until the end of a command
-        public async Task Echo([Remainder] string message)
+        public async Task Echo([Remainder] [Summary("The text to echo")] string message)
         {
             await ReplyAsync(message);
         }
