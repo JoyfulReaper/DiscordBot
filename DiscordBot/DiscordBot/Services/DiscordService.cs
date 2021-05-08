@@ -35,7 +35,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class DiscordService : IChatService
+    class DiscordService : IChatService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly DiscordSocketClient _client;

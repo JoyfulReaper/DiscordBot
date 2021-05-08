@@ -76,22 +76,6 @@ namespace DiscordBot.Commands
             await ReplyAsync(null, false, embed);
         }
 
-        [Command("purge")]
-        [RequireUserPermission(GuildPermission.ManageMessages)]
-        [Summary("Purges the given number of messages from the current channel")]
-        public async Task Purge([Summary("The number of message to purge")] int amount)
-        {
-            var messages = await Context.Channel.GetMessagesAsync(amount + 1).FlattenAsync();
-            await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
-
-            var message = await Context.Channel.SendMessageAsync($"{messages.Count()} messages deleted successfuly!");
-            await Task.Delay(2500);
-            await message.DeleteAsync();
-
-            _logger.LogInformation("{user}#{discriminator} purged {number} messages in {channel} on {server}", 
-                Context.User.Username, Context.User.Discriminator, amount, Context.Channel.Name, Context.Guild.Name);
-        }
-
         [Command("server")]
         [Summary("Retervies some basic information about a server")]
         public async Task Server()
