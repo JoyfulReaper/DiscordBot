@@ -89,7 +89,8 @@ namespace DiscordBot.Commands
                 .WithColor(33, 176, 252)
                 .AddField("Created at", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
                 .AddField("Member count", (Context.Guild as SocketGuild).MemberCount + " members", true)
-                .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true);
+                .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
+                .WithCurrentTimestamp();
 
             var embed = builder.Build();
             //await Context.Channel.SendMessageAsync(null, false, embed);

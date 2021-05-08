@@ -37,6 +37,8 @@ namespace DiscordBot.Services
 {
     class DiscordService : IChatService
     {
+        private const bool _showJoinMessage = false;
+
         private readonly IServiceProvider _serviceProvider;
         private readonly DiscordSocketClient _client;
         private readonly IConfiguration _configuration;
@@ -86,16 +88,19 @@ namespace DiscordBot.Services
             Console.WriteLine("SocketClient is ready");
             Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
 
-            foreach(var guild in _client.Guilds)
+            if (_showJoinMessage)
             {
-                foreach(var channel in guild.Channels)
+                foreach (var guild in _client.Guilds)
                 {
-                    if(channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
+                    foreach (var channel in guild.Channels)
                     {
-                        if(channel != null && channel is SocketTextChannel textChannel)
+                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
                         {
-                            await textChannel.SendMessageAsync("Beep boop! I'm alive!");
-                            await textChannel.SendMessageAsync("MIT License by JoyfulReaper: https://github.com/JoyfulReaper/DiscordBot");
+                            if (channel != null && channel is SocketTextChannel textChannel)
+                            {
+                                await textChannel.SendMessageAsync("Beep boop! I'm alive!");
+                                await textChannel.SendMessageAsync("MIT License by JoyfulReaper: https://github.com/JoyfulReaper/DiscordBot");
+                            }
                         }
                     }
                 }
