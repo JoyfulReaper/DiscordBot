@@ -8,16 +8,26 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
-    // So it turns out that the bot needs the Presence and Server member intent inorder for
+    // So it turns out that the bot needs the Presence and Server member intent in order for
     // All of the members of a channel to be "in scope"
 
     public class General : ModuleBase<SocketCommandContext>
     {
         private readonly ILogger<General> _logger;
+        private readonly DiscordSocketClient _client;
 
-        public General(ILogger<General> logger)
+        public General(ILogger<General> logger, DiscordSocketClient client)
         {
             _logger = logger;
+            _client = client;
+        }
+
+        [Command("owner")]
+        [Summary("Retreive the server owner")]
+        public async Task Owner()
+        {
+            _logger.LogInformation("{username}#{discriminator} invoked owner on: {server}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
+            await ReplyAsync(Context?.Guild?.Owner.Username);
         }
 
         [Command("echo")]
@@ -66,22 +76,6 @@ namespace DiscordBot.Commands
             await ReplyAsync(null, false, embed);
         }
 
-        [Command("purge")]
-        [RequireUserPermission(GuildPermission.ManageMessages)]
-        [Summary("Purges the given number of messages from the current channel")]
-        public async Task Purge([Summary("The number of message to purge")] int amount)
-        {
-            var messages = await Context.Channel.GetMessagesAsync(amount + 1).FlattenAsync();
-            await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
-
-            var message = await Context.Channel.SendMessageAsync($"{messages.Count()} messages deleted successfuly!");
-            await Task.Delay(2500);
-            await message.DeleteAsync();
-
-            _logger.LogInformation("{user}#{discriminator} purged {number} messages in {channel} on {server}", 
-                Context.User.Username, Context.User.Discriminator, amount, Context.Channel.Name, Context.Guild.Name);
-        }
-
         [Command("server")]
         [Summary("Retervies some basic information about a server")]
         public async Task Server()
@@ -95,7 +89,8 @@ namespace DiscordBot.Commands
                 .WithColor(33, 176, 252)
                 .AddField("Created at", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
                 .AddField("Member count", (Context.Guild as SocketGuild).MemberCount + " members", true)
-                .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true);
+                .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
+                .WithCurrentTimestamp();
 
             var embed = builder.Build();
             //await Context.Channel.SendMessageAsync(null, false, embed);
@@ -115,9 +110,23 @@ namespace DiscordBot.Commands
             }
             else
             {
-                //await ReplyAsync("Quiting...");
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
-                Environment.Exit(0);
+
+                foreach (var guild in _client.Guilds)
+                {
+                    foreach (var channel in guild.Channels)
+                    {
+                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
+                        {
+                            if (channel != null && channel is SocketTextChannel textChannel)
+                            {
+                                await textChannel.SendMessageAsync($"{Context.User.Username} has killed me :(");
+                            }
+                        }
+                    }
+                }
+
+                await _client.StopAsync(); // Allow the client to cleanup
             }
         }
     }

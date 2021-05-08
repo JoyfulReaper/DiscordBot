@@ -98,8 +98,9 @@ namespace DiscordBot
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            //TODO I hate this... Fix it
+            //TODO I'm not a big fan of this
             // We need this so the ctor gets called and the commandHandler actually gets instantiated
+            // This way the events get hooked up
             // I really think is a horrible place to do this..
             serviceProvider.GetRequiredService<CommandHandler>();
             serviceProvider.GetRequiredService<LoggingService>();

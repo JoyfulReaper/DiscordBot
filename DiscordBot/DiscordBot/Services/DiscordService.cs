@@ -35,8 +35,10 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class DiscordService : IChatService
+    class DiscordService : IChatService
     {
+        private const bool _showJoinMessage = false;
+
         private readonly IServiceProvider _serviceProvider;
         private readonly DiscordSocketClient _client;
         private readonly IConfiguration _configuration;
@@ -58,7 +60,6 @@ namespace DiscordBot.Services
             _client.Ready += SocketClient_Ready;
             _client.MessageReceived += SocketClient_MessageReceived;
             _client.Disconnected += SocketClient_Disconnected;
-            //_client.Log += SocketClient_Log;
         }
 
         private Task SocketClient_MessageReceived(SocketMessage arg)
@@ -66,13 +67,6 @@ namespace DiscordBot.Services
             //TODO replace this with logging / Possibly keep a database of all messages received
             Console.WriteLine($"Message received: {arg.Author.Username} : {arg.Channel.Name} : {arg.Content}");
             _logger.LogInformation("Message Received: {author} : {channel} : {message}", arg.Author.Username, arg.Channel.Name, arg.Content);
-
-            // Don't let other bots trigger us
-            // TODO make this configurable
-            //if(arg.Author.IsBot)
-            //{
-            //    return Task.CompletedTask;
-            //}
 
             return Task.CompletedTask;
         }
@@ -94,28 +88,24 @@ namespace DiscordBot.Services
             Console.WriteLine("SocketClient is ready");
             Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
 
-            foreach(var guild in _client.Guilds)
+            if (_showJoinMessage)
             {
-                foreach(var channel in guild.Channels)
+                foreach (var guild in _client.Guilds)
                 {
-                    if(channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
+                    foreach (var channel in guild.Channels)
                     {
-                        if(channel != null && channel is SocketTextChannel textChannel)
+                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
                         {
-                            await textChannel.SendMessageAsync("Beep boop! I'm alive!");
+                            if (channel != null && channel is SocketTextChannel textChannel)
+                            {
+                                await textChannel.SendMessageAsync("Beep boop! I'm alive!");
+                                await textChannel.SendMessageAsync("MIT License by JoyfulReaper: https://github.com/JoyfulReaper/DiscordBot");
+                            }
                         }
                     }
                 }
             }
         }
-
-        //private Task SocketClient_Log(LogMessage arg)
-        //{
-        //    _logger.LogInformation("Discord.NET: {message}", arg.Message);
-
-        //    Console.WriteLine(arg.Message); // We can probably remove this so it isn't logged to the console twice (Assuming console sink is used)
-        //    return Task.CompletedTask;
-        //}
 
         public async Task Start()
         {
