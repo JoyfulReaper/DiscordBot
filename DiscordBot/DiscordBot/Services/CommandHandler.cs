@@ -85,6 +85,22 @@ namespace DiscordBot.Services
 
                 var result = await _commands.ExecuteAsync(context, position, _serviceProvider);
 
+                if(result.Error == CommandError.UnknownCommand)
+                {
+                    //TODO add multiple images
+                    //TODO make this optional/a setting
+                    //TODO Message about this handler blocking the gateway thread, wrapping in a Task.Run didn't fix
+                    // Look into this more
+                    await Task.Run(async () =>
+                   {
+                       var badCommandMessage = await messageParam.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");
+                       await Task.Delay(3500);
+                       await badCommandMessage.DeleteAsync();
+                   });
+
+                    return;
+                }
+
                 if(!result.IsSuccess)
                 {
                     _logger.LogError("Error Occured for command {command}: {error}", message.Content, result.Error);
