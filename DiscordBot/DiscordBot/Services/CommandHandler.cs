@@ -37,7 +37,7 @@ namespace DiscordBot.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
-        private readonly IConfiguration _config;
+        private readonly Settings _settings;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
 
@@ -45,21 +45,27 @@ namespace DiscordBot.Services
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
-            IConfiguration config,
+            Settings settings,
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger)
         {
             _client = client;
             _commands = commands;
-            _config = config;
+            _settings = settings;
             _serviceProvider = serviceProvider;
             _logger = logger;
 
-            _prefix = _config.GetSection("Prefix").Value;
+            _prefix = _settings.Prefix;
             _logger.LogInformation("Prefix set to {prefix}", _prefix);
 
             _client.MessageReceived += OnMessageReceived;
+            _client.UserJoined += OnUserJoined;
             _commands.CommandExecuted += OnCommandExecuted;
+        }
+
+        private async Task OnUserJoined(SocketGuildUser userJoining)
+        {
+            await userJoining.Guild.DefaultChannel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
         }
 
         private async Task OnMessageReceived(SocketMessage messageParam)
