@@ -24,16 +24,41 @@ SOFTWARE.
 */
 
 using DiscordBot.Models;
+using DiscordBot.Services;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess
 {
-    public interface IRepository<T> where T : DatabaseEntity
+    public class ServerRepository : Repository<Server>
     {
-        T GetById(int Id);
-        IEnumerable<T> List();
-        void Add(T entity);
-        void Delete(T entity);
-        void Edit(T entity);
+        private readonly Settings _settings;
+        private readonly ILogger<ServerRepository> _logger;
+
+        public ServerRepository(Settings settings,
+            ILogger<ServerRepository> logger) : base(settings, logger)
+        {
+            _settings = settings;
+            _logger = logger;
+        }
+
+        public override void Add(Server entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Delete(Server entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Edit(Server entity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
