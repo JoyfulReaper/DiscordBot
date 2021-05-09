@@ -37,7 +37,7 @@ namespace DiscordBot.DataAccess
 {
     public abstract class Repository<T> : IRepository<T> where T: DatabaseEntity
     {
-        private readonly string _tableName;
+        protected string TableName { get; set; }
         private readonly Settings _settings;
         private readonly ILogger<Repository<T>> _logger;
 
@@ -46,6 +46,7 @@ namespace DiscordBot.DataAccess
         {
             _settings = settings;
             _logger = logger;
+            TableName = nameof(T);
         }
 
         public abstract void Add(T entity);
@@ -54,27 +55,27 @@ namespace DiscordBot.DataAccess
 
         public abstract void Edit(T entity);
 
-        public virtual T GetById(int Id)
+        public virtual T GetById(ulong Id)
         {
-            return QuerySingle<T>($"SELECT * FROM {_tableName} WHERE ID = @Id", new { Id = Id });
+            return QuerySingle<T>($"SELECT * FROM {TableName} WHERE ID = @Id", new { Id = Id });
         }
 
         public virtual IEnumerable<T> List()
         {
-            return Query<T>($"SELECT * FROM {_tableName}");
+            return Query<T>($"SELECT * FROM {TableName}");
         }
 
         public async virtual Task<T> GetByIdAsync(int Id)
         {
-            return await QuerySingleAsync<T>($"SELECT * FROM {_tableName} WHERE ID = @Id", new { Id = Id });
+            return await QuerySingleAsync<T>($"SELECT * FROM {TableName} WHERE ID = @Id", new { Id = Id });
         }
 
         public async virtual Task<IEnumerable<T>> ListAsync()
         {
-            return await QueryAsync<T>($"SELECT * FROM {_tableName}");
+            return await QueryAsync<T>($"SELECT * FROM {TableName}");
         }
 
-        private void Execute(string query, object parameters = null)
+        protected void Execute(string query, object parameters = null)
         {
             try
             {
@@ -89,13 +90,13 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private void ExecuteAsync(string query, object parameters = null)
+        protected async Task ExecuteAsync(string query, object parameters = null)
         {
             try
             {
                 using (SqlConnection connection = new SqlConnection(_settings.ConnectionString))
                 {
-                    connection.ExecuteAsync(query, parameters);
+                    await connection.ExecuteAsync(query, parameters);
                 }
             }
             catch (Exception ex)
@@ -104,7 +105,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private IEnumerable<T> Query<T>(string query, object parameters = null)
+        protected IEnumerable<T> Query<T>(string query, object parameters = null)
         {
             try
             {
@@ -120,7 +121,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private T QueryFirst<T>(string query, object parameters = null)
+        protected T QueryFirst<T>(string query, object parameters = null)
         {
             try
             {
@@ -136,7 +137,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private T QueryFirstOrDefault<T> (string query, object parameters = null)
+        protected T QueryFirstOrDefault<T> (string query, object parameters = null)
         {
             try
             {
@@ -152,7 +153,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private T QuerySingle<T>(string query, object parameters = null)
+        protected T QuerySingle<T>(string query, object parameters = null)
         {
             try
             {
@@ -168,7 +169,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private T QuerySingleOrDefault<T>(string query, object parameters = null)
+        protected T QuerySingleOrDefault<T>(string query, object parameters = null)
         {
             try
             {
@@ -184,7 +185,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private async Task<IEnumerable<T>> QueryAsync<T>(string query, object parameters = null)
+        protected async Task<IEnumerable<T>> QueryAsync<T>(string query, object parameters = null)
         {
             try
             {
@@ -201,7 +202,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private async Task<T> QueryFirstAsync<T>(string query, object parameters = null)
+        protected async Task<T> QueryFirstAsync<T>(string query, object parameters = null)
         {
             try
             {
@@ -217,7 +218,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private async Task<T> QueryFirstOrDefaultAsync<T>(string query, object parameters = null)
+        protected async Task<T> QueryFirstOrDefaultAsync<T>(string query, object parameters = null)
         {
             try
             {
@@ -233,7 +234,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private async Task<T> QuerySingleAsync<T>(string query, object parameters = null)
+        protected async Task<T> QuerySingleAsync<T>(string query, object parameters = null)
         {
             try
             {
@@ -249,7 +250,7 @@ namespace DiscordBot.DataAccess
             }
         }
 
-        private async Task<T> QuerySingleOrDefaultAsync<T>(string query, object parameters = null)
+        protected async Task<T> QuerySingleOrDefaultAsync<T>(string query, object parameters = null)
         {
             try
             {

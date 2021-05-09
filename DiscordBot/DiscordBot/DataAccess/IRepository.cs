@@ -30,7 +30,7 @@ namespace DiscordBot.DataAccess
 {
     public interface IRepository<T> where T : DatabaseEntity
     {
-        T GetById(int Id);
+        T GetById(ulong Id);
         IEnumerable<T> List();
         void Add(T entity);
         void Delete(T entity);
