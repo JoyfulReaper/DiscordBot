@@ -94,7 +94,8 @@ namespace DiscordBot
                 .AddSingleton(socketClient)
                 .AddSingleton<IChatService, DiscordService>()
                 .AddSingleton(commandService)
-                .AddSingleton<CommandHandler>();
+                .AddSingleton<CommandHandler>()
+                .AddSingleton<Settings>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
