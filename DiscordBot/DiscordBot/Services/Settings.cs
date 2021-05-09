@@ -23,13 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using DiscordBot.DataAccess;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Data;
 
 namespace DiscordBot.Services
 {
-    //TODO read settings from appsettings.json
     public class Settings
     {
+        public DatabaseType DatabaseType { get; private set; }
+        public string ConnectionString { get; private set; }
+
         private readonly IConfiguration _configuration;
 
         public Settings(IConfiguration configuration)
@@ -46,6 +51,18 @@ namespace DiscordBot.Services
 
         private void Initialize()
         {
+            var databaseType = _configuration.GetSection("DatabaseType").Value;
+
+            if (databaseType == "SQLite")
+            {
+                DatabaseType = DatabaseType.SQLite;
+                ConnectionString = _configuration.GetConnectionString("SQLite");
+            }
+            else
+            {
+                throw new InvalidOperationException("DatabaseType is not valid.");
+            }
+
             Prefix = _configuration.GetSection("Prefix").Value ?? "!";
             OwnerName = _configuration.GetSection("OwnerName").Value ?? "JoyfulReaper";
             OwnerDiscriminator = _configuration.GetSection("OwnerDiscriminator").Value ?? "7485";
