@@ -1,8 +1,33 @@
-﻿using Discord;
+﻿/*
+MIT License
+
+Copyright(c) 2021 Kyle Givler
+https://github.com/JoyfulReaper
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,11 +40,15 @@ namespace DiscordBot.Commands
     {
         private readonly ILogger<General> _logger;
         private readonly DiscordSocketClient _client;
+        private readonly Settings _settings;
 
-        public General(ILogger<General> logger, DiscordSocketClient client)
+        public General(ILogger<General> logger, 
+            DiscordSocketClient client,
+            Settings settings)
         {
             _logger = logger;
             _client = client;
+            _settings = settings;
         }
 
         [Command("owner")]
@@ -95,39 +124,6 @@ namespace DiscordBot.Commands
             var embed = builder.Build();
             //await Context.Channel.SendMessageAsync(null, false, embed);
             await ReplyAsync(null, false, embed);
-        }
-
-        [Command("quit")]
-        //[RequireUserPermission(GuildPermission.Administrator)]
-        [Summary("Make the bot quit!")]
-        public async Task Quit()
-        {
-            _logger.LogInformation("{username}#{discriminator} invoked quit on {target}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
-
-            if (Context.User.Username != "JoyfulReaper" || Context.User.Discriminator != "7485")
-            {
-                await ReplyAsync("Sorry, only the bot's progammer can make the bot quit!");
-            }
-            else
-            {
-                await ReplyAsync("Please, no! I want to live! Noooo.....");
-
-                foreach (var guild in _client.Guilds)
-                {
-                    foreach (var channel in guild.Channels)
-                    {
-                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
-                        {
-                            if (channel != null && channel is SocketTextChannel textChannel)
-                            {
-                                await textChannel.SendMessageAsync($"{Context.User.Username} has killed me :(");
-                            }
-                        }
-                    }
-                }
-
-                await _client.StopAsync(); // Allow the client to cleanup
-            }
         }
     }
 }
