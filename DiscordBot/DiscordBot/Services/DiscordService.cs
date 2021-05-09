@@ -37,7 +37,7 @@ namespace DiscordBot.Services
 {
     class DiscordService : IChatService
     {
-        private readonly bool _showJoinMessage = true;
+        public static bool ShowJoinAndPartMessages { get; } = false;
 
         private readonly IServiceProvider _serviceProvider;
         private readonly DiscordSocketClient _client;
@@ -90,7 +90,7 @@ namespace DiscordBot.Services
             Console.WriteLine("SocketClient is ready");
             Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
 
-            if (_showJoinMessage)
+            if (ShowJoinAndPartMessages)
             {
                 foreach (var guild in _client.Guilds)
                 {
