@@ -24,20 +24,15 @@ SOFTWARE.
 */
 
 using DiscordBot.Models;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess
 {
-    public interface IRepository<T> where T : DatabaseEntity
+    public interface IServerRepository
     {
-        T GetById(ulong Id);
-        IEnumerable<T> List();
-        //void Add(T entity);
-        //void Delete(T entity);
-        //void Edit(T entity);
-        Task AddAsync(T entity);
-        Task DeleteAsync(T entity);
-        Task EditAsync(T entity);
+        Task AddAsync(Server entity);
+        Task DeleteAsync(Server entity);
+        Task EditAsync(Server entity);
+        Task<Server> GetByServerId(ulong serverId);
     }
 }

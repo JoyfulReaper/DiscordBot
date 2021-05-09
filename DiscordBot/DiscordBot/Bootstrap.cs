@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.DataAccess;
 using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -90,13 +91,15 @@ namespace DiscordBot
             serviceCollection
                 .AddLogging(loggingBuilder =>
                     loggingBuilder.AddSerilog(dispose: true))
+                .AddSingleton<IServerRepository, ServerRepository>()
                 .AddSingleton(config)
                 .AddSingleton<LoggingService>()
                 .AddSingleton(socketClient)
                 .AddSingleton<IChatService, DiscordService>()
                 .AddSingleton(commandService)
                 .AddSingleton<CommandHandler>()
-                .AddSingleton<Settings>();
+                .AddSingleton<Settings>()
+                .AddSingleton<IServers, Servers>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 

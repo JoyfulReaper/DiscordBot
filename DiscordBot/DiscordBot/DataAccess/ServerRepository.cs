@@ -26,15 +26,11 @@ SOFTWARE.
 using DiscordBot.Models;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess
 {
-    public class ServerRepository : Repository<Server>
+    public class ServerRepository : Repository<Server>, IServerRepository
     {
         private readonly Settings _settings;
         private readonly ILogger<ServerRepository> _logger;
@@ -51,18 +47,18 @@ namespace DiscordBot.DataAccess
             return await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId", new { ServerId = serverId });
         }
 
-        public async override void Add(Server entity)
+        public async override Task AddAsync(Server entity)
         {
             await ExecuteAsync($"INSERT INTO ${TableName} (ServerId, Prefix)" +
                 "VALUES (@ServerId, @Prefix);", new { entity.ServerId, entity.Prefix });
         }
 
-        public async override void Delete(Server entity)
+        public async override Task DeleteAsync(Server entity)
         {
             await ExecuteAsync($"DELETE FROM {TableName} WHERE Id=@Id;", new { Id = entity.Id });
         }
 
-        public async override void Edit(Server entity)
+        public async override Task EditAsync(Server entity)
         {
             await ExecuteAsync($"UPDATE {TableName} SET Prefix = @Prefix, ServerId = @ServerId" +
                 $"WHERE Id = @Id;", entity);

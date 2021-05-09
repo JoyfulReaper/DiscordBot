@@ -26,7 +26,10 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,12 +39,33 @@ namespace DiscordBot.Commands
     {
         private readonly DiscordSocketClient _client;
         private readonly ILogger<Moderation> _logger;
+        private readonly IServers _servers;
+        private readonly IConfiguration _configuration;
+        private readonly int _prefixMaxLength;
 
         public Moderation(DiscordSocketClient client,
-            ILogger<Moderation> logger)
+            ILogger<Moderation> logger,
+            IServers servers,
+            IConfiguration configuration)
         {
             _client = client;
             _logger = logger;
+            _servers = servers;
+            _configuration = configuration;
+
+
+            var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
+            if (int.TryParse(prefixConfigValue, out int maxLength))
+            {
+                _prefixMaxLength = maxLength;
+            }
+            else
+            {
+                _prefixMaxLength = 8;
+                _logger.LogError("Unable to set max prefix length, using default: {defaultValue}", _prefixMaxLength);
+               
+                //throw new ArgumentException("Unable to convert PrefixMaxLength to an int", nameof(_prefixMaxLength));
+            }
         }
 
         [Command("purge")]
@@ -60,6 +84,27 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, amount, Context.Channel.Name, Context.Guild.Name);
         }
 
+        [Command("prefix")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("Change the prefix")]
+        public async Task Prefix(string prefix = null)
+        {
+            var myPrefix = await _servers.GetGuildPrefix(Context.Guild.Id);
 
+            if (prefix == null)
+            {
+                await ReplyAsync($"My prefix is: `{myPrefix}`");
+                return;
+            }
+
+            if(prefix.Length > _prefixMaxLength)
+            {
+                await ReplyAsync("Prefix must be less than " + _prefixMaxLength + " characters.");
+                return;
+            }
+
+            await _servers.ModifyGuildPrefix(Context.Guild.Id, prefix);
+            await ReplyAsync($"The prefix has been modified to `{prefix}`.");
+        }
     }
 }

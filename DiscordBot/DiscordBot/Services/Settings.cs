@@ -45,7 +45,6 @@ namespace DiscordBot.Services
 
         public string OwnerName { get; private set; }
         public string OwnerDiscriminator { get; private set; }
-        public string Prefix { get; private set;  }
         public string WelcomeMessage { get; private set; }
 
         private void Initialize()
@@ -62,7 +61,6 @@ namespace DiscordBot.Services
                 throw new InvalidOperationException("DatabaseType is not valid.");
             }
 
-            Prefix = _configuration.GetSection("Prefix").Value ?? "!";
             OwnerName = _configuration.GetSection("OwnerName").Value ?? "JoyfulReaper";
             OwnerDiscriminator = _configuration.GetSection("OwnerDiscriminator").Value ?? "7485";
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
