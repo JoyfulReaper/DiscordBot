@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// TODO Finish implementing this
+
 using Discord;
 using System;
 
@@ -31,10 +33,22 @@ namespace DiscordBot.Helpers
     public static class ColorHelper
     {
         private static Random _random = new();
+        public static Color DefaultColor { get; set; }
+        public static bool UseRandomColor { get; set; } = false;
 
         public static Color RandomColor()
         {
             return new Color(_random.Next(256), _random.Next(256), _random.Next(256));
+        }
+
+        public static Color GetColor()
+        {
+            if (UseRandomColor)
+            {
+                return RandomColor();
+            }
+
+            return DefaultColor;
         }
     }
 }

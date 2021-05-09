@@ -37,6 +37,8 @@ using System.Threading.Tasks;
 // TODO: Write a logging helper than can be used with Task.Run and replace all logger calls with
 // this, or look into other solutions.
 
+// TODO Implement Embed color from appsettings.json
+
 namespace DiscordBot
 {
     class Program
