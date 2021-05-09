@@ -82,7 +82,8 @@ namespace DiscordBot
             DiscordSocketClient socketClient = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Verbose,
-                MessageCacheSize = 1000
+                MessageCacheSize = 1000,
+                AlwaysDownloadUsers = true
             });
 
             var serviceCollection = new ServiceCollection();
@@ -102,7 +103,7 @@ namespace DiscordBot
             //TODO I'm not a big fan of this
             // We need this so the ctor gets called and the commandHandler actually gets instantiated
             // This way the events get hooked up
-            // I really think is a horrible place to do this..
+            // I don't think this is the place to do this, or there must be a better way
             serviceProvider.GetRequiredService<CommandHandler>();
             serviceProvider.GetRequiredService<LoggingService>();
 

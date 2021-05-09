@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
@@ -57,10 +58,11 @@ namespace DiscordBot.Services
             _prefix = _config.GetSection("Prefix").Value;
             _logger.LogInformation("Prefix set to {prefix}", _prefix);
 
-            _client.MessageReceived += MessageReceived;
+            _client.MessageReceived += OnMessageReceived;
+            _commands.CommandExecuted += OnCommandExecuted;
         }
 
-        private async Task MessageReceived(SocketMessage messageParam)
+        private async Task OnMessageReceived(SocketMessage messageParam)
         {
             var message = messageParam as SocketUserMessage;
 
@@ -83,29 +85,33 @@ namespace DiscordBot.Services
                     return;
                 }
 
-                var result = await _commands.ExecuteAsync(context, position, _serviceProvider);
+               await _commands.ExecuteAsync(context, position, _serviceProvider);
+            }
+        }
 
-                if(result.Error == CommandError.UnknownCommand)
+        private async Task OnCommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        {
+            if (result.Error == CommandError.UnknownCommand)
+            {
+                //TODO add multiple images
+                //TODO make this optional/a setting
+                //TODO Message about this handler blocking the gateway thread, wrapping in a Task.Run didn't fix
+                // Look into this more
+                await Task.Run(async () =>
                 {
-                    //TODO add multiple images
-                    //TODO make this optional/a setting
-                    //TODO Message about this handler blocking the gateway thread, wrapping in a Task.Run didn't fix
-                    // Look into this more
-                    await Task.Run(async () =>
-                   {
-                       var badCommandMessage = await messageParam.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");
-                       await Task.Delay(3500);
-                       await badCommandMessage.DeleteAsync();
-                   });
+                    _logger.LogDebug("{user} attempted to use an unknown command {command}", context.User.Username, context.Message.Content);
+                    var badCommandMessage = await context.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");
+                    await Task.Delay(3500);
+                    await badCommandMessage.DeleteAsync();
+                });
 
-                    return;
-                }
+                return;
+            }
 
-                if(!result.IsSuccess)
-                {
-                    _logger.LogError("Error Occured for command {command}: {error}", message.Content, result.Error);
-                    Console.WriteLine($"The following error occured: {result.Error}");
-                }
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("Error Occured for command {command}: {error}", context.Message.Content, result.Error);
+                Console.WriteLine($"The following error occured: {result.Error}");
             }
         }
     }
