@@ -49,7 +49,7 @@ namespace DiscordBot.DataAccess
 
         public async override Task AddAsync(Server entity)
         {
-            await ExecuteAsync($"INSERT INTO ${TableName} (ServerId, Prefix)" +
+            await ExecuteAsync($"INSERT INTO {TableName} (ServerId, Prefix)" +
                 "VALUES (@ServerId, @Prefix);", new { entity.ServerId, entity.Prefix });
         }
 
@@ -60,7 +60,7 @@ namespace DiscordBot.DataAccess
 
         public async override Task EditAsync(Server entity)
         {
-            await ExecuteAsync($"UPDATE {TableName} SET Prefix = @Prefix, ServerId = @ServerId" +
+            await ExecuteAsync($"UPDATE {TableName} SET Prefix = @Prefix, ServerId = @ServerId " +
                 $"WHERE Id = @Id;", entity);
         }
     }
