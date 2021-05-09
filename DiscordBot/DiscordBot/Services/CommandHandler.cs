@@ -121,6 +121,12 @@ namespace DiscordBot.Services
                     await context.Channel.SendMessageAsync($"Unknown object");
                 }
 
+                if(result.Error == CommandError.UnmetPrecondition)
+                {
+                    // TODO better error message
+                    await context.Channel.SendMessageAsync(result.ErrorReason);
+                }
+
                 _logger.LogError("Error Occured for command {command}: {error}", context.Message.Content, result.Error);
                 Console.WriteLine($"The following error occured: {result.Error}");
             }

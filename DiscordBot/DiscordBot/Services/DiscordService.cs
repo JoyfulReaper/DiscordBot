@@ -37,7 +37,7 @@ namespace DiscordBot.Services
 {
     class DiscordService : IChatService
     {
-        public static bool ShowJoinAndPartMessages { get; } = false;
+        public static bool ShowJoinAndPartMessages { get; } = true;
 
         private readonly IServiceProvider _serviceProvider;
         private readonly DiscordSocketClient _client;
