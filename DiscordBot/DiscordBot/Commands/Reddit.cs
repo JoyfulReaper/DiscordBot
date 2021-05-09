@@ -32,6 +32,7 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Discord;
 using System.Collections.Generic;
+using DiscordBot.Helpers;
 
 namespace DiscordBot.Commands
 {
@@ -107,7 +108,8 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder();
 
             var postUrlLower = postUrl.ToLowerInvariant();
-            if (postUrlLower.EndsWith("jpg") || postUrl.EndsWith("png") || postUrl.EndsWith("gif") || postUrl.EndsWith("bmp"))
+            if (postUrlLower.EndsWith("jpg") || postUrl.EndsWith("png") || postUrl.EndsWith("gif") 
+                || postUrl.EndsWith("bmp") || postUrl.EndsWith("gifv"))
             {
                 builder.WithImageUrl(postUrl);
             }
@@ -115,7 +117,8 @@ namespace DiscordBot.Commands
             builder
                 .WithDescription($"/r/{subreddit}")
                 .AddField("url:", postUrl.ToString(), true)
-                .WithColor(new Color(33, 176, 252))
+                //.WithColor(new Color(33, 176, 252))
+                .WithColor(ColorHelper.RandomColor())
                 .WithTitle(post["title"].ToString())
                 .WithUrl("https://reddit.com" + post["permalink"].ToString())
                 .WithFooter($"🗨 {post["num_comments"]} ⬆️ {post["ups"]}")

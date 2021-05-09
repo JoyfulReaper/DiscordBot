@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Data;
@@ -78,6 +79,12 @@ namespace DiscordBot.Commands
             await message.DeleteAsync();
         }
 
+        [Command ("about")]
+        public async Task About()
+        {
+            await ReplyAsync("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot");
+        }
+
         [Command("owner")]
         [Summary("Retreive the server owner")]
         public async Task Owner()
@@ -118,7 +125,8 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(mentionedUser.GetAvatarUrl() ?? mentionedUser.GetDefaultAvatarUrl())
                 .WithDescription("User information:")
-                .WithColor(new Color(33, 176, 252))
+                //.WithColor(new Color(33, 176, 252))
+                .WithColor(ColorHelper.RandomColor())
                 .AddField("User ID", mentionedUser.Id, true)
                 .AddField("Discriminator", mentionedUser.Discriminator, true)
                 .AddField("Created at", mentionedUser.CreatedAt.ToString("MM/dd/yyyy"), true)
@@ -142,7 +150,8 @@ namespace DiscordBot.Commands
                 .WithThumbnailUrl(Context.Guild.IconUrl)
                 .WithDescription("Server information:")
                 .WithTitle($"{Context.Guild.Name} Information")
-                .WithColor(33, 176, 252)
+                //.WithColor(33, 176, 252)
+                .WithColor(ColorHelper.RandomColor())
                 .AddField("Created at", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
                 .AddField("Member count", (Context.Guild as SocketGuild).MemberCount + " members", true)
                 .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
