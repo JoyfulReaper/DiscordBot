@@ -28,6 +28,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -42,13 +43,36 @@ namespace DiscordBot.Commands
         private readonly DiscordSocketClient _client;
         private readonly Settings _settings;
 
-        public General(ILogger<General> logger, 
+        public General(ILogger<General> logger,
             DiscordSocketClient client,
             Settings settings)
         {
             _logger = logger;
             _client = client;
             _settings = settings;
+        }
+
+        [Command("math")]
+        [Alias("calculate", "calculator", "evaluate", "eval")]
+        [Summary("Do math")]
+        public async Task Math([Remainder] string math)
+        {
+            _logger.LogInformation("{username}#{discriminator} executed math: {math}", Context.User.Username, Context.User.Discriminator, math);
+            var dt = new DataTable();
+
+            try
+            {
+                var result = dt.Compute(math, null);
+                await ReplyAsync($"Result: {result}");
+            }
+            catch (EvaluateException)
+            {
+                await ReplyAsync("Unable to evaluate");
+            }
+            catch (SyntaxErrorException)
+            {
+                await ReplyAsync("Syntax error");
+            }
         }
 
         [Command("owner")]
