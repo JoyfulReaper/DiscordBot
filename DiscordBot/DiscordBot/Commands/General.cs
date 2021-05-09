@@ -60,6 +60,7 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed math: {math}", Context.User.Username, Context.User.Discriminator, math);
             var dt = new DataTable();
 
+            var message = await ReplyAsync("https://i.pinimg.com/originals/97/a3/b9/97a3b92384b62eb04566a457f6d76f6c.gif");
             try
             {
                 var result = dt.Compute(math, null);
@@ -73,6 +74,8 @@ namespace DiscordBot.Commands
             {
                 await ReplyAsync("Syntax error");
             }
+            await Task.Delay(1500);
+            await message.DeleteAsync();
         }
 
         [Command("owner")]
