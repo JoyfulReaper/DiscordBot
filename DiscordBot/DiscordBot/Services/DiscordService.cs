@@ -37,7 +37,7 @@ namespace DiscordBot.Services
 {
     class DiscordService : IChatService
     {
-        private const bool _showJoinMessage = false;
+        public static bool ShowJoinAndPartMessages { get; } = false;
 
         private readonly IServiceProvider _serviceProvider;
         private readonly DiscordSocketClient _client;
@@ -85,21 +85,24 @@ namespace DiscordBot.Services
         {
             _logger.LogInformation("Connected as {username}#{discriminator}", _client.CurrentUser.Username, _client.CurrentUser.Discriminator);
 
+            await _client.SetGameAsync("Being a Discord Bot");
+
             Console.WriteLine("SocketClient is ready");
             Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
 
-            if (_showJoinMessage)
+            if (ShowJoinAndPartMessages)
             {
                 foreach (var guild in _client.Guilds)
                 {
                     foreach (var channel in guild.Channels)
                     {
-                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
+                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().Contains("bot-spam"))
                         {
                             if (channel != null && channel is SocketTextChannel textChannel)
                             {
-                                await textChannel.SendMessageAsync("Beep boop! I'm alive!");
-                                await textChannel.SendMessageAsync("MIT License by JoyfulReaper: https://github.com/JoyfulReaper/DiscordBot");
+                                await textChannel.SendMessageAsync("Beep boop! I'm alive!\nI am DiscordBot by JoyfulReaper!\nMIT Licensed and available on his GitHub!");
+                                //await textChannel.SendMessageAsync("Beep boop! I'm alive!");
+                                //await textChannel.SendMessageAsync("MIT License by JoyfulReaper: https://github.com/JoyfulReaper/DiscordBot");
                             }
                         }
                     }

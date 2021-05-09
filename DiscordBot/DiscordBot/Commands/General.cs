@@ -1,8 +1,35 @@
-﻿using Discord;
+﻿/*
+MIT License
+
+Copyright(c) 2021 Kyle Givler
+https://github.com/JoyfulReaper
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Helpers;
+using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
-using System;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,11 +42,47 @@ namespace DiscordBot.Commands
     {
         private readonly ILogger<General> _logger;
         private readonly DiscordSocketClient _client;
+        private readonly Settings _settings;
 
-        public General(ILogger<General> logger, DiscordSocketClient client)
+        public General(ILogger<General> logger,
+            DiscordSocketClient client,
+            Settings settings)
         {
             _logger = logger;
             _client = client;
+            _settings = settings;
+        }
+
+        [Command("math")]
+        [Alias("calculate", "calculator", "evaluate", "eval")]
+        [Summary("Do math")]
+        public async Task Math([Remainder] string math)
+        {
+            _logger.LogInformation("{username}#{discriminator} executed math: {math}", Context.User.Username, Context.User.Discriminator, math);
+            var dt = new DataTable();
+
+            var message = await ReplyAsync("https://i.pinimg.com/originals/97/a3/b9/97a3b92384b62eb04566a457f6d76f6c.gif");
+            try
+            {
+                var result = dt.Compute(math, null);
+                await ReplyAsync($"Result: {result}");
+            }
+            catch (EvaluateException)
+            {
+                await ReplyAsync("Unable to evaluate");
+            }
+            catch (SyntaxErrorException)
+            {
+                await ReplyAsync("Syntax error");
+            }
+            await Task.Delay(1500);
+            await message.DeleteAsync();
+        }
+
+        [Command ("about")]
+        public async Task About()
+        {
+            await ReplyAsync("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot");
         }
 
         [Command("owner")]
@@ -62,7 +125,8 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(mentionedUser.GetAvatarUrl() ?? mentionedUser.GetDefaultAvatarUrl())
                 .WithDescription("User information:")
-                .WithColor(new Color(33, 176, 252))
+                //.WithColor(new Color(33, 176, 252))
+                .WithColor(ColorHelper.RandomColor())
                 .AddField("User ID", mentionedUser.Id, true)
                 .AddField("Discriminator", mentionedUser.Discriminator, true)
                 .AddField("Created at", mentionedUser.CreatedAt.ToString("MM/dd/yyyy"), true)
@@ -86,7 +150,8 @@ namespace DiscordBot.Commands
                 .WithThumbnailUrl(Context.Guild.IconUrl)
                 .WithDescription("Server information:")
                 .WithTitle($"{Context.Guild.Name} Information")
-                .WithColor(33, 176, 252)
+                //.WithColor(33, 176, 252)
+                .WithColor(ColorHelper.RandomColor())
                 .AddField("Created at", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
                 .AddField("Member count", (Context.Guild as SocketGuild).MemberCount + " members", true)
                 .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
@@ -95,39 +160,6 @@ namespace DiscordBot.Commands
             var embed = builder.Build();
             //await Context.Channel.SendMessageAsync(null, false, embed);
             await ReplyAsync(null, false, embed);
-        }
-
-        [Command("quit")]
-        //[RequireUserPermission(GuildPermission.Administrator)]
-        [Summary("Make the bot quit!")]
-        public async Task Quit()
-        {
-            _logger.LogInformation("{username}#{discriminator} invoked quit on {target}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
-
-            if (Context.User.Username != "JoyfulReaper" || Context.User.Discriminator != "7485")
-            {
-                await ReplyAsync("Sorry, only the bot's progammer can make the bot quit!");
-            }
-            else
-            {
-                await ReplyAsync("Please, no! I want to live! Noooo.....");
-
-                foreach (var guild in _client.Guilds)
-                {
-                    foreach (var channel in guild.Channels)
-                    {
-                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
-                        {
-                            if (channel != null && channel is SocketTextChannel textChannel)
-                            {
-                                await textChannel.SendMessageAsync($"{Context.User.Username} has killed me :(");
-                            }
-                        }
-                    }
-                }
-
-                await _client.StopAsync(); // Allow the client to cleanup
-            }
         }
     }
 }

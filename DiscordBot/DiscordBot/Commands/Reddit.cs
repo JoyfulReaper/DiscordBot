@@ -32,6 +32,7 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Discord;
 using System.Collections.Generic;
+using DiscordBot.Helpers;
 
 namespace DiscordBot.Commands
 {
@@ -96,20 +97,28 @@ namespace DiscordBot.Commands
             JObject post = JObject.Parse(arr[0]["data"]["children"][0]["data"].ToString());
 
             string postUrl = post["url"].ToString();
+            string postTitle = post["title"].ToString();
 
-            var builder = new EmbedBuilder()
-                .WithDescription($"/r/{subreddit}");
-                
+            if (postTitle.Length >= 256)
+            {
+                _logger.LogWarning("reddit: Title over 256 characters, trimming!");
+                postTitle = postTitle.Substring(0, 256);
+            }
+
+            var builder = new EmbedBuilder();
 
             var postUrlLower = postUrl.ToLowerInvariant();
-            if (postUrlLower.EndsWith("jpg") || postUrl.EndsWith("png") || postUrl.EndsWith("gif") || postUrl.EndsWith("bmp"))
+            if (postUrlLower.EndsWith("jpg") || postUrl.EndsWith("png") || postUrl.EndsWith("gif") 
+                || postUrl.EndsWith("bmp") || postUrl.EndsWith("gifv"))
             {
                 builder.WithImageUrl(postUrl);
             }
 
             builder
+                .WithDescription($"/r/{subreddit}")
                 .AddField("url:", postUrl.ToString(), true)
-                .WithColor(new Color(33, 176, 252))
+                //.WithColor(new Color(33, 176, 252))
+                .WithColor(ColorHelper.RandomColor())
                 .WithTitle(post["title"].ToString())
                 .WithUrl("https://reddit.com" + post["permalink"].ToString())
                 .WithFooter($"🗨 {post["num_comments"]} ⬆️ {post["ups"]}")

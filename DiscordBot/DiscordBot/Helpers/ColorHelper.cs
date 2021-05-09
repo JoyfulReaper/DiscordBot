@@ -23,13 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Threading.Tasks;
+using Discord;
+using System;
 
-namespace DiscordBot.Services
+namespace DiscordBot.Helpers
 {
-    public interface IChatService
+    public static class ColorHelper
     {
-        public static bool ShowJoinAndPartMessages { get; } = false;
-        Task Start();
+        private static Random _random = new();
+
+        public static Color RandomColor()
+        {
+            return new Color(_random.Next(256), _random.Next(256), _random.Next(256));
+        }
     }
 }

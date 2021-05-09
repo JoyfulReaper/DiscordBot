@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -36,7 +36,7 @@ namespace DiscordBot.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
-        private readonly IConfiguration _config;
+        private readonly Settings _settings;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
 
@@ -44,23 +44,30 @@ namespace DiscordBot.Services
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
-            IConfiguration config,
+            Settings settings,
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger)
         {
             _client = client;
             _commands = commands;
-            _config = config;
+            _settings = settings;
             _serviceProvider = serviceProvider;
             _logger = logger;
 
-            _prefix = _config.GetSection("Prefix").Value;
+            _prefix = _settings.Prefix;
             _logger.LogInformation("Prefix set to {prefix}", _prefix);
 
-            _client.MessageReceived += MessageReceived;
+            _client.MessageReceived += OnMessageReceived;
+            _client.UserJoined += OnUserJoined;
+            _commands.CommandExecuted += OnCommandExecuted;
         }
 
-        private async Task MessageReceived(SocketMessage messageParam)
+        private async Task OnUserJoined(SocketGuildUser userJoining)
+        {
+            await userJoining.Guild.DefaultChannel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
+        }
+
+        private async Task OnMessageReceived(SocketMessage messageParam)
         {
             var message = messageParam as SocketUserMessage;
 
@@ -83,13 +90,38 @@ namespace DiscordBot.Services
                     return;
                 }
 
-                var result = await _commands.ExecuteAsync(context, position, _serviceProvider);
+               await _commands.ExecuteAsync(context, position, _serviceProvider);
+            }
+        }
 
-                if(!result.IsSuccess)
+        private async Task OnCommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        {
+            if (result.Error == CommandError.UnknownCommand)
+            {
+                //TODO add multiple images
+                //TODO make this optional/a setting
+                //TODO Message about this handler blocking the gateway thread, wrapping in a Task.Run didn't fix
+                // Look into this more
+                await Task.Run(async () =>
                 {
-                    _logger.LogError("Error Occured for command {command}: {error}", message.Content, result.Error);
-                    Console.WriteLine($"The following error occured: {result.Error}");
+                    _logger.LogDebug("{user} attempted to use an unknown command {command}", context.User.Username, context.Message.Content);
+                    var badCommandMessage = await context.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");
+                    await Task.Delay(3500);
+                    await badCommandMessage.DeleteAsync();
+                });
+
+                return;
+            }
+
+            if (!result.IsSuccess)
+            {
+                if(result.Error == CommandError.ObjectNotFound)
+                {
+                    await context.Channel.SendMessageAsync($"Unknown object");
                 }
+
+                _logger.LogError("Error Occured for command {command}: {error}", context.Message.Content, result.Error);
+                Console.WriteLine($"The following error occured: {result.Error}");
             }
         }
     }
