@@ -8,6 +8,7 @@ namespace DiscordBot.Models
 {
     public class Server : DatabaseEntity
     {
+        public ulong ServerId { get; set; }
         public string Prefix { get; set; }
     }
 }

@@ -46,19 +46,26 @@ namespace DiscordBot.DataAccess
             _logger = logger;
         }
 
-        public override void Add(Server entity)
+        public async Task<Server> GetByServerId(ulong serverId)
         {
-            throw new NotImplementedException();
+            return await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId", new { ServerId = serverId });
         }
 
-        public override void Delete(Server entity)
+        public async override void Add(Server entity)
         {
-            throw new NotImplementedException();
+            await ExecuteAsync($"INSERT INTO ${TableName} (ServerId, Prefix)" +
+                "VALUES (@ServerId, @Prefix);", new { entity.ServerId, entity.Prefix });
         }
 
-        public override void Edit(Server entity)
+        public async override void Delete(Server entity)
         {
-            throw new NotImplementedException();
+            await ExecuteAsync($"DELETE FROM {TableName} WHERE Id=@Id;", new { Id = entity.Id });
+        }
+
+        public async override void Edit(Server entity)
+        {
+            await ExecuteAsync($"UPDATE {TableName} SET Prefix = @Prefix, ServerId = @ServerId" +
+                $"WHERE Id = @Id;", entity);
         }
     }
 }
