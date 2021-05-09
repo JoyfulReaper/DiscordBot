@@ -26,7 +26,6 @@ SOFTWARE.
 using DiscordBot.DataAccess;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Data;
 
 namespace DiscordBot.Services
 {
