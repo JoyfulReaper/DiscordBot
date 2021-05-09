@@ -110,6 +110,11 @@ namespace DiscordBot.Services
 
             if (!result.IsSuccess)
             {
+                if(result.Error == CommandError.ObjectNotFound)
+                {
+                    await context.Channel.SendMessageAsync($"Unknown object");
+                }
+
                 _logger.LogError("Error Occured for command {command}: {error}", context.Message.Content, result.Error);
                 Console.WriteLine($"The following error occured: {result.Error}");
             }
