@@ -23,32 +23,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// TODO Finish implementing this
+using DiscordBot.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-using Discord;
-using System;
-
-namespace DiscordBot.Helpers
+namespace DiscordBot.DataAccess
 {
-    public static class ColorHelper
+    public interface IRepository<T> where T : DatabaseEntity
     {
-        private static Random _random = new();
-        public static Color DefaultColor { get; set; }
-        public static bool UseRandomColor { get; set; } = false;
-
-        public static Color RandomColor()
-        {
-            return new Color(_random.Next(256), _random.Next(256), _random.Next(256));
-        }
-
-        public static Color GetColor()
-        {
-            if (UseRandomColor)
-            {
-                return RandomColor();
-            }
-
-            return DefaultColor;
-        }
+        T GetById(ulong Id);
+        IEnumerable<T> List();
+        //void Add(T entity);
+        //void Delete(T entity);
+        //void Edit(T entity);
+        Task AddAsync(T entity);
+        Task DeleteAsync(T entity);
+        Task EditAsync(T entity);
     }
 }

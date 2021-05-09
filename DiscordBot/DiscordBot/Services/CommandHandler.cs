@@ -39,24 +39,21 @@ namespace DiscordBot.Services
         private readonly Settings _settings;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
-
-        private readonly string _prefix;
+        private readonly IServers _servers;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
             Settings settings,
             IServiceProvider serviceProvider,
-            ILogger<CommandHandler> logger)
+            ILogger<CommandHandler> logger,
+            IServers servers)
         {
             _client = client;
             _commands = commands;
             _settings = settings;
             _serviceProvider = serviceProvider;
             _logger = logger;
-
-            _prefix = _settings.Prefix;
-            _logger.LogInformation("Prefix set to {prefix}", _prefix);
-
+            _servers = servers;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
             _commands.CommandExecuted += OnCommandExecuted;
@@ -64,6 +61,7 @@ namespace DiscordBot.Services
 
         private async Task OnUserJoined(SocketGuildUser userJoining)
         {
+            // TODO Store this in the database
             await userJoining.Guild.DefaultChannel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
         }
 
@@ -77,10 +75,13 @@ namespace DiscordBot.Services
                 return;
             }
 
+            var prefix = await _servers.GetGuildPrefix((message.Channel as SocketGuildChannel).Guild.Id);
+
             var context = new SocketCommandContext(_client, message);
             int position = 0;
 
-            if(message.HasStringPrefix(_prefix, ref position) || message.HasMentionPrefix(_client.CurrentUser, ref position))
+            if(message.HasStringPrefix(prefix, ref position) 
+                || message.HasMentionPrefix(_client.CurrentUser, ref position))
             {
                 _logger.LogInformation("Command received: {command}", message.Content);
 
@@ -118,6 +119,12 @@ namespace DiscordBot.Services
                 if(result.Error == CommandError.ObjectNotFound)
                 {
                     await context.Channel.SendMessageAsync($"Unknown object");
+                }
+
+                if(result.Error == CommandError.UnmetPrecondition)
+                {
+                    // TODO better error message
+                    await context.Channel.SendMessageAsync(result.ErrorReason);
                 }
 
                 _logger.LogError("Error Occured for command {command}: {error}", context.Message.Content, result.Error);
