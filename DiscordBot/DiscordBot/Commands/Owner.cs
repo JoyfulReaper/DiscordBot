@@ -60,6 +60,9 @@ namespace DiscordBot.Commands
             else
             {
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
+                var message = await ReplyAsync("https://i.makeagif.com/media/11-18-2014/2oMnrI.gif");
+                await Task.Delay(2500);
+                await message.DeleteAsync();
 
                 foreach (var guild in _client.Guilds)
                 {
@@ -67,7 +70,7 @@ namespace DiscordBot.Commands
                     {
                         if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
                         {
-                            if (channel != null && channel is SocketTextChannel textChannel)
+                            if (channel != null && channel is SocketTextChannel textChannel && DiscordService.ShowJoinAndPartMessages)
                             {
                                 await textChannel.SendMessageAsync($"{Context.User.Username} has killed me :(");
                             }
@@ -81,7 +84,7 @@ namespace DiscordBot.Commands
 
         [Command("game")]
         [Summary("Set the same the bot is playing")]
-        public async Task SetGame(string game)
+        public async Task SetGame([Remainder]string game)
         {
             _logger.LogInformation("{username}#{discriminator} invoked game of {game}", Context.User.Username, Context.User.Discriminator, game);
 
