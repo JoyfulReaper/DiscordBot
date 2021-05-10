@@ -108,7 +108,6 @@ namespace DiscordBot.Commands
 
             var embed = builder.Build();
             await ReplyAsync(null, false, embed);
-            await ReplyAsync(Context?.Guild?.Owner.Username);
         }
 
         [Command("echo")]
