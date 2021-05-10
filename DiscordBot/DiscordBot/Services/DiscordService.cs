@@ -124,7 +124,7 @@ namespace DiscordBot.Services
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Failed to parse ShowJoinMessages. Using false.");
+                _logger.LogWarning(ex, "Failed to parse ShowJoinMessages. Using false.");
                 ShowJoinAndPartMessages = false;
 
             }

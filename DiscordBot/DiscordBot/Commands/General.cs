@@ -30,6 +30,7 @@ using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -43,14 +44,17 @@ namespace DiscordBot.Commands
         private readonly ILogger<General> _logger;
         private readonly DiscordSocketClient _client;
         private readonly Settings _settings;
+        private readonly Images _images;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
-            Settings settings)
+            Settings settings,
+            Images images)
         {
             _logger = logger;
             _client = client;
             _settings = settings;
+            _images = images;
         }
 
         [Command("math")]
@@ -172,6 +176,20 @@ namespace DiscordBot.Commands
 
             var embed = builder.Build();
             await ReplyAsync(null, false, embed);
+        }
+
+        [Command("image", RunMode = RunMode.Async)]
+        public async Task Image(SocketGuildUser user = null)
+        {
+            if(user == null)
+            {
+                user = Context.Message.Author as SocketGuildUser;
+            }
+
+            var memoryStream = await _images.CreateImage(user);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            await Context.Channel.SendFileAsync(memoryStream, $"{user.Username}.png");
+            //File.Delete(path);
         }
     }
 }
