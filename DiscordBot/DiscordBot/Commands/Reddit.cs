@@ -33,6 +33,7 @@ using Newtonsoft.Json.Linq;
 using Discord;
 using System.Collections.Generic;
 using DiscordBot.Helpers;
+using Microsoft.Extensions.Configuration;
 
 namespace DiscordBot.Commands
 {
@@ -43,6 +44,7 @@ namespace DiscordBot.Commands
 
         private readonly ILogger<Reddit> _logger;
         private readonly DiscordSocketClient _client;
+        private readonly IConfiguration _configuration;
         private readonly Random _random = new();
 
         // TODO store learned subbreddit in the database
@@ -51,12 +53,17 @@ namespace DiscordBot.Commands
             "ATAAE", "ATBGE", "badcode", "BikiniBottomTwitter", "bitchimabus", "blackmagicfuckery", "cringe", "cringetopia",
             "eyebleach", "facepalm", "facebookcringe", "forwardsfromgrandma", "FuckNestle", "interestingasfuck",
             "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor",
-            "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes"};
+            "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes",
+            "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
+            "itookapciture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua"};
 
-        public Reddit(ILogger<Reddit> logger, DiscordSocketClient client)
+        public Reddit(ILogger<Reddit> logger, 
+            DiscordSocketClient client,
+            IConfiguration configuration)
         {
             _logger = logger;
             _client = client;
+            _configuration = configuration;
         }
 
         [Command("reddit")]
@@ -81,6 +88,23 @@ namespace DiscordBot.Commands
 
             HttpClient httpClient = new HttpClient();
             var result = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
+
+            // TODO make the NSFW stuff per server
+            bool hideNSFW = false;
+            try
+            {
+                hideNSFW = bool.Parse(_configuration.GetSection("AttemptToAvoidNSFW").Value);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogWarning("Failed to parse AttemptToAvoidNSFW, using true");
+            }
+
+            if(result.Contains("nsfw") && hideNSFW == true)
+            {
+                await ReplyAsync("Not showing nsfw post...");
+                return;
+            }
 
             if(!result.StartsWith("["))
             {
