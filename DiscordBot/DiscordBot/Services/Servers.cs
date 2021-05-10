@@ -32,13 +32,13 @@ namespace DiscordBot.Services
     public class Servers : IServers
     {
         private readonly IServerRepository _serverRepository;
-        private readonly IConfiguration _configuration;
+        private readonly Settings _settings;
 
         public Servers(IServerRepository serverRepository,
-            IConfiguration configuration)
+            Settings settings)
         {
             _serverRepository = serverRepository;
-            _configuration = configuration;
+            _settings = settings;
         }
 
         public async Task ModifyGuildPrefix(ulong id, string prefix)
@@ -58,12 +58,12 @@ namespace DiscordBot.Services
 
         public async Task<string> GetGuildPrefix(ulong id)
         {
-            string prefix = null;
+            string prefix;
             var server = await _serverRepository.GetByServerId(id);
 
             if (server == null)
             {
-                prefix = _configuration.GetSection("DefaultPrefix").Value;
+                prefix = _settings.DefaultPrefix;
             }
             else
             {

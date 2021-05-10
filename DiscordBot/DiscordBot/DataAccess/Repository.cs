@@ -74,7 +74,7 @@ namespace DiscordBot.DataAccess
             return Query<T>($"SELECT * FROM {TableName}");
         }
 
-        public async virtual Task<T> GetByIdAsync(int Id)
+        public async virtual Task<T> GetByIdAsync(ulong Id)
         {
             return await QuerySingleAsync<T>($"SELECT * FROM {TableName} WHERE ID = @Id", new { Id = Id });
         }

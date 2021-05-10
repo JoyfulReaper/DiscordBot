@@ -101,7 +101,9 @@ namespace DiscordBot
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<Settings>()
                 .AddSingleton<IServers, Servers>()
-                .AddSingleton<Images>();
+                .AddSingleton<ImageService>()
+                .AddSingleton<RankService>()
+                .AddSingleton<IRankRepository, RankRepository>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 

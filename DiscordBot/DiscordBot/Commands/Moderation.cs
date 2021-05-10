@@ -67,6 +67,7 @@ namespace DiscordBot.Commands
 
         [Command("purge")]
         [RequireUserPermission(GuildPermission.ManageMessages)]
+        [RequireBotPermission(GuildPermission.ManageMessages)]
         [Summary("Purges the given number of messages from the current channel")]
         public async Task Purge([Summary("The number of message to purge")] int amount)
         {
@@ -81,7 +82,7 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, amount, Context.Channel.Name, Context.Guild.Name);
         }
 
-        [Command("prefix")]
+        [Command("prefix", RunMode = RunMode.Async)]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Change the prefix")]
         public async Task Prefix(string prefix = null)

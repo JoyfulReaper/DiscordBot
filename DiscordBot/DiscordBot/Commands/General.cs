@@ -44,12 +44,12 @@ namespace DiscordBot.Commands
         private readonly ILogger<General> _logger;
         private readonly DiscordSocketClient _client;
         private readonly Settings _settings;
-        private readonly Images _images;
+        private readonly ImageService _images;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
             Settings settings,
-            Images images)
+            ImageService images)
         {
             _logger = logger;
             _client = client;

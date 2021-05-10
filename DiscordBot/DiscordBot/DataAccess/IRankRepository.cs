@@ -29,16 +29,12 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess
 {
-    public interface IRepository<T> where T : DatabaseEntity
+    public interface IRankRepository
     {
-        T GetById(ulong Id);
-        Task<T> GetByIdAsync(ulong Id);
-        IEnumerable<T> List();
-        //void Add(T entity);
-        //void Delete(T entity);
-        //void Edit(T entity);
-        Task AddAsync(T entity);
-        Task DeleteAsync(T entity);
-        Task EditAsync(T entity);
+        Task AddAsync(Rank entity);
+        Task DeleteAsync(Rank entity);
+        Task DeleteRank(ulong serverId, ulong roleId);
+        Task EditAsync(Rank entity);
+        Task<List<Rank>> GetRanksByServerId(ulong serverId);
     }
 }

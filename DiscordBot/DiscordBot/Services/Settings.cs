@@ -35,6 +35,10 @@ namespace DiscordBot.Services
     {
         public DatabaseType DatabaseType { get; private set; }
         public string ConnectionString { get; private set; }
+        public string OwnerName { get; private set; }
+        public string OwnerDiscriminator { get; private set; }
+        public string WelcomeMessage { get; private set; }
+        public string DefaultPrefix { get; private set; }
 
         private readonly IConfiguration _configuration;
         private readonly ILogger<Settings> _logger;
@@ -46,10 +50,6 @@ namespace DiscordBot.Services
             _logger = logger;
             Initialize();
         }
-
-        public string OwnerName { get; private set; }
-        public string OwnerDiscriminator { get; private set; }
-        public string WelcomeMessage { get; private set; }
 
         private void Initialize()
         {
@@ -68,6 +68,7 @@ namespace DiscordBot.Services
             OwnerName = _configuration.GetSection("OwnerName").Value ?? "JoyfulReaper";
             OwnerDiscriminator = _configuration.GetSection("OwnerDiscriminator").Value ?? "7485";
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
+            DefaultPrefix = _configuration.GetSection("DefaultPrefix").Value ?? "!";
 
             SetEmbedColors();            
         }

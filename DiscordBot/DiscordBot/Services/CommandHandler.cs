@@ -42,7 +42,7 @@ namespace DiscordBot.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
         private readonly IServers _servers;
-        private readonly Images _images;
+        private readonly ImageService _images;
         private readonly IConfiguration _configuration;
 
         public CommandHandler(DiscordSocketClient client,
@@ -51,7 +51,7 @@ namespace DiscordBot.Services
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger,
             IServers servers,
-            Images images,
+            ImageService images,
             IConfiguration configuration)
         {
             _client = client;
