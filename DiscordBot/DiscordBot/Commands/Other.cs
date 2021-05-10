@@ -9,7 +9,7 @@ namespace DiscordBot.Commands
         [Summary("A picture of the bot programmer's dog")]
         public async Task Shelly()
         {
-            await ReplyAsync("Enjoy this photo of JofulReaper's dog!");
+            await ReplyAsync("Enjoy this photo of JoyfulReaper's dog!");
             await ReplyAsync("https://kgivler.com/images/Shelly/Shelly.jpg");
         }
     }
