@@ -120,11 +120,11 @@ namespace DiscordBot.Services
         {
             try
             {
-                ShowJoinAndPartMessages = bool.Parse(_configuration.GetSection("ShowJoinMessages").Value);
+                ShowJoinAndPartMessages = bool.Parse(_configuration.GetSection("ShowBotJoinMessages").Value);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to parse ShowJoinMessages. Using false.");
+                _logger.LogWarning(ex, "Failed to parse ShowBotJoinMessages. Using false.");
                 ShowJoinAndPartMessages = false;
 
             }
