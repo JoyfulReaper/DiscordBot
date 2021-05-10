@@ -55,7 +55,7 @@ namespace DiscordBot.Commands
             "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor",
             "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes",
             "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
-            "itookapciture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua"};
+            "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua"};
 
         public Reddit(ILogger<Reddit> logger, 
             DiscordSocketClient client,
