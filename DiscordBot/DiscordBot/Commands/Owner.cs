@@ -49,6 +49,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("quit")]
+        [Alias("stop")]
         //[RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Make the bot quit!")]
         public async Task Quit()
