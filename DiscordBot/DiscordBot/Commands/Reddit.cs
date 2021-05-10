@@ -99,10 +99,10 @@ namespace DiscordBot.Commands
             string postUrl = post["url"].ToString();
             string postTitle = post["title"].ToString();
 
-            if (postTitle.Length >= 256)
+            if (postTitle.Length >= 255)
             {
                 _logger.LogWarning("reddit: Title over 256 characters, trimming!");
-                postTitle = postTitle.Substring(0, 256);
+                postTitle = postTitle.Substring(0, 255);
             }
 
             var builder = new EmbedBuilder();
@@ -118,7 +118,7 @@ namespace DiscordBot.Commands
                 .WithDescription($"/r/{subreddit}")
                 .AddField("url:", postUrl.ToString(), true)
                 .WithColor(ColorHelper.GetColor())
-                .WithTitle(post["title"].ToString())
+                .WithTitle(postTitle.ToString())
                 .WithUrl("https://reddit.com" + post["permalink"].ToString())
                 .WithFooter($"🗨 {post["num_comments"]} ⬆️ {post["ups"]}")
                 .WithCurrentTimestamp();
