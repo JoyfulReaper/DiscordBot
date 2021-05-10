@@ -91,7 +91,7 @@ namespace DiscordBot.Commands
             var result = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
 
             // TODO make the NSFW stuff per server
-            bool hideNSFW = false;
+            bool hideNSFW = true;
             try
             {
                 hideNSFW = bool.Parse(_configuration.GetSection("AttemptToAvoidNSFW").Value);
