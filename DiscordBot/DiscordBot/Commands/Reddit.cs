@@ -33,6 +33,7 @@ using Newtonsoft.Json.Linq;
 using Discord;
 using System.Collections.Generic;
 using DiscordBot.Helpers;
+using Microsoft.Extensions.Configuration;
 
 namespace DiscordBot.Commands
 {
@@ -43,6 +44,7 @@ namespace DiscordBot.Commands
 
         private readonly ILogger<Reddit> _logger;
         private readonly DiscordSocketClient _client;
+        private readonly IConfiguration _configuration;
         private readonly Random _random = new();
 
         // TODO store learned subbreddit in the database
@@ -51,12 +53,18 @@ namespace DiscordBot.Commands
             "ATAAE", "ATBGE", "badcode", "BikiniBottomTwitter", "bitchimabus", "blackmagicfuckery", "cringe", "cringetopia",
             "eyebleach", "facepalm", "facebookcringe", "forwardsfromgrandma", "FuckNestle", "interestingasfuck",
             "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor",
-            "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes"};
+            "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes",
+            "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
+            "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua", "chemicalreactiongifs",
+            "shittyfoodporn", "animalsbeingjerks"};
 
-        public Reddit(ILogger<Reddit> logger, DiscordSocketClient client)
+        public Reddit(ILogger<Reddit> logger, 
+            DiscordSocketClient client,
+            IConfiguration configuration)
         {
             _logger = logger;
             _client = client;
+            _configuration = configuration;
         }
 
         [Command("reddit")]
@@ -82,6 +90,23 @@ namespace DiscordBot.Commands
             HttpClient httpClient = new HttpClient();
             var result = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
 
+            // TODO make the NSFW stuff per server
+            bool hideNSFW = false;
+            try
+            {
+                hideNSFW = bool.Parse(_configuration.GetSection("AttemptToAvoidNSFW").Value);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogWarning("Failed to parse AttemptToAvoidNSFW, using true");
+            }
+
+            if(result.Contains("nsfw") && hideNSFW == true)
+            {
+                await ReplyAsync("Not showing nsfw post...");
+                return;
+            }
+
             if(!result.StartsWith("["))
             {
                 await Context.Channel.SendMessageAsync($"{subreddit} does not exist!");
@@ -99,17 +124,18 @@ namespace DiscordBot.Commands
             string postUrl = post["url"].ToString();
             string postTitle = post["title"].ToString();
 
-            if (postTitle.Length >= 256)
+            if (postTitle.Length >= 255)
             {
                 _logger.LogWarning("reddit: Title over 256 characters, trimming!");
-                postTitle = postTitle.Substring(0, 256);
+                postTitle = postTitle.Substring(0, 255);
             }
 
             var builder = new EmbedBuilder();
 
             var postUrlLower = postUrl.ToLowerInvariant();
+            // Note to self gifv doesn't work don't add it back..
             if (postUrlLower.EndsWith("jpg") || postUrl.EndsWith("png") || postUrl.EndsWith("gif") 
-                || postUrl.EndsWith("bmp") || postUrl.EndsWith("gifv"))
+                || postUrl.EndsWith("bmp"))
             {
                 builder.WithImageUrl(postUrl);
             }
@@ -117,9 +143,8 @@ namespace DiscordBot.Commands
             builder
                 .WithDescription($"/r/{subreddit}")
                 .AddField("url:", postUrl.ToString(), true)
-                //.WithColor(new Color(33, 176, 252))
-                .WithColor(ColorHelper.RandomColor())
-                .WithTitle(post["title"].ToString())
+                .WithColor(ColorHelper.GetColor())
+                .WithTitle(postTitle.ToString())
                 .WithUrl("https://reddit.com" + post["permalink"].ToString())
                 .WithFooter($"🗨 {post["num_comments"]} ⬆️ {post["ups"]}")
                 .WithCurrentTimestamp();

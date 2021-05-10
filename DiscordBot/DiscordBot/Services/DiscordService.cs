@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -37,7 +38,7 @@ namespace DiscordBot.Services
 {
     class DiscordService : IChatService
     {
-        public static bool ShowJoinAndPartMessages { get; } = true;
+        public static bool ShowJoinAndPartMessages { get; set; }
 
         private readonly IServiceProvider _serviceProvider;
         private readonly DiscordSocketClient _client;
@@ -100,9 +101,14 @@ namespace DiscordBot.Services
                         {
                             if (channel != null && channel is SocketTextChannel textChannel)
                             {
-                                await textChannel.SendMessageAsync("Beep boop! I'm alive!\nI am DiscordBot by JoyfulReaper!\nMIT Licensed and available on his GitHub!");
-                                //await textChannel.SendMessageAsync("Beep boop! I'm alive!");
-                                //await textChannel.SendMessageAsync("MIT License by JoyfulReaper: https://github.com/JoyfulReaper/DiscordBot");
+                                var builder = new EmbedBuilder()
+                                    .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
+                                    .WithDescription("DiscordBot Starting\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
+                                    .WithColor(ColorHelper.GetColor())
+                                    .WithCurrentTimestamp();
+
+                                var embed = builder.Build();
+                                await textChannel.SendMessageAsync(null, false, embed);
                             }
                         }
                     }
@@ -112,6 +118,17 @@ namespace DiscordBot.Services
 
         public async Task Start()
         {
+            try
+            {
+                ShowJoinAndPartMessages = bool.Parse(_configuration.GetSection("ShowBotJoinMessages").Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to parse ShowBotJoinMessages. Using false.");
+                ShowJoinAndPartMessages = false;
+
+            }
+
             //TODO Figure out a better place to store the token Maybe in a DB
             _logger.LogInformation("Reading token from config file");
             var token = File.ReadAllText(@"C:\token.txt");

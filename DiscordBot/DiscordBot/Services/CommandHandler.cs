@@ -26,6 +26,8 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Helpers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -40,13 +42,17 @@ namespace DiscordBot.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
         private readonly IServers _servers;
+        private readonly Images _images;
+        private readonly IConfiguration _configuration;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
             Settings settings,
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger,
-            IServers servers)
+            IServers servers,
+            Images images,
+            IConfiguration configuration)
         {
             _client = client;
             _commands = commands;
@@ -54,15 +60,36 @@ namespace DiscordBot.Services
             _serviceProvider = serviceProvider;
             _logger = logger;
             _servers = servers;
+            _images = images;
+            _configuration = configuration;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
+
             _commands.CommandExecuted += OnCommandExecuted;
         }
 
         private async Task OnUserJoined(SocketGuildUser userJoining)
         {
-            // TODO Store this in the database
-            await userJoining.Guild.DefaultChannel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
+            bool showMessage = false;
+
+            try
+            {
+                showMessage = bool.Parse(_configuration.GetSection("ShowWelcomeMessage").Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to parse ShowWelecomMessage, using {value}", showMessage);
+            }
+
+            if (showMessage)
+            {
+                await userJoining.Guild.DefaultChannel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
+
+                var channel = userJoining.Guild.DefaultChannel as ISocketMessageChannel;
+                var memoryStream = await _images.CreateImage(userJoining);
+                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+                await channel.SendFileAsync(memoryStream, $"{userJoining.Username}.png");
+            }
         }
 
         private async Task OnMessageReceived(SocketMessage messageParam)

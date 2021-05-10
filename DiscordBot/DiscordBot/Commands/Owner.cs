@@ -23,8 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
@@ -47,6 +49,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("quit")]
+        [Alias("stop")]
         //[RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Make the bot quit!")]
         public async Task Quit()
@@ -72,7 +75,14 @@ namespace DiscordBot.Commands
                         {
                             if (channel != null && channel is SocketTextChannel textChannel && DiscordService.ShowJoinAndPartMessages)
                             {
-                                await textChannel.SendMessageAsync($"{Context.User.Username} has killed me :(");
+                                var builder = new EmbedBuilder()
+                                    .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
+                                    .WithDescription($"DiscordBot Stopped by {Context.User.Username}\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
+                                    .WithColor(ColorHelper.GetColor())
+                                    .WithCurrentTimestamp();
+
+                                var embed = builder.Build();
+                                await textChannel.SendMessageAsync(null, false, embed);
                             }
                         }
                     }

@@ -30,6 +30,7 @@ using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -43,14 +44,17 @@ namespace DiscordBot.Commands
         private readonly ILogger<General> _logger;
         private readonly DiscordSocketClient _client;
         private readonly Settings _settings;
+        private readonly Images _images;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
-            Settings settings)
+            Settings settings,
+            Images images)
         {
             _logger = logger;
             _client = client;
             _settings = settings;
+            _images = images;
         }
 
         [Command("math")]
@@ -65,7 +69,7 @@ namespace DiscordBot.Commands
             try
             {
                 var result = dt.Compute(math, null);
-                await ReplyAsync($"Result: {result}");
+                await ReplyAsync($"Result: `{result}`");
             }
             catch (EvaluateException)
             {
@@ -82,7 +86,16 @@ namespace DiscordBot.Commands
         [Command ("about")]
         public async Task About()
         {
-            await ReplyAsync("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot");
+            _logger.LogInformation("{username}#{discriminator} invoked about", Context.User.Username, Context.User.Discriminator);
+
+            var builder = new EmbedBuilder()
+                .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
+                .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
+                .WithColor(ColorHelper.GetColor())
+                .WithCurrentTimestamp();
+
+            var embed = builder.Build();
+            await ReplyAsync(null, false, embed);
         }
 
         [Command("owner")]
@@ -90,7 +103,15 @@ namespace DiscordBot.Commands
         public async Task Owner()
         {
             _logger.LogInformation("{username}#{discriminator} invoked owner on: {server}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
-            await ReplyAsync(Context?.Guild?.Owner.Username);
+
+            var builder = new EmbedBuilder()
+                .WithThumbnailUrl(Context?.Guild?.Owner.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
+                .WithDescription($"{Context?.Guild?.Owner.Username} is the owner of {Context.Guild.Name}")
+                .WithColor(ColorHelper.GetColor())
+                .WithCurrentTimestamp();
+
+            var embed = builder.Build();
+            await ReplyAsync(null, false, embed);
         }
 
         [Command("echo")]
@@ -125,8 +146,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(mentionedUser.GetAvatarUrl() ?? mentionedUser.GetDefaultAvatarUrl())
                 .WithDescription("User information:")
-                //.WithColor(new Color(33, 176, 252))
-                .WithColor(ColorHelper.RandomColor())
+                .WithColor(ColorHelper.GetColor())
                 .AddField("User ID", mentionedUser.Id, true)
                 .AddField("Discriminator", mentionedUser.Discriminator, true)
                 .AddField("Created at", mentionedUser.CreatedAt.ToString("MM/dd/yyyy"), true)
@@ -135,8 +155,6 @@ namespace DiscordBot.Commands
                 .WithCurrentTimestamp();
 
             var embed = builder.Build();
-
-            //await Context.Channel.SendMessageAsync(null, false, embed);
             await ReplyAsync(null, false, embed);
         }
 
@@ -150,16 +168,28 @@ namespace DiscordBot.Commands
                 .WithThumbnailUrl(Context.Guild.IconUrl)
                 .WithDescription("Server information:")
                 .WithTitle($"{Context.Guild.Name} Information")
-                //.WithColor(33, 176, 252)
-                .WithColor(ColorHelper.RandomColor())
+                .WithColor(ColorHelper.GetColor())
                 .AddField("Created at", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
                 .AddField("Member count", (Context.Guild as SocketGuild).MemberCount + " members", true)
                 .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
                 .WithCurrentTimestamp();
 
             var embed = builder.Build();
-            //await Context.Channel.SendMessageAsync(null, false, embed);
             await ReplyAsync(null, false, embed);
+        }
+
+        [Command("image", RunMode = RunMode.Async)]
+        public async Task Image(SocketGuildUser user = null)
+        {
+            if(user == null)
+            {
+                user = Context.Message.Author as SocketGuildUser;
+            }
+
+            var memoryStream = await _images.CreateImage(user);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            await Context.Channel.SendFileAsync(memoryStream, $"{user.Username}.png");
+            //File.Delete(path);
         }
     }
 }
