@@ -24,7 +24,9 @@ SOFTWARE.
 */
 
 using DiscordBot.DataAccess;
+using DiscordBot.Helpers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace DiscordBot.Services
@@ -35,11 +37,13 @@ namespace DiscordBot.Services
         public string ConnectionString { get; private set; }
 
         private readonly IConfiguration _configuration;
+        private readonly ILogger<Settings> _logger;
 
-        public Settings(IConfiguration configuration)
+        public Settings(IConfiguration configuration,
+            ILogger<Settings> logger)
         {
             _configuration = configuration;
-
+            _logger = logger;
             Initialize();
         }
 
@@ -64,6 +68,49 @@ namespace DiscordBot.Services
             OwnerName = _configuration.GetSection("OwnerName").Value ?? "JoyfulReaper";
             OwnerDiscriminator = _configuration.GetSection("OwnerDiscriminator").Value ?? "7485";
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
+
+            SetEmbedColors();            
+        }
+
+        private void SetEmbedColors()
+        {
+            try
+            {
+                ColorHelper.UseRandomColor = bool.Parse(_configuration.GetSection("RandomEmbedColor").Value);
+                _logger.LogDebug("Using random embed colors: {Value}", ColorHelper.UseRandomColor);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Exception while parsing RandomEmbedColor");
+                ColorHelper.UseRandomColor = false;
+            }
+
+            if(!ColorHelper.UseRandomColor)
+            {
+                string color = _configuration.GetSection("EmbedColor").Value;
+                var colorValues = color.Split(',', StringSplitOptions.TrimEntries);
+
+                if(colorValues.Length != 3)
+                {
+                    throw new InvalidOperationException("EmebedColor is not valid");
+                }
+
+                int[] iColorValues = new int[3];
+                try
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        iColorValues[i] = int.Parse(colorValues[i]);
+                    }
+                    ColorHelper.DefaultColor = new Discord.Color(iColorValues[0], iColorValues[1], iColorValues[2]);
+                    _logger.LogDebug("Using Color({r},{g},{b})", iColorValues[0], iColorValues[1], iColorValues[2]);
+                } 
+                catch(Exception ex)
+                {
+                    _logger.LogWarning(ex, "Exception while parsing EmbedColor. Using 33, 176, 252");
+                    ColorHelper.DefaultColor = new Discord.Color(33, 176, 252);
+                }
+            }
         }
     }
 }
