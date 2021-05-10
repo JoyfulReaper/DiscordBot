@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -100,9 +101,14 @@ namespace DiscordBot.Services
                         {
                             if (channel != null && channel is SocketTextChannel textChannel)
                             {
-                                await textChannel.SendMessageAsync("Beep boop! I'm alive!\nI am DiscordBot by JoyfulReaper!\nMIT Licensed and available on his GitHub!");
-                                //await textChannel.SendMessageAsync("Beep boop! I'm alive!");
-                                //await textChannel.SendMessageAsync("MIT License by JoyfulReaper: https://github.com/JoyfulReaper/DiscordBot");
+                                var builder = new EmbedBuilder()
+                                    .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
+                                    .WithDescription("DiscordBot Starting\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
+                                    .WithColor(ColorHelper.GetColor())
+                                    .WithCurrentTimestamp();
+
+                                var embed = builder.Build();
+                                await textChannel.SendMessageAsync(null, false, embed);
                             }
                         }
                     }

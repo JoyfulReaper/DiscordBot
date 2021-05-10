@@ -29,7 +29,6 @@ using Discord.WebSocket;
 using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -63,8 +62,6 @@ namespace DiscordBot.Commands
             {
                 _prefixMaxLength = 8;
                 _logger.LogError("Unable to set max prefix length, using default: {defaultValue}", _prefixMaxLength);
-               
-                //throw new ArgumentException("Unable to convert PrefixMaxLength to an int", nameof(_prefixMaxLength));
             }
         }
 
