@@ -37,7 +37,7 @@ namespace DiscordBot.Services
 {
     class DiscordService : IChatService
     {
-        public static bool ShowJoinAndPartMessages { get; } = true;
+        public static bool ShowJoinAndPartMessages { get; set; }
 
         private readonly IServiceProvider _serviceProvider;
         private readonly DiscordSocketClient _client;
@@ -112,6 +112,17 @@ namespace DiscordBot.Services
 
         public async Task Start()
         {
+            try
+            {
+                ShowJoinAndPartMessages = bool.Parse(_configuration.GetSection("ShowJoinMessages").Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Failed to parse ShowJoinMessages. Using false.");
+                ShowJoinAndPartMessages = false;
+
+            }
+
             //TODO Figure out a better place to store the token Maybe in a DB
             _logger.LogInformation("Reading token from config file");
             var token = File.ReadAllText(@"C:\token.txt");
