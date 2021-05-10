@@ -55,7 +55,8 @@ namespace DiscordBot.Commands
             "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor",
             "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes",
             "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
-            "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua"};
+            "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua", "chemicalreactiongifs",
+            "shittyfoodporn", "animalsbeingjerks"};
 
         public Reddit(ILogger<Reddit> logger, 
             DiscordSocketClient client,
@@ -132,8 +133,9 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder();
 
             var postUrlLower = postUrl.ToLowerInvariant();
+            // Note to self gifv doesn't work don't add it back..
             if (postUrlLower.EndsWith("jpg") || postUrl.EndsWith("png") || postUrl.EndsWith("gif") 
-                || postUrl.EndsWith("bmp") || postUrl.EndsWith("gifv"))
+                || postUrl.EndsWith("bmp"))
             {
                 builder.WithImageUrl(postUrl);
             }
