@@ -26,15 +26,13 @@ SOFTWARE.
 using DiscordBot.Models;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess
 {
-    class SubredditRepository : Repository<Subreddit>
+    public class SubredditRepository : Repository<Subreddit>, ISubredditRepository
     {
         private readonly ILogger<SubredditRepository> _logger;
         private readonly Settings _settings;
@@ -46,6 +44,12 @@ namespace DiscordBot.DataAccess
             _settings = settings;
         }
 
+        public async Task<List<Subreddit>> GetSubredditByServerId(ulong serverId)
+        {
+            var queryResult = await QueryAsync<Subreddit>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId", new { ServerId = serverId });
+            return queryResult.ToList();
+        }
+
         public async override Task AddAsync(Subreddit entity)
         {
             await ExecuteAsync($"INSERT INTO {TableName} (ServerId, Name) " +
@@ -54,12 +58,13 @@ namespace DiscordBot.DataAccess
 
         public async override Task DeleteAsync(Subreddit entity)
         {
-            throw new NotImplementedException();
+            await ExecuteAsync($"DELETE FROM {TableName} WHERE Id = @Id", new { Id = entity.Id });
         }
 
         public async override Task EditAsync(Subreddit entity)
         {
-            throw new NotImplementedException();
+            await ExecuteAsync($"UPDATE {TableName} SET Name = @Name, ServerId = @ServerId " +
+                $"WHERE Id = @Id;", entity);
         }
     }
 }
