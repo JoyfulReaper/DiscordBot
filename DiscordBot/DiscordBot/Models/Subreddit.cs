@@ -25,9 +25,9 @@ SOFTWARE.
 
 namespace DiscordBot.Models
 {
-    public class Server : DatabaseEntity
+    public class Subreddit : DatabaseEntity
     {
-        public ulong ServerId { get; set; }
-        public string Prefix { get; set; }
+        public uint ServerId { get; set; }
+        public string Name { get; set; }
     }
 }
