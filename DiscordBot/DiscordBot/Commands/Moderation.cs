@@ -38,13 +38,13 @@ namespace DiscordBot.Commands
     {
         private readonly DiscordSocketClient _client;
         private readonly ILogger<Moderation> _logger;
-        private readonly IServers _servers;
+        private readonly IServerService _servers;
         private readonly IConfiguration _configuration;
         private readonly int _prefixMaxLength;
 
         public Moderation(DiscordSocketClient client,
             ILogger<Moderation> logger,
-            IServers servers,
+            IServerService servers,
             IConfiguration configuration)
         {
             _client = client;

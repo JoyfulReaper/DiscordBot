@@ -12,10 +12,10 @@ namespace DiscordBot.Commands
     public class Ranks : ModuleBase<SocketCommandContext>
     {
         private readonly RankService _rankService;
-        private readonly IServers _servers;
+        private readonly IServerService _servers;
 
         public Ranks(RankService rankService,
-            IServers servers)
+            IServerService servers)
         {
             _rankService = rankService;
             _servers = servers;

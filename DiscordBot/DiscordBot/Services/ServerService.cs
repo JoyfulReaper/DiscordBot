@@ -29,12 +29,12 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class Servers : IServers
+    public class ServerService : IServerService
     {
         private readonly IServerRepository _serverRepository;
         private readonly Settings _settings;
 
-        public Servers(IServerRepository serverRepository,
+        public ServerService(IServerRepository serverRepository,
             Settings settings)
         {
             _serverRepository = serverRepository;

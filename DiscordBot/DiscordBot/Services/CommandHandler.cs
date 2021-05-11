@@ -41,7 +41,7 @@ namespace DiscordBot.Services
         private readonly Settings _settings;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
-        private readonly IServers _servers;
+        private readonly IServerService _servers;
         private readonly ImageService _images;
         private readonly IConfiguration _configuration;
 
@@ -50,7 +50,7 @@ namespace DiscordBot.Services
             Settings settings,
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger,
-            IServers servers,
+            IServerService servers,
             ImageService images,
             IConfiguration configuration)
         {
