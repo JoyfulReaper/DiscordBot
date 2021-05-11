@@ -61,10 +61,29 @@ namespace DiscordBot.DataAccess
             await ExecuteAsync($"DELETE FROM {TableName} WHERE Id = @Id", new { Id = entity.Id });
         }
 
+        public async Task DeleteAsync(ulong serverId, string subreddit)
+        {
+            await ExecuteAsync($"DELETE FROM {TableName} WHERE " +
+                $"Name = @Name AND ServerId = @ServerId", new { Name = subreddit, ServerId = serverId });
+        }
+
         public async override Task EditAsync(Subreddit entity)
         {
             await ExecuteAsync($"UPDATE {TableName} SET Name = @Name, ServerId = @ServerId " +
                 $"WHERE Id = @Id;", entity);
+        }
+
+        public async Task<bool> IsKnown(ulong serverId, string subreddit)
+        {
+            var queryRequest = await QuerySingleAsync<int>($"SELECT COUNT (Name) FROM {TableName} WHERE " +
+                $"ServerId = @ServerId AND Name = @Name", new { ServerId = serverId, Name = subreddit });
+
+            if(queryRequest == 0)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

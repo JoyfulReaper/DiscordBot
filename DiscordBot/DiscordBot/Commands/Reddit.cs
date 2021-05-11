@@ -42,12 +42,10 @@ namespace DiscordBot.Commands
 {
     public class Reddit : ModuleBase<SocketCommandContext>
     {
-        // Allow the bot to learn new subbreddit for it's list of random subreddits
-        private const bool _allowLearning = true;
-
         private readonly ILogger<Reddit> _logger;
         private readonly IConfiguration _configuration;
         private readonly ISubredditRepository _subredditRepository;
+        private readonly IServerRepository _serverRepository;
         private readonly Random _random = new();
 
         private static readonly List<string> _seedSubreddits = new List<string>() {"funny", "programmerhumor", "memes", "4PanelCringe", "AdviceAnimals",
@@ -61,15 +59,18 @@ namespace DiscordBot.Commands
 
         public Reddit(ILogger<Reddit> logger, 
             IConfiguration configuration,
-            ISubredditRepository subredditRepository)
+            ISubredditRepository subredditRepository,
+            IServerRepository serverRepository)
         {
             _logger = logger;
             _configuration = configuration;
             _subredditRepository = subredditRepository;
+            _serverRepository = serverRepository;
         }
 
         [Command("reddit", RunMode = RunMode.Async)]
-        public async Task RedditPost(string subreddit = null)
+        [Summary("Show a reddit post")]
+        public async Task RedditPost([Summary("The subreddit from which to show a post")]string subreddit = null)
         {
             _logger.LogInformation("{username}#{discriminator} invoked reddit with subreddit {subreddit}", Context.User.Username, Context.User.Discriminator, subreddit);
             await Context.Channel.TriggerTypingAsync();
@@ -87,13 +88,17 @@ namespace DiscordBot.Commands
                 subreddit = subreddits[_random.Next(subreddits.Count)].Name;
             }
 
-            await AddSubRedditIfNotKnownAndLearningEnabled(subreddits, subreddit);
+            if(!await AddSubRedditIfNotKnownAndLearningEnabled(subreddits, subreddit))
+            {
+                await ReplyAsync("Subreddit is not known and learning is disabled for this server.");
+                return;
+            }
 
             HttpClient httpClient = new HttpClient();
             var httpResult = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
 
             bool showNSFW = channel.IsNsfw;
-            if(httpResult.Contains("nsfw") && showNSFW != true)
+            if(httpResult.ToLowerInvariant().Contains("nsfw") && showNSFW != true)
             {
                 await ReplyAsync("NSFW Posts only shown on NSFW channels");
                 return;
@@ -105,6 +110,60 @@ namespace DiscordBot.Commands
             JObject post = JObject.Parse(arr[0]["data"]["children"][0]["data"].ToString());
 
             await CreateAndSendEmbed(post, subreddit);
+        }
+
+        [Command("subredditremove", RunMode = RunMode.Async)]
+        [Summary("Remove a subreddit")]
+        public async Task RemoveSubreddit([Summary("The subreddit to remove")]string subreddit)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} invoked removesubreddit with subreddit {subreddit}", Context.User.Username, Context.User.Discriminator, subreddit);
+            if(!await _subredditRepository.IsKnown(Context.Guild.Id, subreddit))
+            {
+                await ReplyAsync($"{subreddit} was not known.");
+                return;
+            }
+
+            await _subredditRepository.DeleteAsync(Context.Guild.Id, subreddit);
+            await ReplyAsync($"Removed {subreddit}");
+        }
+
+        [Command("subredditlearning", RunMode = RunMode.Async)]
+        [Summary("enable or disable learning")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task SubredditLearning(string value = null)
+        {
+            var server = await _serverRepository.GetByServerId(Context.Guild.Id);
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(Context.Guild.Id);
+                server = await _serverRepository.GetByServerId(Context.Guild.Id);
+            }
+
+            if(value == null)
+            {
+                await ReplyAsync($"Subreddit learning is {(server.SubredditLearning ? "enabled" : "disabled")}");
+                return;
+            }
+
+            if (value.ToLowerInvariant() == "on")
+            {
+                server.SubredditLearning = true;
+                await ReplyAsync("Subreddit learning enabled");
+            }
+            else if (value.ToLowerInvariant() == "off")
+            {
+                server.SubredditLearning = false;
+                await ReplyAsync("Subreddit learning disabled");
+            }
+            else
+            {
+                await ReplyAsync("Valid options are `on` or `off`");
+                return;
+            }
+
+            await _serverRepository.EditAsync(server);
         }
 
         private async Task CreateAndSendEmbed(JObject post, string subreddit)
@@ -158,10 +217,17 @@ namespace DiscordBot.Commands
             }
         }
 
-        private async Task AddSubRedditIfNotKnownAndLearningEnabled(List<Subreddit> subreddits, string subreddit)
+        private async Task<bool> AddSubRedditIfNotKnownAndLearningEnabled(List<Subreddit> subreddits, string subreddit)
         {
-            if (!subreddits.Any(x => x.Name == subreddit) && _allowLearning)
+            var server = await _serverRepository.GetByServerId(Context.Guild.Id);
+
+            if (!subreddits.Any(x => x.Name == subreddit))
             {
+                if(!server.SubredditLearning)
+                {
+                    return false;
+                }
+
                 await _subredditRepository.AddAsync(new Subreddit { Name = subreddit, ServerId = Context.Guild.Id });
 
                 _logger.LogInformation("reddit: learned {subreddit}", subreddit);
@@ -169,6 +235,8 @@ namespace DiscordBot.Commands
 
                 await ReplyAsync($"I learned a new subreddit! Now I know of {subreddits.Count + 1} subreddits!");
             }
+
+            return true;
         }
 
         private async Task<List<Subreddit>> GetSubreddits( )

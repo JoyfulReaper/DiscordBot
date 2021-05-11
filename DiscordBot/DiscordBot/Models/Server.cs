@@ -29,5 +29,6 @@ namespace DiscordBot.Models
     {
         public ulong ServerId { get; set; }
         public string Prefix { get; set; }
+        public bool SubredditLearning { get; set; } = false;
     }
 }

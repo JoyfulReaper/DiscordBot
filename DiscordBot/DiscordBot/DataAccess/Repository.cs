@@ -30,7 +30,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,8 +47,13 @@ namespace DiscordBot.DataAccess
         {
             _settings = settings;
             _logger = logger;
+
             string typeName = typeof(T).ToString();
             TableName = typeName.Substring(typeName.LastIndexOf('.') + 1);
+
+            SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
+            SqlMapper.AddTypeHandler(new GuidHandler());
+            SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
         //public abstract void Add(T entity);

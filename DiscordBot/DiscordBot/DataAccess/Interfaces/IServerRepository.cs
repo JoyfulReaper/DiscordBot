@@ -31,6 +31,7 @@ namespace DiscordBot.DataAccess
     public interface IServerRepository
     {
         Task AddAsync(Server entity);
+        Task AddAsync(ulong serverId);
         Task DeleteAsync(Server entity);
         Task EditAsync(Server entity);
         Task<Server> GetByServerId(ulong serverId);

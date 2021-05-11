@@ -33,7 +33,9 @@ namespace DiscordBot.DataAccess
     {
         Task AddAsync(Subreddit entity);
         Task DeleteAsync(Subreddit entity);
+        Task DeleteAsync(ulong serverId, string subreddit);
         Task EditAsync(Subreddit entity);
         Task<List<Subreddit>> GetSubredditByServerId(ulong serverId);
+        Task<bool> IsKnown(ulong serverId, string subreddit);
     }
 }

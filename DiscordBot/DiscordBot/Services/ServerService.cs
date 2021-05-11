@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using DiscordBot.DataAccess;
+using DiscordBot.Models;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 
@@ -47,7 +48,7 @@ namespace DiscordBot.Services
 
             if (server == null)
             {
-                await _serverRepository.AddAsync(new Models.Server { ServerId = id, Prefix = prefix });
+                await _serverRepository.AddAsync(new Server { ServerId = id, Prefix = prefix });
             }
             else
             {

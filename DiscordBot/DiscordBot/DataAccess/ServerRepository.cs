@@ -49,8 +49,15 @@ namespace DiscordBot.DataAccess
 
         public async override Task AddAsync(Server entity)
         {
-            await ExecuteAsync($"INSERT INTO {TableName} (ServerId, Prefix)" +
-                "VALUES (@ServerId, @Prefix);", new { entity.ServerId, entity.Prefix });
+            await ExecuteAsync($"INSERT INTO {TableName} (ServerId, Prefix, SubredditLearning)" +
+                "VALUES (@ServerId, @Prefix, @SubredditLearning);",
+                entity);
+        }
+
+        public async Task AddAsync(ulong id)
+        {
+            var defaultPrefix = _settings.DefaultPrefix;
+            await AddAsync(new Server { ServerId = id, Prefix = defaultPrefix });
         }
 
         public async override Task DeleteAsync(Server entity)
@@ -60,8 +67,10 @@ namespace DiscordBot.DataAccess
 
         public async override Task EditAsync(Server entity)
         {
-            await ExecuteAsync($"UPDATE {TableName} SET Prefix = @Prefix, ServerId = @ServerId " +
-                $"WHERE Id = @Id;", entity);
+            await ExecuteAsync($"UPDATE {TableName} " +
+                $"SET Prefix = @Prefix, ServerId = @ServerId, SubredditLearning = @SubredditLearning " +
+                $"WHERE Id = @Id;",
+                entity);
         }
     }
 }
