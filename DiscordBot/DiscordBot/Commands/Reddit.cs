@@ -74,8 +74,14 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} invoked reddit with subreddit {subreddit}", Context.User.Username, Context.User.Discriminator, subreddit);
             await Context.Channel.TriggerTypingAsync();
 
-            var subreddits = await GetSubreddits();
+            SocketTextChannel channel = Context.Channel as SocketTextChannel;
+            if(channel == null)
+            {
+                _logger.LogWarning("Channel {channel} is not a text channel.", channel);
+                return;
+            }
 
+            var subreddits = await GetSubreddits();
             if (subreddit == null)
             {
                 subreddit = subreddits[_random.Next(subreddits.Count)].Name;
@@ -86,20 +92,10 @@ namespace DiscordBot.Commands
             HttpClient httpClient = new HttpClient();
             var httpResult = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
 
-            // TODO make the NSFW stuff per server
-            bool hideNSFW = true;
-            try
+            bool showNSFW = channel.IsNsfw;
+            if(httpResult.Contains("nsfw") && showNSFW != true)
             {
-                hideNSFW = bool.Parse(_configuration.GetSection("AttemptToAvoidNSFW").Value);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogWarning("Failed to parse AttemptToAvoidNSFW, using true");
-            }
-
-            if(httpResult.Contains("nsfw") && hideNSFW == true)
-            {
-                await ReplyAsync("Not showing nsfw post...");
+                await ReplyAsync("NSFW Posts only shown on NSFW channels");
                 return;
             }
 
