@@ -42,22 +42,22 @@ namespace DiscordBot.DataAccess
             _logger = logger;
         }
 
-        public async Task<Server> GetByServerId(ulong serverId)
+        public async Task<Server> GetByServerId(ulong guildId)
         {
-            return await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId", new { ServerId = serverId });
+            return await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE ServerId = @GuildId", new { GuildId = guildId });
         }
 
         public async override Task AddAsync(Server entity)
         {
-            await ExecuteAsync($"INSERT INTO {TableName} (ServerId, Prefix, SubredditLearning)" +
-                "VALUES (@ServerId, @Prefix, @SubredditLearning);",
+            await ExecuteAsync($"INSERT INTO {TableName} (GuildId, Prefix, SubredditLearning)" +
+                "VALUES (@GuildId, @Prefix, @SubredditLearning);",
                 entity);
         }
 
         public async Task AddAsync(ulong id)
         {
             var defaultPrefix = _settings.DefaultPrefix;
-            await AddAsync(new Server { ServerId = id, Prefix = defaultPrefix });
+            await AddAsync(new Server { GuildId = id, Prefix = defaultPrefix });
         }
 
         public async override Task DeleteAsync(Server entity)
@@ -68,7 +68,7 @@ namespace DiscordBot.DataAccess
         public async override Task EditAsync(Server entity)
         {
             await ExecuteAsync($"UPDATE {TableName} " +
-                $"SET Prefix = @Prefix, ServerId = @ServerId, SubredditLearning = @SubredditLearning " +
+                $"SET Prefix = @Prefix, GuildId = @GuildId, SubredditLearning = @SubredditLearning " +
                 $"WHERE Id = @Id;",
                 entity);
         }

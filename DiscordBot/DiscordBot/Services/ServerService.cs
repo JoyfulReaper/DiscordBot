@@ -48,7 +48,7 @@ namespace DiscordBot.Services
 
             if (server == null)
             {
-                await _serverRepository.AddAsync(new Server { ServerId = id, Prefix = prefix });
+                await _serverRepository.AddAsync(new Server { GuildId = id, Prefix = prefix });
             }
             else
             {

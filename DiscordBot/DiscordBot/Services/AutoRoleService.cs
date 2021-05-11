@@ -98,7 +98,7 @@ namespace DiscordBot.Services
 
             if (server == null)
             {
-                await _serverRepository.AddAsync(new Server { ServerId = serverId, Prefix = _settings.DefaultPrefix });
+                await _serverRepository.AddAsync(new Server { GuildId = serverId, Prefix = _settings.DefaultPrefix });
             }
 
             await _autoRoleRepository.AddAsync(new AutoRole { RoleId = roleId, ServerId = serverId });
