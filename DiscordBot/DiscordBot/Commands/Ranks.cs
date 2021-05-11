@@ -68,6 +68,7 @@ namespace DiscordBot.Commands
             if(ranks.Any(x => x.Id == role.Id))
             {
                 await ReplyAsync("That role is already a rank!");
+                return;
             }
 
             await _rankService.AddRank(Context.Guild.Id, role.Id);

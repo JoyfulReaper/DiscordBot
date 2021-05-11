@@ -71,6 +71,8 @@ namespace DiscordBot.Commands
         [Summary("Purges the given number of messages from the current channel")]
         public async Task Purge([Summary("The number of message to purge")] int amount)
         {
+            await Context.Channel.TriggerTypingAsync();
+
             var messages = await Context.Channel.GetMessagesAsync(amount + 1).FlattenAsync();
             await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
 

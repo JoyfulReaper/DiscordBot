@@ -128,9 +128,7 @@ namespace DiscordBot.Services
             {
                 //TODO add multiple images
                 //TODO make this optional/a setting
-                //TODO Message about this handler blocking the gateway thread, wrapping in a Task.Run didn't fix
-                // Look into this more
-                await Task.Run(async () =>
+                Task.Run(async () =>
                 {
                     _logger.LogDebug("{user} attempted to use an unknown command {command}", context.User.Username, context.Message.Content);
                     var badCommandMessage = await context.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");

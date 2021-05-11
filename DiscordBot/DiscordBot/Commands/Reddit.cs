@@ -72,6 +72,8 @@ namespace DiscordBot.Commands
         {
             _logger.LogInformation("{username}#{discriminator} invoked reddit with subreddit {subreddit}", Context.User.Username, Context.User.Discriminator, subreddit);
 
+            await Context.Channel.TriggerTypingAsync();
+
             if (subreddit == null)
             {
                 subreddit = _subreddits[_random.Next(_subreddits.Count)];
