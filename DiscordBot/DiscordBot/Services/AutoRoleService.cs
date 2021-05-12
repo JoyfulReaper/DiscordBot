@@ -33,7 +33,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    class AutoRoleService
+    public class AutoRoleService
     {
         private readonly IAutoRoleRepository _autoRoleRepository;
         private readonly IServerRepository _serverRepository;
