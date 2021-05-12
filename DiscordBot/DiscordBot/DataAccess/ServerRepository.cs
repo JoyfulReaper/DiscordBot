@@ -44,7 +44,7 @@ namespace DiscordBot.DataAccess
 
         public async Task<Server> GetByServerId(ulong guildId)
         {
-            return await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE ServerId = @GuildId", new { GuildId = guildId });
+            return await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE GuildId = @GuildId", new { GuildId = guildId });
         }
 
         public async override Task AddAsync(Server entity)

@@ -104,7 +104,7 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            await RemoveSubredditIfNonexistant(httpResult, subreddit, subreddits);
+            await RemoveSubredditIfNonexistant(httpResult, subreddit);
 
             JArray arr = JArray.Parse(httpResult);
             JObject post = JObject.Parse(arr[0]["data"]["children"][0]["data"].ToString());
@@ -114,19 +114,22 @@ namespace DiscordBot.Commands
 
         [Command("subredditremove", RunMode = RunMode.Async)]
         [Summary("Remove a subreddit")]
-        public async Task RemoveSubreddit([Summary("The subreddit to remove")]string subreddit)
+        public async Task RemoveSubreddit([Summary("The subreddit to remove")]string subredditParam)
         {
             await Context.Channel.TriggerTypingAsync();
+            _logger.LogInformation("{username}#{discriminator} invoked removesubreddit with subreddit {subreddit}", 
+                Context.User.Username, Context.User.Discriminator, subredditParam);
 
-            _logger.LogInformation("{username}#{discriminator} invoked removesubreddit with subreddit {subreddit}", Context.User.Username, Context.User.Discriminator, subreddit);
-            if(!await _subredditRepository.IsKnown(Context.Guild.Id, subreddit))
+            var subreddit = await _subredditRepository.GetSubredditByServerId(Context.Guild.Id, subredditParam);
+            if(subreddit == null)
             {
-                await ReplyAsync($"{subreddit} was not known.");
+                await ReplyAsync($"{subredditParam} was not known.");
                 return;
             }
 
-            await _subredditRepository.DeleteAsync(Context.Guild.Id, subreddit);
-            await ReplyAsync($"Removed {subreddit}");
+
+            await _subredditRepository.DeleteAsync(Context.Guild.Id, subreddit.Id);
+            await ReplyAsync($"Removed {subredditParam}");
         }
 
         [Command("subredditlearning", RunMode = RunMode.Async)]
@@ -200,35 +203,31 @@ namespace DiscordBot.Commands
             await Context.Channel.SendMessageAsync(null, false, embed);
         }
 
-        private async Task RemoveSubredditIfNonexistant(string httpResult, string subreddit, List<Subreddit> subreddits)
+        private async Task RemoveSubredditIfNonexistant(string httpResult, string subreddit)
         {
+            // TODO CHECK THIS
             if (!httpResult.StartsWith("["))
             {
                 await Context.Channel.SendMessageAsync($"{subreddit} does not exist!");
 
-                if (subreddits.Any(x => x.Name == subreddit))
-                {
-                    var subredditToDelete = subreddits.Where(x => x.Name == subreddit).First();
-                    subreddits.Remove(subredditToDelete);
-                    await _subredditRepository.DeleteAsync(subredditToDelete);
-                    _logger.LogDebug("reddit: Removed {subreddit}", subreddit);
-                }
+                await _subredditRepository.DeleteAsync(subreddit);
+                _logger.LogDebug("reddit: Removed {subreddit}", subreddit);
+
                 return;
             }
         }
 
         private async Task<bool> AddSubRedditIfNotKnownAndLearningEnabled(List<Subreddit> subreddits, string subreddit)
         {
-            var server = await _serverRepository.GetByServerId(Context.Guild.Id);
-
             if (!subreddits.Any(x => x.Name == subreddit))
             {
-                if(!server.SubredditLearning)
+                var server = await _serverRepository.GetByServerId(Context.Guild.Id);
+                if (!server.SubredditLearning)
                 {
                     return false;
                 }
 
-                await _subredditRepository.AddAsync(new Subreddit { Name = subreddit, ServerId = Context.Guild.Id });
+                await _subredditRepository.AddAsync(Context.Guild.Id, subreddit);
 
                 _logger.LogInformation("reddit: learned {subreddit}", subreddit);
                 Console.WriteLine("reddit: Learned" + subreddit);
@@ -241,19 +240,17 @@ namespace DiscordBot.Commands
 
         private async Task<List<Subreddit>> GetSubreddits( )
         {
-            var subredits = await _subredditRepository.GetSubredditByServerId(Context.Guild.Id);
+            var subreddits = await _subredditRepository.GetSubredditListByServerId(Context.Guild.Id);
 
-            if(subredits.Count == 0)
+            if(subreddits.Count == 0)
             {
-                foreach(string subreddit in _seedSubreddits)
+                foreach(string seed in _seedSubreddits)
                 {
-                    Subreddit sub = new Subreddit { Name = subreddit, ServerId = Context.Guild.Id };
-                    subredits.Add(sub);
-                    await _subredditRepository.AddAsync(sub);
+                    subreddits.Add(await _subredditRepository.AddAsync(Context.Guild.Id, seed));
                 }
             }
 
-            return subredits;
+            return subreddits;
         }
     }
 }

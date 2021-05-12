@@ -32,10 +32,13 @@ namespace DiscordBot.DataAccess
     public interface ISubredditRepository
     {
         Task AddAsync(Subreddit entity);
+        Task<Subreddit> AddAsync(ulong serverId, string subreddit);
+        Task DeleteAsync(string subreddit);
         Task DeleteAsync(Subreddit entity);
-        Task DeleteAsync(ulong serverId, string subreddit);
+        Task DeleteAsync(ulong serverId, ulong subreddit);
         Task EditAsync(Subreddit entity);
-        Task<List<Subreddit>> GetSubredditByServerId(ulong serverId);
-        Task<bool> IsKnown(ulong serverId, string subreddit);
+        Task<Subreddit> GetSubreddit(string name);
+        Task<Subreddit> GetSubredditByServerId(ulong guildId, string subreddit);
+        Task<List<Subreddit>> GetSubredditListByServerId(ulong guildId);
     }
 }

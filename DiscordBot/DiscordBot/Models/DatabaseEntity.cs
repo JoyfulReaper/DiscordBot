@@ -8,6 +8,6 @@ namespace DiscordBot.Models
 {
     public abstract class DatabaseEntity
     {
-        public int Id { get; protected set; }
+        public ulong Id { get; set; }
     }
 }
