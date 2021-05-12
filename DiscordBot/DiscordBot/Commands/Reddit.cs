@@ -55,7 +55,7 @@ namespace DiscordBot.Commands
             "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes",
             "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
             "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua", "chemicalreactiongifs",
-            "shittyfoodporn", "animalsbeingjerks"};
+            "shittyfoodporn", "animalsbeingjerks", "wigglebutts"};
 
         public Reddit(ILogger<Reddit> logger, 
             IConfiguration configuration,
@@ -95,7 +95,16 @@ namespace DiscordBot.Commands
             }
 
             HttpClient httpClient = new HttpClient();
-            var httpResult = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
+            string httpResult = string.Empty;
+            try
+            {
+                httpResult = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown downloading reddit post!");
+                await ReplyAsync("Something went wrong :(");
+            }
 
             bool showNSFW = channel.IsNsfw;
             if(httpResult.ToLowerInvariant().Contains("nsfw") && showNSFW != true)
