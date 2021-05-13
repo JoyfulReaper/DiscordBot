@@ -27,13 +27,13 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.DataAccess;
-using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
 using System.IO;
+using Victoria;
 
 namespace DiscordBot
 {
@@ -92,6 +92,12 @@ namespace DiscordBot
             serviceCollection
                 .AddLogging(loggingBuilder =>
                     loggingBuilder.AddSerilog(dispose: true))
+                .AddLavaNode(x =>
+                {
+                    x.SelfDeaf = true;
+                    x.LogSeverity = LogSeverity.Info;
+                    x.Authorization = "notarealpassword";
+                })
                 .AddSingleton<IServerRepository, ServerRepository>()
                 .AddSingleton(config)
                 .AddSingleton<LoggingService>()

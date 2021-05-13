@@ -30,6 +30,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using Victoria;
 
 namespace DiscordBot.Services
 {
@@ -44,6 +45,7 @@ namespace DiscordBot.Services
         private readonly ImageService _images;
         private readonly IConfiguration _configuration;
         private readonly AutoRoleService _autoRoleService;
+        private readonly LavaNode _lavaNode;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
@@ -53,7 +55,8 @@ namespace DiscordBot.Services
             IServerService servers,
             ImageService images,
             IConfiguration configuration,
-            AutoRoleService autoRoleService)
+            AutoRoleService autoRoleService,
+            LavaNode lavaNode)
         {
             _client = client;
             _commands = commands;
@@ -64,10 +67,20 @@ namespace DiscordBot.Services
             _images = images;
             _configuration = configuration;
             _autoRoleService = autoRoleService;
+            _lavaNode = lavaNode;
+            _client.Ready += OnReady;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
 
             _commands.CommandExecuted += OnCommandExecuted;
+        }
+
+        private async Task OnReady()
+        {
+            if (!_lavaNode.IsConnected)
+            {
+                await _lavaNode.ConnectAsync();
+            }
         }
 
         private async Task OnUserJoined(SocketGuildUser userJoining)
