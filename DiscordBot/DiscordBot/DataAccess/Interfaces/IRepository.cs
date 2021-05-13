@@ -32,6 +32,7 @@ namespace DiscordBot.DataAccess
     public interface IRepository<T> where T : DatabaseEntity
     {
         T GetById(ulong Id);
+        Task<T> GetByIdAsync(ulong Id);
         IEnumerable<T> List();
         //void Add(T entity);
         //void Delete(T entity);

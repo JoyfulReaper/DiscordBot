@@ -10,13 +10,13 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Helpers
+namespace DiscordBot.Services
 {
-    public class Images
+    public class ImageService
     {
-        private readonly ILogger<Images> _logger;
+        private readonly ILogger<ImageService> _logger;
 
-        public Images(ILogger<Images> logger)
+        public ImageService(ILogger<ImageService> logger)
         {
             _logger = logger;
         }

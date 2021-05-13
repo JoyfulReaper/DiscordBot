@@ -38,13 +38,13 @@ namespace DiscordBot.Commands
     {
         private readonly DiscordSocketClient _client;
         private readonly ILogger<Moderation> _logger;
-        private readonly IServers _servers;
+        private readonly IServerService _servers;
         private readonly IConfiguration _configuration;
         private readonly int _prefixMaxLength;
 
         public Moderation(DiscordSocketClient client,
             ILogger<Moderation> logger,
-            IServers servers,
+            IServerService servers,
             IConfiguration configuration)
         {
             _client = client;
@@ -67,9 +67,12 @@ namespace DiscordBot.Commands
 
         [Command("purge")]
         [RequireUserPermission(GuildPermission.ManageMessages)]
+        [RequireBotPermission(GuildPermission.ManageMessages)]
         [Summary("Purges the given number of messages from the current channel")]
         public async Task Purge([Summary("The number of message to purge")] int amount)
         {
+            await Context.Channel.TriggerTypingAsync();
+
             var messages = await Context.Channel.GetMessagesAsync(amount + 1).FlattenAsync();
             await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
 
@@ -81,7 +84,7 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, amount, Context.Channel.Name, Context.Guild.Name);
         }
 
-        [Command("prefix")]
+        [Command("prefix", RunMode = RunMode.Async)]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Change the prefix")]
         public async Task Prefix(string prefix = null)

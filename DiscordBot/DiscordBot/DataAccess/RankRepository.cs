@@ -26,51 +26,51 @@ SOFTWARE.
 using DiscordBot.Models;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess
 {
-    public class ServerRepository : Repository<Server>, IServerRepository
+    class RankRepository : Repository<Rank>, IRankRepository
     {
         private readonly Settings _settings;
-        private readonly ILogger<ServerRepository> _logger;
+        private readonly ILogger<RankRepository> _logger;
 
-        public ServerRepository(Settings settings,
-            ILogger<ServerRepository> logger) : base(settings, logger)
+        public RankRepository(Settings settings,
+        ILogger<RankRepository> logger) : base(settings, logger)
         {
             _settings = settings;
             _logger = logger;
         }
 
-        public async Task<Server> GetByServerId(ulong guildId)
+        public async Task<List<Rank>> GetRanksByServerId(ulong serverId)
         {
-            return await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE GuildId = @GuildId", new { GuildId = guildId });
+            var queryResult = await QueryAsync<Rank>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId;", new { ServerId = serverId });
+            return queryResult.ToList();
         }
 
-        public async override Task AddAsync(Server entity)
+        public async override Task AddAsync(Rank entity)
         {
-            await ExecuteAsync($"INSERT INTO {TableName} (GuildId, Prefix, SubredditLearning)" +
-                "VALUES (@GuildId, @Prefix, @SubredditLearning);",
-                entity);
+            await ExecuteAsync($"INSERT INTO {TableName} (ServerId, RoleId) " +
+                $"VALUES (@ServerId, @RoleId);", new { ServerId = entity.ServerId, RoleId = entity.RoleId });
         }
 
-        public async Task AddAsync(ulong id)
+        public async override Task DeleteAsync(Rank entity)
         {
-            var defaultPrefix = _settings.DefaultPrefix;
-            await AddAsync(new Server { GuildId = id, Prefix = defaultPrefix });
+            await ExecuteAsync($"DELETE FROM {TableName} WHERE ID = @Id;", new { Id = entity.Id });
         }
 
-        public async override Task DeleteAsync(Server entity)
+        public async Task DeleteRank(ulong serverId, ulong roleId)
         {
-            await ExecuteAsync($"DELETE FROM {TableName} WHERE Id=@Id;", new { Id = entity.Id });
+            await ExecuteAsync($"DELETE FROM {TableName} WHERE ServerId = @ServerId AND roleId = @RoleId;",
+                new { ServerId = serverId, RoleId = roleId });
         }
 
-        public async override Task EditAsync(Server entity)
+        public async override Task EditAsync(Rank entity)
         {
-            await ExecuteAsync($"UPDATE {TableName} " +
-                $"SET Prefix = @Prefix, GuildId = @GuildId, SubredditLearning = @SubredditLearning " +
-                $"WHERE Id = @Id;",
-                entity);
+            await ExecuteAsync($"UPDATE {TableName} SET ServerId = @ServerId, RoleId=@RoleId " +
+                $"WHERE Id = @Id;", entity);
         }
     }
 }

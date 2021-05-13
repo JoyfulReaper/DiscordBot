@@ -24,21 +24,22 @@ SOFTWARE.
 */
 
 using DiscordBot.DataAccess;
+using DiscordBot.Models;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class Servers : IServers
+    public class ServerService : IServerService
     {
         private readonly IServerRepository _serverRepository;
-        private readonly IConfiguration _configuration;
+        private readonly Settings _settings;
 
-        public Servers(IServerRepository serverRepository,
-            IConfiguration configuration)
+        public ServerService(IServerRepository serverRepository,
+            Settings settings)
         {
             _serverRepository = serverRepository;
-            _configuration = configuration;
+            _settings = settings;
         }
 
         public async Task ModifyGuildPrefix(ulong id, string prefix)
@@ -47,7 +48,7 @@ namespace DiscordBot.Services
 
             if (server == null)
             {
-                await _serverRepository.AddAsync(new Models.Server { ServerId = id, Prefix = prefix });
+                await _serverRepository.AddAsync(new Server { GuildId = id, Prefix = prefix });
             }
             else
             {
@@ -58,12 +59,14 @@ namespace DiscordBot.Services
 
         public async Task<string> GetGuildPrefix(ulong id)
         {
-            string prefix = null;
+            string prefix;
             var server = await _serverRepository.GetByServerId(id);
 
             if (server == null)
             {
-                prefix = _configuration.GetSection("DefaultPrefix").Value;
+                prefix = _settings.DefaultPrefix;
+                server = new Server { GuildId = id, Prefix = prefix };
+                await _serverRepository.AddAsync(server);
             }
             else
             {

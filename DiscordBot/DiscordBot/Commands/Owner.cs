@@ -54,6 +54,8 @@ namespace DiscordBot.Commands
         [Summary("Make the bot quit!")]
         public async Task Quit()
         {
+            await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} invoked quit on {target}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
 
             if (Context.User.Username != _settings.OwnerName || Context.User.Discriminator != _settings.OwnerDiscriminator)

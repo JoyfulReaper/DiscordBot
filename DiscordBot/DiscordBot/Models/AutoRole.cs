@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Models
 {
-    public abstract class DatabaseEntity
+    public class AutoRole : DatabaseEntity
     {
-        public ulong Id { get; set; }
+        public ulong RoleId { get; set; }
+        public ulong ServerId { get; set; }
     }
 }

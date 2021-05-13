@@ -2,7 +2,7 @@
 
 namespace DiscordBot.Services
 {
-    public interface IServers
+    public interface IServerService
     {
         Task<string> GetGuildPrefix(ulong id);
         Task ModifyGuildPrefix(ulong id, string prefix);

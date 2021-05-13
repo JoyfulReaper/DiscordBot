@@ -26,7 +26,6 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -41,18 +40,20 @@ namespace DiscordBot.Services
         private readonly Settings _settings;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
-        private readonly IServers _servers;
-        private readonly Images _images;
+        private readonly IServerService _servers;
+        private readonly ImageService _images;
         private readonly IConfiguration _configuration;
+        private readonly AutoRoleService _autoRoleService;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
             Settings settings,
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger,
-            IServers servers,
-            Images images,
-            IConfiguration configuration)
+            IServerService servers,
+            ImageService images,
+            IConfiguration configuration,
+            AutoRoleService autoRoleService)
         {
             _client = client;
             _commands = commands;
@@ -62,6 +63,7 @@ namespace DiscordBot.Services
             _servers = servers;
             _images = images;
             _configuration = configuration;
+            _autoRoleService = autoRoleService;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
 
@@ -69,6 +71,23 @@ namespace DiscordBot.Services
         }
 
         private async Task OnUserJoined(SocketGuildUser userJoining)
+        {
+            await AssignAutoRoles(userJoining);
+            await ShowWelcomeMessage(userJoining);
+        }
+
+        private async Task AssignAutoRoles(SocketGuildUser userJoining)
+        {
+            var roles = await _autoRoleService.GetAutoRoles(userJoining.Guild);
+            if (roles.Count < 1)
+            {
+                return;
+            }
+
+            await userJoining.AddRolesAsync(roles);
+        }
+
+        private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
         {
             bool showMessage = false;
 
@@ -128,9 +147,7 @@ namespace DiscordBot.Services
             {
                 //TODO add multiple images
                 //TODO make this optional/a setting
-                //TODO Message about this handler blocking the gateway thread, wrapping in a Task.Run didn't fix
-                // Look into this more
-                await Task.Run(async () =>
+                Task.Run(async () =>
                 {
                     _logger.LogDebug("{user} attempted to use an unknown command {command}", context.User.Username, context.Message.Content);
                     var badCommandMessage = await context.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");

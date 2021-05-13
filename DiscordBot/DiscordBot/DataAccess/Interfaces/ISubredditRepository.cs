@@ -24,15 +24,21 @@ SOFTWARE.
 */
 
 using DiscordBot.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess
 {
-    public interface IServerRepository
+    public interface ISubredditRepository
     {
-        Task AddAsync(Server entity);
-        Task DeleteAsync(Server entity);
-        Task EditAsync(Server entity);
-        Task<Server> GetByServerId(ulong serverId);
+        Task AddAsync(Subreddit entity);
+        Task<Subreddit> AddAsync(ulong serverId, string subreddit);
+        Task DeleteAsync(string subreddit);
+        Task DeleteAsync(Subreddit entity);
+        Task DeleteAsync(ulong serverId, ulong subreddit);
+        Task EditAsync(Subreddit entity);
+        Task<Subreddit> GetSubreddit(string name);
+        Task<Subreddit> GetSubredditByServerId(ulong guildId, string subreddit);
+        Task<List<Subreddit>> GetSubredditListByServerId(ulong guildId);
     }
 }

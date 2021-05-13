@@ -34,93 +34,152 @@ using Discord;
 using System.Collections.Generic;
 using DiscordBot.Helpers;
 using Microsoft.Extensions.Configuration;
+using DiscordBot.DataAccess;
+using DiscordBot.Models;
+using System.Linq;
 
 namespace DiscordBot.Commands
 {
     public class Reddit : ModuleBase<SocketCommandContext>
     {
-        // Allow the bot to learn new subbreddit for it's list of random subreddits
-        private const bool _allowLearning = true;
-
         private readonly ILogger<Reddit> _logger;
-        private readonly DiscordSocketClient _client;
         private readonly IConfiguration _configuration;
+        private readonly ISubredditRepository _subredditRepository;
+        private readonly IServerRepository _serverRepository;
         private readonly Random _random = new();
 
-        // TODO store learned subbreddit in the database
-        // Looks like this class is instantiated as needed, so adding is pointless at the moment...
-        private static readonly List<string> _subreddits = new List<string>() {"funny", "programmerhumor", "memes", "4PanelCringe", "AdviceAnimals",
+        private static readonly List<string> _seedSubreddits = new List<string>() {"funny", "programmerhumor", "memes", "4PanelCringe", "AdviceAnimals",
             "ATAAE", "ATBGE", "badcode", "BikiniBottomTwitter", "bitchimabus", "blackmagicfuckery", "cringe", "cringetopia",
             "eyebleach", "facepalm", "facebookcringe", "forwardsfromgrandma", "FuckNestle", "interestingasfuck",
             "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor",
             "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes",
             "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
             "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua", "chemicalreactiongifs",
-            "shittyfoodporn", "animalsbeingjerks"};
+            "shittyfoodporn", "animalsbeingjerks", "wigglebutts"};
 
         public Reddit(ILogger<Reddit> logger, 
-            DiscordSocketClient client,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ISubredditRepository subredditRepository,
+            IServerRepository serverRepository)
         {
             _logger = logger;
-            _client = client;
             _configuration = configuration;
+            _subredditRepository = subredditRepository;
+            _serverRepository = serverRepository;
         }
 
-        [Command("reddit")]
-        public async Task RedditPost(string subreddit = null)
+        [Command("reddit", RunMode = RunMode.Async)]
+        [Summary("Show a reddit post")]
+        public async Task RedditPost([Summary("The subreddit from which to show a post")]string subreddit = null)
         {
             _logger.LogInformation("{username}#{discriminator} invoked reddit with subreddit {subreddit}", Context.User.Username, Context.User.Discriminator, subreddit);
+            await Context.Channel.TriggerTypingAsync();
 
+            SocketTextChannel channel = Context.Channel as SocketTextChannel;
+            if(channel == null)
+            {
+                _logger.LogWarning("Channel {channel} is not a text channel.", channel);
+                return;
+            }
+
+            var subreddits = await GetSubreddits();
             if (subreddit == null)
             {
-                subreddit = _subreddits[_random.Next(_subreddits.Count)];
+                subreddit = subreddits[_random.Next(subreddits.Count)].Name;
             }
-            
-            if(!_subreddits.Contains(subreddit) && _allowLearning)
+
+            if(!await AddSubRedditIfNotKnownAndLearningEnabled(subreddits, subreddit))
             {
-                _subreddits.Add(subreddit);
-
-                _logger.LogInformation("reddit: learned {subreddit}", subreddit);
-                Console.WriteLine("reddit: Learned" + subreddit);
-
-                await ReplyAsync($"I learned a new subreddit! Now I know of {_subreddits.Count} PS: learning currently doesn't work correctly...");
+                await ReplyAsync("Subreddit is not known and learning is disabled for this server.");
+                return;
             }
 
             HttpClient httpClient = new HttpClient();
-            var result = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
-
-            // TODO make the NSFW stuff per server
-            bool hideNSFW = true;
+            string httpResult = string.Empty;
             try
             {
-                hideNSFW = bool.Parse(_configuration.GetSection("AttemptToAvoidNSFW").Value);
+                httpResult = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
             }
-            catch(Exception ex)
+            catch (HttpRequestException ex)
             {
-                _logger.LogWarning("Failed to parse AttemptToAvoidNSFW, using true");
+                _logger.LogError(ex, "Exception thrown downloading reddit post!");
+                await ReplyAsync($"HttpClient encountered an error: {ex.StatusCode}");
             }
 
-            if(result.Contains("nsfw") && hideNSFW == true)
+            bool showNSFW = channel.IsNsfw;
+            if(httpResult.ToLowerInvariant().Contains("nsfw") && showNSFW != true)
             {
-                await ReplyAsync("Not showing nsfw post...");
+                await ReplyAsync("NSFW Posts only shown on NSFW channels");
                 return;
             }
 
-            if(!result.StartsWith("["))
-            {
-                await Context.Channel.SendMessageAsync($"{subreddit} does not exist!");
-                if(_subreddits.Contains(subreddit))
-                {
-                    subreddit.Remove(subreddit.IndexOf(subreddit));
-                    _logger.LogDebug("reddit: Removed {subreddit}", subreddit);
-                }
-                return;
-            }
+            await RemoveSubredditIfNonexistant(httpResult, subreddit);
 
-            JArray arr = JArray.Parse(result);
+            JArray arr = JArray.Parse(httpResult);
             JObject post = JObject.Parse(arr[0]["data"]["children"][0]["data"].ToString());
 
+            await CreateAndSendEmbed(post, subreddit);
+        }
+
+        [Command("subredditremove", RunMode = RunMode.Async)]
+        [Summary("Remove a subreddit")]
+        public async Task RemoveSubreddit([Summary("The subreddit to remove")]string subredditParam)
+        {
+            await Context.Channel.TriggerTypingAsync();
+            _logger.LogInformation("{username}#{discriminator} invoked removesubreddit with subreddit {subreddit}", 
+                Context.User.Username, Context.User.Discriminator, subredditParam);
+
+            var subreddit = await _subredditRepository.GetSubredditByServerId(Context.Guild.Id, subredditParam);
+            if(subreddit == null)
+            {
+                await ReplyAsync($"{subredditParam} was not known.");
+                return;
+            }
+
+
+            await _subredditRepository.DeleteAsync(Context.Guild.Id, subreddit.Id);
+            await ReplyAsync($"Removed {subredditParam}");
+        }
+
+        [Command("subredditlearning", RunMode = RunMode.Async)]
+        [Summary("enable or disable learning")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task SubredditLearning(string value = null)
+        {
+            var server = await _serverRepository.GetByServerId(Context.Guild.Id);
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(Context.Guild.Id);
+                server = await _serverRepository.GetByServerId(Context.Guild.Id);
+            }
+
+            if(value == null)
+            {
+                await ReplyAsync($"Subreddit learning is {(server.SubredditLearning ? "enabled" : "disabled")}");
+                return;
+            }
+
+            if (value.ToLowerInvariant() == "on")
+            {
+                server.SubredditLearning = true;
+                await ReplyAsync("Subreddit learning enabled");
+            }
+            else if (value.ToLowerInvariant() == "off")
+            {
+                server.SubredditLearning = false;
+                await ReplyAsync("Subreddit learning disabled");
+            }
+            else
+            {
+                await ReplyAsync("Valid options are `on` or `off`");
+                return;
+            }
+
+            await _serverRepository.EditAsync(server);
+        }
+
+        private async Task CreateAndSendEmbed(JObject post, string subreddit)
+        {
             string postUrl = post["url"].ToString();
             string postTitle = post["title"].ToString();
 
@@ -134,7 +193,7 @@ namespace DiscordBot.Commands
 
             var postUrlLower = postUrl.ToLowerInvariant();
             // Note to self gifv doesn't work don't add it back..
-            if (postUrlLower.EndsWith("jpg") || postUrl.EndsWith("png") || postUrl.EndsWith("gif") 
+            if (postUrlLower.EndsWith("jpg") || postUrl.EndsWith("png") || postUrl.EndsWith("gif")
                 || postUrl.EndsWith("bmp"))
             {
                 builder.WithImageUrl(postUrl);
@@ -151,6 +210,56 @@ namespace DiscordBot.Commands
 
             var embed = builder.Build();
             await Context.Channel.SendMessageAsync(null, false, embed);
+        }
+
+        private async Task RemoveSubredditIfNonexistant(string httpResult, string subreddit)
+        {
+            // TODO CHECK THIS
+            if (!httpResult.StartsWith("["))
+            {
+                await Context.Channel.SendMessageAsync($"{subreddit} does not exist!");
+
+                await _subredditRepository.DeleteAsync(subreddit);
+                _logger.LogDebug("reddit: Removed {subreddit}", subreddit);
+
+                return;
+            }
+        }
+
+        private async Task<bool> AddSubRedditIfNotKnownAndLearningEnabled(List<Subreddit> subreddits, string subreddit)
+        {
+            if (!subreddits.Any(x => x.Name == subreddit))
+            {
+                var server = await _serverRepository.GetByServerId(Context.Guild.Id);
+                if (!server.SubredditLearning)
+                {
+                    return false;
+                }
+
+                await _subredditRepository.AddAsync(Context.Guild.Id, subreddit);
+
+                _logger.LogInformation("reddit: learned {subreddit}", subreddit);
+                Console.WriteLine("reddit: Learned" + subreddit);
+
+                await ReplyAsync($"I learned a new subreddit! Now I know of {subreddits.Count + 1} subreddits!");
+            }
+
+            return true;
+        }
+
+        private async Task<List<Subreddit>> GetSubreddits( )
+        {
+            var subreddits = await _subredditRepository.GetSubredditListByServerId(Context.Guild.Id);
+
+            if(subreddits.Count == 0)
+            {
+                foreach(string seed in _seedSubreddits)
+                {
+                    subreddits.Add(await _subredditRepository.AddAsync(Context.Guild.Id, seed));
+                }
+            }
+
+            return subreddits;
         }
     }
 }
