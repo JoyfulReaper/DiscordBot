@@ -104,9 +104,16 @@ namespace DiscordBot.Commands
 
         [Command("rank", RunMode = RunMode.Async)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Rank([Remainder]string identifier)
+        public async Task Rank([Remainder]string identifier = null)
         {
             await Context.Channel.TriggerTypingAsync();
+
+            if(identifier == null)
+            {
+                await ReplyAsync("Please specifiy the rank to add/remove");
+                return;
+            }
+
             var ranks = await _rankService.GetRanks(Context.Guild);
 
             IRole role;

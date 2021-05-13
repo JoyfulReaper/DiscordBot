@@ -26,7 +26,6 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -44,6 +43,7 @@ namespace DiscordBot.Services
         private readonly IServerService _servers;
         private readonly ImageService _images;
         private readonly IConfiguration _configuration;
+        private readonly AutoRoleService _autoRoleService;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
@@ -52,7 +52,8 @@ namespace DiscordBot.Services
             ILogger<CommandHandler> logger,
             IServerService servers,
             ImageService images,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            AutoRoleService autoRoleService)
         {
             _client = client;
             _commands = commands;
@@ -62,6 +63,7 @@ namespace DiscordBot.Services
             _servers = servers;
             _images = images;
             _configuration = configuration;
+            _autoRoleService = autoRoleService;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
 
@@ -69,6 +71,23 @@ namespace DiscordBot.Services
         }
 
         private async Task OnUserJoined(SocketGuildUser userJoining)
+        {
+            await AssignAutoRoles(userJoining);
+            await ShowWelcomeMessage(userJoining);
+        }
+
+        private async Task AssignAutoRoles(SocketGuildUser userJoining)
+        {
+            var roles = await _autoRoleService.GetAutoRoles(userJoining.Guild);
+            if (roles.Count < 1)
+            {
+                return;
+            }
+
+            await userJoining.AddRolesAsync(roles);
+        }
+
+        private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
         {
             bool showMessage = false;
 
