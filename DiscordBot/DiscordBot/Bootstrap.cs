@@ -106,7 +106,8 @@ namespace DiscordBot
                 .AddSingleton<AutoRoleService>()
                 .AddSingleton<IRankRepository, RankRepository>()
                 .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
-                .AddSingleton<ISubredditRepository, SubredditRepository>();
+                .AddSingleton<ISubredditRepository, SubredditRepository>()
+                .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 

@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.DataAccess;
 using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
@@ -38,19 +39,21 @@ namespace DiscordBot.Commands
         private readonly DiscordSocketClient _client;
         private readonly Settings _settings;
         private readonly ILogger<Owner> _logger;
+        private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
 
         public Owner(DiscordSocketClient client,
             Settings settings,
-            ILogger<Owner> logger)
+            ILogger<Owner> logger,
+            IDiscordBotSettingsRepository discordBotSettingsRepository)
         {
             _client = client;
             _settings = settings;
             _logger = logger;
+            _discordBotSettingsRepository = discordBotSettingsRepository;
         }
 
         [Command("quit")]
         [Alias("stop")]
-        //[RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Make the bot quit!")]
         public async Task Quit()
         {
@@ -106,7 +109,10 @@ namespace DiscordBot.Commands
             }
             else
             {
+                var settings = await _discordBotSettingsRepository.Get();
                 await _client.SetGameAsync(game);
+                settings.Game = game;
+                await _discordBotSettingsRepository.EditAsync(settings);
             }
         }
     }

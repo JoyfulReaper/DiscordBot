@@ -21,6 +21,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Some elements of this bot were insipred by the Discord.NET Bot Development Series:
+https://www.youtube.com/playlist?list=PLaqoc7lYL3ZDCDT9TcP_5hEKuWQl7zudR
+
+Although most of the code is modified from the orginal 
+(For example here we use Dapper vs EF and SQLite vs MySQL)
+any code used from the series is licensed under MIT as well:
+https://github.com/Directoire/dnbds
 */
 
 

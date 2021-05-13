@@ -24,19 +24,15 @@ SOFTWARE.
 */
 
 using DiscordBot.Models;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess
 {
-    public interface IRepository<T> where T : DatabaseEntity
+    public interface IDiscordBotSettingsRepository
     {
-        //void Add(T entity);
-        //void Delete(T entity);
-        //void Edit(T entity);
-
-        Task AddAsync(T entity);
-        Task DeleteAsync(T entity);
-        Task EditAsync(T entity);
+        Task AddAsync(DiscordBotSettings entity);
+        Task DeleteAsync(DiscordBotSettings entity);
+        Task EditAsync(DiscordBotSettings entity);
+        Task<DiscordBotSettings> Get();
     }
 }
