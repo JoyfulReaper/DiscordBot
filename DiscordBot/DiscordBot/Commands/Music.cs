@@ -1,9 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
@@ -19,7 +16,8 @@ namespace DiscordBot.Commands
             _lavaNode = lavaNode;
         }
 
-        [Command("Play")]
+        [Command("play", RunMode = RunMode.Async)]
+        [Summary("Play a song from YouTube")]
         public async Task PlayAsync([Remainder] string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -92,7 +90,8 @@ namespace DiscordBot.Commands
             }
         }
 
-        [Command("Join")]
+        [Command("Join", RunMode = RunMode.Async)]
+        [Summary("Join voice channel")]
         public async Task JoinAsync()
         {
             if (_lavaNode.HasPlayer(Context.Guild))
@@ -118,7 +117,8 @@ namespace DiscordBot.Commands
             }
         }
 
-        [Command("skip")]
+        [Command("skip", RunMode = RunMode.Async)]
+        [Summary("Skip the currently playing track")]
         public async Task Skip()
         {
             var voiceState = Context.User as IVoiceState;
@@ -138,7 +138,8 @@ namespace DiscordBot.Commands
             await ReplyAsync($"Skipped! Now playing **{player.Track.Title}**");
         }
 
-        [Command("pause")]
+        [Command("pause", RunMode = RunMode.Async)]
+        [Summary("Pause the currently playing track")]
         public async Task Pause()
         {
             var voiceState = Context.User as IVoiceState;
@@ -158,7 +159,8 @@ namespace DiscordBot.Commands
             await ReplyAsync("Music is paused!");
         }
 
-        [Command("resume")]
+        [Command("resume", RunMode = RunMode.Async)]
+        [Summary("Resume track")]
         public async Task Resume()
         {
             var voiceState = Context.User as IVoiceState;
