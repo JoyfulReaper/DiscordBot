@@ -100,10 +100,10 @@ namespace DiscordBot.Commands
             {
                 httpResult = await httpClient.GetStringAsync($"https://reddit.com/r/{subreddit ?? "memes"}/random.json?limit=1");
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "Exception thrown downloading reddit post!");
-                await ReplyAsync("Something went wrong :(");
+                await ReplyAsync($"HttpClient encountered an error: {ex.StatusCode}");
             }
 
             bool showNSFW = channel.IsNsfw;
