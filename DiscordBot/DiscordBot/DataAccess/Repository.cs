@@ -57,9 +57,7 @@ namespace DiscordBot.DataAccess
         }
 
         //public abstract void Add(T entity);
-
         //public abstract void Delete(T entity);
-
         //public abstract void Edit(T entity);
 
         public abstract Task AddAsync(T entity);
@@ -67,26 +65,6 @@ namespace DiscordBot.DataAccess
         public abstract Task DeleteAsync(T entity);
 
         public abstract Task EditAsync(T entity);
-
-        public virtual T GetById(ulong Id)
-        {
-            return QuerySingle<T>($"SELECT * FROM {TableName} WHERE ID = @Id", new { Id = Id });
-        }
-
-        public virtual IEnumerable<T> List()
-        {
-            return Query<T>($"SELECT * FROM {TableName}");
-        }
-
-        public async virtual Task<T> GetByIdAsync(ulong Id)
-        {
-            return await QuerySingleAsync<T>($"SELECT * FROM {TableName} WHERE ID = @Id", new { Id = Id });
-        }
-
-        public async virtual Task<IEnumerable<T>> ListAsync()
-        {
-            return await QueryAsync<T>($"SELECT * FROM {TableName}");
-        }
 
         protected void Execute(string query, object parameters = null)
         {

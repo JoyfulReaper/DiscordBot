@@ -26,11 +26,15 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.DataAccess;
 using DiscordBot.Helpers;
+using DiscordBot.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -45,18 +49,21 @@ namespace DiscordBot.Services
         private readonly IConfiguration _configuration;
         private readonly CommandService _commands;
         private readonly ILogger _logger;
+        private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
 
         public DiscordService(IServiceProvider serviceProvider,
             DiscordSocketClient client,
             IConfiguration configuration,
             CommandService commands,
-            ILogger<DiscordService> logger)
+            ILogger<DiscordService> logger,
+            IDiscordBotSettingsRepository discordBotSettingsRepository)
         {
             _serviceProvider = serviceProvider;
             _client = client;
             _configuration = configuration;
             _commands = commands;
             _logger = logger;
+            _discordBotSettingsRepository = discordBotSettingsRepository;
 
             _client.Ready += SocketClient_Ready;
             _client.MessageReceived += SocketClient_MessageReceived;
@@ -86,7 +93,8 @@ namespace DiscordBot.Services
         {
             _logger.LogInformation("Connected as {username}#{discriminator}", _client.CurrentUser.Username, _client.CurrentUser.Discriminator);
 
-            await _client.SetGameAsync("Being a Discord Bot");
+            var settings = await _discordBotSettingsRepository.Get();
+            await _client.SetGameAsync(settings.Game);
 
             Console.WriteLine("SocketClient is ready");
             Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
@@ -129,20 +137,43 @@ namespace DiscordBot.Services
 
             }
 
-            //TODO Figure out a better place to store the token Maybe in a DB
-            _logger.LogInformation("Reading token from config file");
-            var token = File.ReadAllText(@"C:\token.txt");
-
-            if(string.IsNullOrEmpty(token))
+            var settings = await _discordBotSettingsRepository.Get();
+            if(settings == null)
             {
-                _logger.LogCritical("Token is null or empty");
-                throw new InvalidOperationException("Token is null or empty");
+                settings = GetTokenFromConsole();
             }
 
-            await _client.LoginAsync(TokenType.Bot, token);
-            await _client.StartAsync();
+            try
+            {
+                await _client.LoginAsync(TokenType.Bot, settings.Token);
+            }
+            catch (Discord.Net.HttpException ex)
+            {
+                if(ex.Reason == "401: Unauthorized")
+                {
+                    Console.WriteLine("\nToken is incorrect.");
+                    Console.Write("Enter Token: ");
+                    settings.Token = Console.ReadLine();
 
+                    await _discordBotSettingsRepository.EditAsync(settings);
+                    Start();
+                }
+            }
+
+            await _client.StartAsync();
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
+        }
+
+        private DiscordBotSettings GetTokenFromConsole()
+        {
+            Console.WriteLine("\nToken has not yet been saved.");
+            Console.Write("Please enter the bot's token: ");
+            var token = Console.ReadLine();
+
+            DiscordBotSettings settings = new DiscordBotSettings { Token = token, Game = "https://github.com/JoyfulReaper" };
+            _discordBotSettingsRepository.AddAsync(settings);
+
+            return settings;
         }
     }
 }

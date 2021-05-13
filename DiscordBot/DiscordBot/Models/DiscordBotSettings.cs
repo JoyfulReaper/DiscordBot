@@ -23,20 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBot.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System;
 
-namespace DiscordBot.DataAccess
+namespace DiscordBot.Models
 {
-    public interface IRepository<T> where T : DatabaseEntity
+    public class DiscordBotSettings : DatabaseEntity
     {
-        //void Add(T entity);
-        //void Delete(T entity);
-        //void Edit(T entity);
-
-        Task AddAsync(T entity);
-        Task DeleteAsync(T entity);
-        Task EditAsync(T entity);
+        public string Token { get; set; }
+        public string Game { get; set; }
     }
 }
