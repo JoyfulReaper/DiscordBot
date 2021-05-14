@@ -72,14 +72,22 @@ namespace DiscordBot.Services
             _client.Ready += OnReady;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
+            _client.Disconnected += OnDisconnected;
 
             _commands.CommandExecuted += OnCommandExecuted;
+        }
+
+        private async Task OnDisconnected(Exception arg)
+        {
+            _logger.LogDebug("Disconnecting from Lavalink");
+            await _lavaNode.DisconnectAsync();
         }
 
         private async Task OnReady()
         {
             if (!_lavaNode.IsConnected)
             {
+                _logger.LogDebug("Connecting to Lavalink");
                 await _lavaNode.ConnectAsync();
             }
         }

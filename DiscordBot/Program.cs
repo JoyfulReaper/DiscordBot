@@ -66,10 +66,10 @@ namespace DiscordBot
             ILogger logger = Log.ForContext<Program>();
             
             var cts = new CancellationTokenSource();
+            Process lavaLink = new Process();
 
             if (chatService != null)
             {
-                Process lavaLink = new Process();
                 try
                 {
                     logger.Information("Starting LavaLink");
@@ -85,13 +85,17 @@ namespace DiscordBot
                 }
                 catch (OperationCanceledException)
                 {
+                    // I don't think this will ever hit, I think I'm doing this wrong.
                     logger.Warning("Cancelation was Requested");
                     Console.WriteLine("Cancelation was requested");
+
+                    logger.Information("Killing Lavalink Proccess");
+                    lavaLink.Kill(true);
+                    Environment.Exit(0);
                 }
                 catch(Exception e)
                 {
                     // Catch all exceptions if they aren't handeled anywhere else, log and exit.
-
                     logger.Error(e, "Unhandeled Exception Caught!");
 
                     Console.WriteLine("Unhandeled Exception Caught!");
@@ -107,10 +111,6 @@ namespace DiscordBot
 
                     Environment.Exit(1);
                 }
-                finally
-                {
-                    lavaLink.Kill();
-                }
             }
             else
             {
@@ -121,20 +121,19 @@ namespace DiscordBot
 
             while(true)
             {
-                QuitOnQPress(cts);
-            }
-        }
+                // If the "Q" key is pressed quit the bot!
+                var key = Console.ReadKey(true).KeyChar;
 
-        private static void QuitOnQPress(CancellationTokenSource cts)
-        {
-            // If the "Q" key is pressed quit the bot!
-            var key = Console.ReadKey(true).KeyChar;
+                if (char.ToLowerInvariant(key) == 'q')
+                {
+                    Console.WriteLine("Quiting!");
+                    cts.Cancel();
 
-            if(char.ToLowerInvariant(key) == 'q')
-            {
-                Console.WriteLine("Quiting!");
-                cts.Cancel();
-                Environment.Exit(0);
+                    logger.Information("Killing Lavalink Proccess");
+                    lavaLink.Kill(true);
+
+                    Environment.Exit(0);
+                }
             }
         }
     }
