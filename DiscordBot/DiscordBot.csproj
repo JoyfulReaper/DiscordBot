@@ -7,10 +7,18 @@
 
   <ItemGroup>
     <None Remove="DiscordBot.db" />
+    <None Remove="LavaLink\application.yml" />
+    <None Remove="LavaLink\Lavalink.jar" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="DiscordBot.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LavaLink\application.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LavaLink\Lavalink.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

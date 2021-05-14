@@ -36,6 +36,8 @@ using DiscordBot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -67,8 +69,16 @@ namespace DiscordBot
 
             if (chatService != null)
             {
+                Process lavaLink = new Process();
                 try
                 {
+                    logger.Information("Starting LavaLink");
+                    lavaLink.StartInfo.UseShellExecute = false;
+                    lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+                    lavaLink.StartInfo.FileName = "java";
+                    lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
+                    lavaLink.Start();
+
                     // Start the DiscordBot
                     logger.Information("Starting chatService");
                     await Task.Run(chatService.Start, cts.Token);
@@ -96,6 +106,10 @@ namespace DiscordBot
                     }
 
                     Environment.Exit(1);
+                }
+                finally
+                {
+                    lavaLink.Kill();
                 }
             }
             else

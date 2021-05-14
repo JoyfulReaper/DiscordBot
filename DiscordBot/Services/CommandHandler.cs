@@ -68,6 +68,7 @@ namespace DiscordBot.Services
             _configuration = configuration;
             _autoRoleService = autoRoleService;
             _lavaNode = lavaNode;
+
             _client.Ready += OnReady;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
