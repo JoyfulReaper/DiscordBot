@@ -106,17 +106,23 @@ namespace DiscordBot.Commands
                 await ReplyAsync($"HttpClient encountered an error: {ex.StatusCode}");
             }
 
-            bool showNSFW = channel.IsNsfw;
-            if(httpResult.ToLowerInvariant().Contains("nsfw") && showNSFW != true)
-            {
-                await ReplyAsync("NSFW Posts only shown on NSFW channels");
-                return;
-            }
+            //bool showNSFW = channel.IsNsfw;
+            //if(httpResult.ToLowerInvariant().Contains("nsfw") && showNSFW != true)
+            //{
+            //    await ReplyAsync("NSFW Posts only shown on NSFW channels");
+            //    return;
+            //}
 
             await RemoveSubredditIfNonexistant(httpResult, subreddit);
 
             JArray arr = JArray.Parse(httpResult);
             JObject post = JObject.Parse(arr[0]["data"]["children"][0]["data"].ToString());
+
+            if(post["over_18"].ToString() == "True" && !channel.IsNsfw)
+            {
+                await ReplyAsync("NSFW Posts only shown on NSFW channels");
+                return;
+            }
 
             await CreateAndSendEmbed(post, subreddit);
         }
