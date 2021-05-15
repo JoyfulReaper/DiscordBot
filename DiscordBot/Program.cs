@@ -80,6 +80,7 @@ namespace DiscordBot
 
                     // Start the DiscordBot
                     logger.Information("Starting chatService");
+
                     await Task.Run(chatService.Start, cts.Token);
                 }
                 catch (OperationCanceledException)

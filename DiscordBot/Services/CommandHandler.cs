@@ -30,7 +30,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Victoria;
 
 namespace DiscordBot.Services
 {
@@ -44,7 +43,7 @@ namespace DiscordBot.Services
         private readonly IServerService _servers;
         private readonly ImageService _images;
         private readonly IConfiguration _configuration;
-        private readonly AutoRoleService _autoRoleService;
+        private readonly IAutoRoleService _autoRoleService;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
@@ -54,7 +53,7 @@ namespace DiscordBot.Services
             IServerService servers,
             ImageService images,
             IConfiguration configuration,
-            AutoRoleService autoRoleService)
+            IAutoRoleService autoRoleService)
         {
             _client = client;
             _commands = commands;

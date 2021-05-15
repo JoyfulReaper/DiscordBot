@@ -33,7 +33,10 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class RankService
+    /// <summary>
+    /// Ranks are roles the user can choose to assign to themselves
+    /// </summary>
+    public class RankService : IRankService
     {
         private readonly IRankRepository _rankRepository;
         private readonly IServerRepository _serverRepository;
@@ -48,6 +51,11 @@ namespace DiscordBot.Services
             _settings = settings;
         }
 
+        /// <summary>
+        /// Get a list of ranks for this server
+        /// </summary>
+        /// <param name="guild">The server for which to retereive the ranks</param>
+        /// <returns>A list of ranks for the given server</returns>
         public async Task<List<IRole>> GetRanks(IGuild guild)
         {
             var roles = new List<IRole>();
@@ -59,7 +67,7 @@ namespace DiscordBot.Services
             {
                 var role = guild.Roles.FirstOrDefault(x => x.Id == rank.RoleId);
 
-                if(role == null)
+                if (role == null)
                 {
                     invalidRanks.Add(rank);
                 }
@@ -68,7 +76,7 @@ namespace DiscordBot.Services
                     var currentUser = await guild.GetCurrentUserAsync();
                     var hierachy = (currentUser as SocketGuildUser).Hierarchy;
 
-                    if(role.Position > hierachy)
+                    if (role.Position > hierachy)
                     {
                         invalidRanks.Add(rank);
                     }
@@ -79,7 +87,7 @@ namespace DiscordBot.Services
                 }
             }
 
-            if(invalidRanks.Count > 0)
+            if (invalidRanks.Count > 0)
             {
                 await ClearRanks(invalidRanks);
             }
@@ -87,16 +95,27 @@ namespace DiscordBot.Services
             return roles;
         }
 
+        /// <summary>
+        /// Get a list of ranks for this server
+        /// </summary>
+        /// <param name="serverId">The server for which to retereive the ranks</param>
+        /// <returns>A list of ranks for the given server</returns>
         public async Task<List<Rank>> GetRanks(ulong serverId)
         {
             return await _rankRepository.GetRanksByServerId(serverId);
         }
 
+        /// <summary>
+        /// Add a rank for the given server
+        /// </summary>
+        /// <param name="serverId">The id of the sercer</param>
+        /// <param name="roleId">The id of the rank to add</param>
+        /// <returns></returns>
         public async Task AddRank(ulong serverId, ulong roleId)
         {
             var server = await _serverRepository.GetByServerId(serverId);
 
-            if(server == null)
+            if (server == null)
             {
                 await _serverRepository.AddAsync(new Server { GuildId = serverId, Prefix = _settings.DefaultPrefix });
             }
@@ -104,14 +123,26 @@ namespace DiscordBot.Services
             await _rankRepository.AddAsync(new Rank { RoleId = roleId, ServerId = serverId });
         }
 
+        /// <summary>
+        /// Remove a rank for the given server
+        /// </summary>
+        /// <param name="serverId">Id of the server</param>
+        /// <param name="roleId">Id of the rank to remove</param>
+        /// <returns></returns>
         public async Task RemoveRank(ulong serverId, ulong roleId)
         {
             await _rankRepository.DeleteRank(serverId, roleId);
         }
 
+
+        /// <summary>
+        /// Delete a list of ranks from the DB
+        /// </summary>
+        /// <param name="autoRoles">The list of ranks to delete</param>
+        /// <returns></returns>
         public async Task ClearRanks(List<Rank> ranks)
         {
-            foreach(Rank rank in ranks)
+            foreach (Rank rank in ranks)
             {
                 await _rankRepository.DeleteAsync(rank);
             }
