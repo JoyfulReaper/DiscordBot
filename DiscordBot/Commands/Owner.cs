@@ -31,6 +31,7 @@ using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Victoria;
 
 namespace DiscordBot.Commands
 {
@@ -40,16 +41,19 @@ namespace DiscordBot.Commands
         private readonly Settings _settings;
         private readonly ILogger<Owner> _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
+        private readonly LavaNode _lavaNode;
 
         public Owner(DiscordSocketClient client,
             Settings settings,
             ILogger<Owner> logger,
-            IDiscordBotSettingsRepository discordBotSettingsRepository)
+            IDiscordBotSettingsRepository discordBotSettingsRepository,
+            LavaNode lavaNode)
         {
             _client = client;
             _settings = settings;
             _logger = logger;
             _discordBotSettingsRepository = discordBotSettingsRepository;
+            _lavaNode = lavaNode;
         }
 
         [Command("quit")]
@@ -67,6 +71,8 @@ namespace DiscordBot.Commands
             }
             else
             {
+                await _lavaNode.DisconnectAsync();
+
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
                 var message = await ReplyAsync("https://i.makeagif.com/media/11-18-2014/2oMnrI.gif");
                 await Task.Delay(2500);
@@ -94,6 +100,7 @@ namespace DiscordBot.Commands
                 }
 
                 await _client.StopAsync(); // Allow the client to cleanup
+                Program.ExitCleanly();
             }
         }
 

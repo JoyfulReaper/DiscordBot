@@ -129,7 +129,7 @@ namespace DiscordBot
             }
         }
 
-        private static void ExitCleanly()
+        public static void ExitCleanly()
         {
             Console.WriteLine("Quiting!");
             cts.Cancel();

@@ -32,11 +32,9 @@ using DiscordBot.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Victoria;
 
 namespace DiscordBot.Services
 {
@@ -50,13 +48,15 @@ namespace DiscordBot.Services
         private readonly CommandService _commands;
         private readonly ILogger _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
+        private readonly LavaNode _lavaNode;
 
         public DiscordService(IServiceProvider serviceProvider,
             DiscordSocketClient client,
             IConfiguration configuration,
             CommandService commands,
             ILogger<DiscordService> logger,
-            IDiscordBotSettingsRepository discordBotSettingsRepository)
+            IDiscordBotSettingsRepository discordBotSettingsRepository,
+            LavaNode lavaNode)
         {
             _serviceProvider = serviceProvider;
             _client = client;
@@ -64,13 +64,14 @@ namespace DiscordBot.Services
             _commands = commands;
             _logger = logger;
             _discordBotSettingsRepository = discordBotSettingsRepository;
+            _lavaNode = lavaNode;
 
-            _client.Ready += SocketClient_Ready;
-            _client.MessageReceived += SocketClient_MessageReceived;
-            _client.Disconnected += SocketClient_Disconnected;
+            _client.Ready += OnReady;
+            _client.MessageReceived += OnMessageReceived;
+            _client.Disconnected += OnDisconncted;
         }
 
-        private Task SocketClient_MessageReceived(SocketMessage arg)
+        private Task OnMessageReceived(SocketMessage arg)
         {
             //TODO replace this with logging / Possibly keep a database of all messages received
             Console.WriteLine($"Message received: {arg.Author.Username} : {arg.Channel.Name} : {arg.Content}");
@@ -79,17 +80,27 @@ namespace DiscordBot.Services
             return Task.CompletedTask;
         }
 
-        private Task SocketClient_Disconnected(Exception arg)
+        private async Task OnDisconncted(Exception arg)
         {
             _logger.LogError(arg, "SocketClient disconnected!");
-
             Console.WriteLine("SocketClient disconnected!");
-            return Task.CompletedTask;
+
+            //Todo make this a setting
+            int retryDelay = 5;
+            _logger.LogDebug("Retrying connection after {delay} seconds", retryDelay);
+            await Task.Delay(TimeSpan.FromSeconds(retryDelay));
+            await Start();
         }
 
-        private async Task SocketClient_Ready()
+        private async Task OnReady()
         {
             _logger.LogInformation("Connected as {username}#{discriminator}", _client.CurrentUser.Username, _client.CurrentUser.Discriminator);
+
+            if (!_lavaNode.IsConnected)
+            {
+                _logger.LogDebug("Connecting to Lavalink");
+                await _lavaNode.ConnectAsync();
+            }
 
             var settings = await _discordBotSettingsRepository.Get();
             await _client.SetGameAsync(settings.Game);
