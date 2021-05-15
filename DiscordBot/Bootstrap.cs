@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.DataAccess;
@@ -98,6 +99,7 @@ namespace DiscordBot
                     x.LogSeverity = LogSeverity.Info;
                     x.Authorization = "notarealpassword";
                 })
+                .AddSingleton<InteractiveService>()
                 .AddSingleton<IServerRepository, ServerRepository>()
                 .AddSingleton(config)
                 .AddSingleton<LoggingService>()
