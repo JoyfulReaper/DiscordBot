@@ -127,6 +127,7 @@ namespace DiscordBot
                     break;
                 }
             }
+            ExitCleanly();
         }
 
         public static void ExitCleanly()
