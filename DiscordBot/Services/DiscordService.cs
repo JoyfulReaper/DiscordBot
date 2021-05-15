@@ -84,8 +84,6 @@ namespace DiscordBot.Services
             _logger.LogError(arg, "SocketClient disconnected!");
 
             Console.WriteLine("SocketClient disconnected!");
-            Environment.Exit(1);
-
             return Task.CompletedTask;
         }
 
