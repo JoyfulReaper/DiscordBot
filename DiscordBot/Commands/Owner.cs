@@ -38,13 +38,13 @@ namespace DiscordBot.Commands
     public class Owner : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient _client;
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
         private readonly ILogger<Owner> _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
 
         public Owner(DiscordSocketClient client,
-            Settings settings,
+            ISettings settings,
             ILogger<Owner> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
             LavaNode lavaNode)

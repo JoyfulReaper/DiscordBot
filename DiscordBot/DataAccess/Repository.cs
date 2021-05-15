@@ -39,10 +39,10 @@ namespace DiscordBot.DataAccess
     public abstract class Repository<T> : IRepository<T> where T: DatabaseEntity
     {
         protected string TableName { get; set; }
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
         private readonly ILogger<Repository<T>> _logger;
 
-        public Repository(Settings settings,
+        public Repository(ISettings settings,
             ILogger<Repository<T>> logger)
         {
             _settings = settings;

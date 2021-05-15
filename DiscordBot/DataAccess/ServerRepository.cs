@@ -32,10 +32,10 @@ namespace DiscordBot.DataAccess
 {
     public class ServerRepository : Repository<Server>, IServerRepository
     {
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
         private readonly ILogger<ServerRepository> _logger;
 
-        public ServerRepository(Settings settings,
+        public ServerRepository(ISettings settings,
             ILogger<ServerRepository> logger) : base(settings, logger)
         {
             _settings = settings;

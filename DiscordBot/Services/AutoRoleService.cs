@@ -41,11 +41,11 @@ namespace DiscordBot.Services
     {
         private readonly IAutoRoleRepository _autoRoleRepository;
         private readonly IServerRepository _serverRepository;
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
 
         public AutoRoleService(IAutoRoleRepository autoRoleRepository,
             IServerRepository serverRepository,
-            Settings settings)
+            ISettings settings)
         {
             _autoRoleRepository = autoRoleRepository;
             _serverRepository = serverRepository;

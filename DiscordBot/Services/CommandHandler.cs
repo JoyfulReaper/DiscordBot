@@ -37,7 +37,7 @@ namespace DiscordBot.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
         private readonly IServerService _servers;
@@ -47,7 +47,7 @@ namespace DiscordBot.Services
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
-            Settings settings,
+            ISettings settings,
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger,
             IServerService servers,

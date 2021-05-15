@@ -119,7 +119,7 @@ namespace DiscordBot.Services
                             if (channel != null && channel is SocketTextChannel textChannel)
                             {
                                 var builder = new EmbedBuilder()
-                                    .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
+                                    .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                                     .WithDescription("DiscordBot Starting\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
                                     .WithColor(ColorHelper.GetColor())
                                     .WithCurrentTimestamp();
@@ -143,7 +143,6 @@ namespace DiscordBot.Services
             {
                 _logger.LogWarning(ex, "Failed to parse ShowBotJoinMessages. Using false.");
                 ShowJoinAndPartMessages = false;
-
             }
 
             var settings = await _discordBotSettingsRepository.Get();
@@ -160,12 +159,22 @@ namespace DiscordBot.Services
             {
                 if(ex.Reason == "401: Unauthorized")
                 {
+                    _logger.LogCritical("Token is not correct!");
                     Console.WriteLine("\nToken is incorrect.");
                     Console.Write("Enter Token: ");
                     settings.Token = Console.ReadLine();
 
                     await _discordBotSettingsRepository.EditAsync(settings);
                     Start();
+                }
+                else
+                {
+                    _logger.LogCritical(ex, "An unhandeled HttpException has occured!");
+                    Console.WriteLine("An unhandeled HttpException has occured!");
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.StackTrace);
+
+                    Program.ExitCleanly(-1);
                 }
             }
 

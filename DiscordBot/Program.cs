@@ -131,14 +131,14 @@ namespace DiscordBot
             ExitCleanly();
         }
 
-        public static void ExitCleanly()
+        public static void ExitCleanly(int exitCode = 0)
         {
             Console.WriteLine("Quiting!");
             cts.Cancel();
             logger.Information("Killing Lavalink Proccess");
             lavaLink.Kill(true);
 
-            Environment.Exit(0);
+            Environment.Exit(exitCode);
         }
     }
 }
