@@ -82,9 +82,11 @@ namespace DiscordBot.Services
             var roles = await _autoRoleService.GetAutoRoles(userJoining.Guild);
             if (roles.Count < 1)
             {
+                _logger.LogInformation("No auto roles to assign to {user} in {server}", userJoining.Username, userJoining.Guild.Name);
                 return;
             }
 
+            _logger.LogInformation("Assigning auto roles to {user}", userJoining.Username);
             await userJoining.AddRolesAsync(roles);
         }
 
@@ -103,6 +105,7 @@ namespace DiscordBot.Services
 
             if (showMessage)
             {
+                _logger.LogInformation("Showing welcome message for {user} in {server}", userJoining.Username, userJoining.Guild.Name);
                 await userJoining.Guild.DefaultChannel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
 
                 var channel = userJoining.Guild.DefaultChannel as ISocketMessageChannel;
