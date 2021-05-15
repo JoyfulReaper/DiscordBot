@@ -53,6 +53,10 @@ namespace DiscordBot
 {
     class Program
     {
+        private static readonly CancellationTokenSource cts = new CancellationTokenSource();
+        private static readonly Process lavaLink = new Process();
+        private static readonly ILogger logger = Log.ForContext<Program>();
+
         static async Task Main(string[] args)
         {
             // Initial Logging for before the Dependency Injection is setup
@@ -61,12 +65,6 @@ namespace DiscordBot
             // Set up Dependency Injection
             var serviceProvider = Bootstrap.Initialize(args);
             var chatService = serviceProvider.GetRequiredService<IChatService>();
-
-            // Static logger
-            ILogger logger = Log.ForContext<Program>();
-            
-            var cts = new CancellationTokenSource();
-            Process lavaLink = new Process();
 
             if (chatService != null)
             {
@@ -90,9 +88,7 @@ namespace DiscordBot
                     logger.Warning("Cancelation was Requested");
                     Console.WriteLine("Cancelation was requested");
 
-                    logger.Information("Killing Lavalink Proccess");
-                    lavaLink.Kill(true);
-                    Environment.Exit(0);
+                    ExitCleanly();
                 }
                 catch(Exception e)
                 {
@@ -110,14 +106,15 @@ namespace DiscordBot
                         Console.WriteLine(e.StackTrace);
                     }
 
-                    Environment.Exit(1);
+                    ExitCleanly();
                 }
             }
             else
             {
                 logger.Fatal("Failed to retrieve ChatService!");
                 Console.WriteLine("Failed to retrieve ChatService!");
-                Environment.Exit(1);
+
+                ExitCleanly();
             }
 
             while(true)
@@ -127,15 +124,19 @@ namespace DiscordBot
 
                 if (char.ToLowerInvariant(key) == 'q')
                 {
-                    Console.WriteLine("Quiting!");
-                    cts.Cancel();
-
-                    logger.Information("Killing Lavalink Proccess");
-                    lavaLink.Kill(true);
-
-                    Environment.Exit(0);
+                    break;
                 }
             }
+        }
+
+        private static void ExitCleanly()
+        {
+            Console.WriteLine("Quiting!");
+            cts.Cancel();
+            logger.Information("Killing Lavalink Proccess");
+            lavaLink.Kill(true);
+
+            Environment.Exit(0);
         }
     }
 }
