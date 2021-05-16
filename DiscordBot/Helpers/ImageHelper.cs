@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
+using Discord.WebSocket;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -49,19 +51,27 @@ namespace DiscordBot.Helpers
             }
 
             var stream = await response.Content.ReadAsStreamAsync();
-            var image = Image.FromStream(stream);
+            var image = System.Drawing.Image.FromStream(stream);
             MemoryStream output = new MemoryStream();
 
             if (url.EndsWith(".gif"))
             {
-                image.Save(output, ImageFormat.Gif);
+                image.Save(output, System.Drawing.Imaging.ImageFormat.Gif);
             }
             else
             {
-                image.Save(output, ImageFormat.Png);
+                image.Save(output, System.Drawing.Imaging.ImageFormat.Png);
             }
 
             return await Task.FromResult(output);
+        }
+
+        public static async Task<IUserMessage> SendImageAsync(ISocketMessageChannel channel, string imageUrl)
+        {
+            var memoryStream = await FetchImage(imageUrl);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return await channel.SendFileAsync(memoryStream, $"{imageUrl}");
         }
     }
 }
