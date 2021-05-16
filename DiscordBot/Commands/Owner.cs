@@ -30,6 +30,8 @@ using DiscordBot.DataAccess;
 using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Victoria;
 
@@ -42,6 +44,14 @@ namespace DiscordBot.Commands
         private readonly ILogger<Owner> _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
+        private readonly Random _random = new Random();
+
+        //TODO store these in the database
+        private readonly List<string> _quitImages = new List<string>
+        {
+            "https://i.makeagif.com/media/11-18-2014/2oMnrI.gif", "https://news.efinancialcareers.com/binaries/content/gallery/efinancial-careers/articles/2017/11/I-quit_twinsterphoto_GettyImages.jpg",
+            "https://myzol.co.zw/Data/Articles/2387/bye-quit__zoom.png", "https://c1.staticflickr.com/3/2199/3527660157_2827558f95_z.jpg"
+        };
 
         public Owner(DiscordSocketClient client,
             ISettings settings,
@@ -62,7 +72,6 @@ namespace DiscordBot.Commands
         public async Task Quit()
         {
             await Context.Channel.TriggerTypingAsync();
-
             _logger.LogInformation("{username}#{discriminator} invoked quit on {target}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
 
             if (Context.User.Username != _settings.OwnerName || Context.User.Discriminator != _settings.OwnerDiscriminator)
@@ -71,29 +80,40 @@ namespace DiscordBot.Commands
             }
             else
             {
+                IUserMessage message;
                 await _lavaNode.DisconnectAsync();
-
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
-                var message = await ReplyAsync("https://i.makeagif.com/media/11-18-2014/2oMnrI.gif");
+
+                var memoryStream = await ImageHelper.FetchImage(_quitImages[_random.Next(_quitImages.Count)]);
+                if(memoryStream == null)
+                {
+                    await ReplyAsync("Quit Image could not be fetched! Bye anyway!");
+                }
+                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+                message = await Context.Channel.SendFileAsync(memoryStream, "quitimage.png");
+
                 await Task.Delay(2500);
                 await message.DeleteAsync();
 
-                foreach (var guild in _client.Guilds)
+                if (DiscordService.ShowJoinAndPartMessages)
                 {
-                    foreach (var channel in guild.Channels)
+                    foreach (var guild in _client.Guilds)
                     {
-                        if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
+                        foreach (var channel in guild.Channels)
                         {
-                            if (channel != null && channel is SocketTextChannel textChannel && DiscordService.ShowJoinAndPartMessages)
+                            if (channel.Name.ToLowerInvariant() == "bot" || channel.Name.ToLowerInvariant().StartsWith("bot-spam"))
                             {
-                                var builder = new EmbedBuilder()
-                                    .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
-                                    .WithDescription($"DiscordBot Stopped by {Context.User.Username}\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
-                                    .WithColor(ColorHelper.GetColor())
-                                    .WithCurrentTimestamp();
+                                if (channel != null && channel is SocketTextChannel textChannel)
+                                {
+                                    var builder = new EmbedBuilder()
+                                        .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
+                                        .WithDescription($"DiscordBot Stopped by {Context.User.Username}\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
+                                        .WithColor(ColorHelper.GetColor())
+                                        .WithCurrentTimestamp();
 
-                                var embed = builder.Build();
-                                await textChannel.SendMessageAsync(null, false, embed);
+                                    var embed = builder.Build();
+                                    await textChannel.SendMessageAsync(null, false, embed);
+                                }
                             }
                         }
                     }
