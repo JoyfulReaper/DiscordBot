@@ -51,7 +51,16 @@ namespace DiscordBot.Helpers
             var stream = await response.Content.ReadAsStreamAsync();
             var image = Image.FromStream(stream);
             MemoryStream output = new MemoryStream();
-            image.Save(output, ImageFormat.Png);
+
+            if (url.EndsWith(".gif"))
+            {
+                image.Save(output, ImageFormat.Gif);
+            }
+            else
+            {
+                image.Save(output, ImageFormat.Png);
+            }
+
             return await Task.FromResult(output);
         }
     }
