@@ -1,15 +1,24 @@
-﻿using Discord.Addons.Interactive;
+﻿// Just a demo of the Discord.Addons.Interactive nuget package
+
+using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
+using DiscordBot.Helpers;
+using DiscordBot.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
     public class PaginationDemo : InteractiveBase
     {
+        private readonly ISettings _settings;
+
+        public PaginationDemo(ISettings settings)
+        {
+            _settings = settings;
+        }
+
         // DeleteAfterAsync will send a message and asynchronously delete it after the timeout has popped
         // This method will not block.
         [Command("delete")]
@@ -28,7 +37,16 @@ namespace DiscordBot.Commands
             await ReplyAsync("What is 2+2?");
             var response = await NextMessageAsync();
             if (response != null)
-                await ReplyAsync($"You replied: {response.Content}");
+            {
+                if (response.Content == "4")
+                {
+                    await ReplyAsync("You must be some sort of genius!");
+                }
+                else
+                {
+                    await ReplyAsync($"I'm not so sure {response.Content} is the correct answer...");
+                }
+            }
             else
                 await ReplyAsync("You did not reply before the timeout");
         }
@@ -40,8 +58,25 @@ namespace DiscordBot.Commands
         [Command("paginator")]
         public async Task Test_Paginator()
         {
-            var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
-            await PagedReplyAsync(pages);
+            var pages = new[] { "**Help**\n\n`!help` - Show the help command",
+                "**Help**\n\n`!prefix` - View or change the prefix",
+                "**Help**\n\n`!ping` - View the current latency"
+                };
+
+            PaginatedMessage paginatedMessage = new PaginatedMessage()
+            {
+                Pages = pages,
+                Options = new PaginatedAppearanceOptions()
+                {
+                    InformationText = "THIS IS A TEST!!",
+                    Info = new Emoji("❓")
+                },
+                Color = ColorHelper.GetColor(),
+                Title = "Awesome Paginator"
+            };
+
+
+            await PagedReplyAsync(paginatedMessage);
         }
     }
 }
