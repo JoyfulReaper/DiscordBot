@@ -50,12 +50,12 @@ namespace DiscordBot.Commands
 
         private static readonly List<string> _seedSubreddits = new List<string>() {"funny", "programmerhumor", "memes", "4PanelCringe", "AdviceAnimals",
             "ATAAE", "ATBGE", "badcode", "BikiniBottomTwitter", "bitchimabus", "blackmagicfuckery", "cringe", "cringetopia",
-            "eyebleach", "facepalm", "facebookcringe", "forwardsfromgrandma", "FuckNestle", "interestingasfuck",
-            "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor",
+            "eyebleach", "facepalm", "facebookcringe", "forwardsfromgrandma", "FuckNestle", "interestingasfuck", "bloop",
+            "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor", "aww",
             "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes",
             "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
             "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua", "chemicalreactiongifs",
-            "shittyfoodporn", "animalsbeingjerks", "animalsbeingbros", "wigglebutts", "humanporn"};
+            "shittyfoodporn", "animalsbeingjerks", "animalsbeingbros", "wigglebutts", "humanporn", "techsupportgore", "iiiiiiitttttttttttt", "fffffffuuuuuuuuuuuu"};
 
         public Reddit(ILogger<Reddit> logger, 
             IConfiguration configuration,
