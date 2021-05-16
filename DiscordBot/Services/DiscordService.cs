@@ -80,16 +80,18 @@ namespace DiscordBot.Services
             return Task.CompletedTask;
         }
 
-        private async Task OnDisconncted(Exception arg)
+        private Task OnDisconncted(Exception arg)
         {
             _logger.LogError(arg, "SocketClient disconnected!");
             Console.WriteLine("SocketClient disconnected!");
 
             //Todo make this a setting
-            int retryDelay = 5;
-            _logger.LogDebug("Retrying connection after {delay} seconds", retryDelay);
-            await Task.Delay(TimeSpan.FromSeconds(retryDelay));
-            await Start();
+            //int retryDelay = 5;
+            //_logger.LogDebug("Retrying connection after {delay} seconds", retryDelay);
+            //await Task.Delay(TimeSpan.FromSeconds(retryDelay));
+            //await Start();
+
+            return Task.CompletedTask;
         }
 
         private async Task OnReady()
