@@ -50,12 +50,12 @@ namespace DiscordBot.Commands
 
         private static readonly List<string> _seedSubreddits = new List<string>() {"funny", "programmerhumor", "memes", "4PanelCringe", "AdviceAnimals",
             "ATAAE", "ATBGE", "badcode", "BikiniBottomTwitter", "bitchimabus", "blackmagicfuckery", "cringe", "cringetopia",
-            "eyebleach", "facepalm", "facebookcringe", "forwardsfromgrandma", "FuckNestle", "interestingasfuck",
-            "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor",
+            "eyebleach", "facepalm", "facebookcringe", "forwardsfromgrandma", "FuckNestle", "interestingasfuck", "bloop",
+            "nextfuckinglevel", "ProgrammerDadJokes", "programming_memes", "programminghorror", "programminghumor", "aww",
             "programmingpuns", "rareinsults", "shittyprogramming", "shittyrobots", "softwaregore", "programmingmemes",
             "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
             "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua", "chemicalreactiongifs",
-            "shittyfoodporn", "animalsbeingjerks", "wigglebutts"};
+            "shittyfoodporn", "animalsbeingjerks", "animalsbeingbros", "wigglebutts", "humanporn", "techsupportgore", "iiiiiiitttttttttttt", "fffffffuuuuuuuuuuuu"};
 
         public Reddit(ILogger<Reddit> logger, 
             IConfiguration configuration,
@@ -225,7 +225,7 @@ namespace DiscordBot.Commands
             {
                 await Context.Channel.SendMessageAsync($"{subreddit} does not exist!");
 
-                await _subredditRepository.DeleteAsync(subreddit);
+                await _subredditRepository.DeleteAsync(subreddit.ToLowerInvariant());
                 _logger.LogDebug("reddit: Removed {subreddit}", subreddit);
 
                 return;
@@ -234,7 +234,7 @@ namespace DiscordBot.Commands
 
         private async Task<bool> AddSubRedditIfNotKnownAndLearningEnabled(List<Subreddit> subreddits, string subreddit)
         {
-            if (!subreddits.Any(x => x.Name == subreddit))
+            if (!subreddits.Any(x => x.Name.ToLowerInvariant() == subreddit.ToLowerInvariant()))
             {
                 var server = await _serverRepository.GetByServerId(Context.Guild.Id);
                 if (!server.SubredditLearning)
@@ -242,7 +242,7 @@ namespace DiscordBot.Commands
                     return false;
                 }
 
-                await _subredditRepository.AddAsync(Context.Guild.Id, subreddit);
+                await _subredditRepository.AddAsync(Context.Guild.Id, subreddit.ToLowerInvariant());
 
                 _logger.LogInformation("reddit: learned {subreddit}", subreddit);
                 Console.WriteLine("reddit: Learned" + subreddit);
@@ -261,7 +261,7 @@ namespace DiscordBot.Commands
             {
                 foreach(string seed in _seedSubreddits)
                 {
-                    subreddits.Add(await _subredditRepository.AddAsync(Context.Guild.Id, seed));
+                    subreddits.Add(await _subredditRepository.AddAsync(Context.Guild.Id, seed.ToLowerInvariant()));
                 }
             }
 

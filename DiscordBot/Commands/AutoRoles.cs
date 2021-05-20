@@ -34,10 +34,10 @@ namespace DiscordBot.Commands
 {
     public class AutoRoles : ModuleBase<SocketCommandContext>
     {
-        private readonly AutoRoleService _autoRoleService;
+        private readonly IAutoRoleService _autoRoleService;
         private readonly IServerService _servers;
 
-        public AutoRoles(AutoRoleService autoRoleService,
+        public AutoRoles(IAutoRoleService autoRoleService,
             IServerService servers)
         {
             _autoRoleService = autoRoleService;

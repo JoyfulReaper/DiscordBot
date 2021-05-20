@@ -23,12 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
+using Discord;
+using DiscordBot.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace DiscordBot.Models
+namespace DiscordBot.Services
 {
-    public abstract class DatabaseEntity
+    public interface IAutoRoleService
     {
-        public ulong Id { get; set; }
+        Task AddAutoRole(ulong serverId, ulong roleId);
+        Task ClearAutoRoles(List<AutoRole> autoRoles);
+        Task<List<IRole>> GetAutoRoles(IGuild guild);
+        Task<List<AutoRole>> GetAutoRoles(ulong serverId);
+        Task RemoveAutoRole(ulong serverId, ulong roleId);
     }
 }

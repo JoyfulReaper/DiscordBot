@@ -30,7 +30,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Victoria;
 
 namespace DiscordBot.Services
 {
@@ -38,25 +37,23 @@ namespace DiscordBot.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
         private readonly IServerService _servers;
         private readonly ImageService _images;
         private readonly IConfiguration _configuration;
-        private readonly AutoRoleService _autoRoleService;
-        private readonly LavaNode _lavaNode;
+        private readonly IAutoRoleService _autoRoleService;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
-            Settings settings,
+            ISettings settings,
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger,
             IServerService servers,
             ImageService images,
             IConfiguration configuration,
-            AutoRoleService autoRoleService,
-            LavaNode lavaNode)
+            IAutoRoleService autoRoleService)
         {
             _client = client;
             _commands = commands;
@@ -67,29 +64,31 @@ namespace DiscordBot.Services
             _images = images;
             _configuration = configuration;
             _autoRoleService = autoRoleService;
-            _lavaNode = lavaNode;
 
-            _client.Ready += OnReady;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
-            _client.Disconnected += OnDisconnected;
+            _client.ReactionAdded += OnReactionAdded;
 
             _commands.CommandExecuted += OnCommandExecuted;
         }
 
-        private async Task OnDisconnected(Exception arg)
+        private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            _logger.LogDebug("Disconnecting from Lavalink");
-            await _lavaNode.DisconnectAsync();
-        }
-
-        private async Task OnReady()
-        {
-            if (!_lavaNode.IsConnected)
+            //TODO Maybe find a way to make this useful...
+            //TODO Maybe keep a DB of reactable messages
+            // and find a way to have them trigger something
+            if (reaction.MessageId != 843516844794314782)
             {
-                _logger.LogDebug("Connecting to Lavalink");
-                await _lavaNode.ConnectAsync();
+                return;
             }
+
+            if(reaction.Emote.Name != "✅")
+            {
+                return;
+            }
+
+            var textChannel = await (channel as ITextChannel).Guild.GetTextChannelAsync(821113360711155729);
+            await textChannel.SendMessageAsync($"{reaction.User.Value.Mention} reacted with the ✅");
         }
 
         private async Task OnUserJoined(SocketGuildUser userJoining)
@@ -103,9 +102,11 @@ namespace DiscordBot.Services
             var roles = await _autoRoleService.GetAutoRoles(userJoining.Guild);
             if (roles.Count < 1)
             {
+                _logger.LogInformation("No auto roles to assign to {user} in {server}", userJoining.Username, userJoining.Guild.Name);
                 return;
             }
 
+            _logger.LogInformation("Assigning auto roles to {user}", userJoining.Username);
             await userJoining.AddRolesAsync(roles);
         }
 
@@ -124,6 +125,7 @@ namespace DiscordBot.Services
 
             if (showMessage)
             {
+                _logger.LogInformation("Showing welcome message for {user} in {server}", userJoining.Username, userJoining.Guild.Name);
                 await userJoining.Guild.DefaultChannel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
 
                 var channel = userJoining.Guild.DefaultChannel as ISocketMessageChannel;

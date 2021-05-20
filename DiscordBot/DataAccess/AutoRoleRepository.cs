@@ -9,10 +9,10 @@ namespace DiscordBot.DataAccess
 {
     public class AutoRoleRepository : Repository<AutoRole>, IAutoRoleRepository
     {
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
         private readonly ILogger<AutoRoleRepository> _logger;
 
-        public AutoRoleRepository(Settings settings,
+        public AutoRoleRepository(ISettings settings,
             ILogger<AutoRoleRepository> logger) : base(settings, logger)
         {
             _settings = settings;

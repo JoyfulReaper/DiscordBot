@@ -43,12 +43,12 @@ namespace DiscordBot.Commands
     {
         private readonly ILogger<General> _logger;
         private readonly DiscordSocketClient _client;
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
         private readonly ImageService _images;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
-            Settings settings,
+            ISettings settings,
             ImageService images)
         {
             _logger = logger;
@@ -84,12 +84,13 @@ namespace DiscordBot.Commands
         }
 
         [Command ("about")]
+        [Summary("Information about the bot itself")]
         public async Task About()
         {
             _logger.LogInformation("{username}#{discriminator} invoked about", Context.User.Username, Context.User.Discriminator);
 
             var builder = new EmbedBuilder()
-                .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
+                .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                 .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
                 .WithColor(ColorHelper.GetColor())
                 .WithCurrentTimestamp();
@@ -128,7 +129,18 @@ namespace DiscordBot.Commands
         public async Task Ping()
         {
             _logger.LogInformation("{username}#{discriminator} invoked ping", Context.User.Username, Context.User.Discriminator);
-            await ReplyAsync("Pong!");
+
+            var builder = new EmbedBuilder();
+            builder
+                .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
+                .WithTitle("Ping Results")
+                .WithDescription("Pong!")
+                .AddField("Round-trip latency to the WebSocket server (ms):", _client.Latency, false)
+                .WithColor(ColorHelper.GetColor())
+                .WithCurrentTimestamp();
+
+            await ReplyAsync(null, false, builder.Build());
+            //await ReplyAsync($"Pong!\nRound-trip latency to the WebSocket server: {_client.Latency} ms");
         }
 
         [Command("info")]

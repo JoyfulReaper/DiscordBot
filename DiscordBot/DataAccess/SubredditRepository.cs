@@ -35,10 +35,10 @@ namespace DiscordBot.DataAccess
     public class SubredditRepository : Repository<Subreddit>, ISubredditRepository
     {
         private readonly ILogger<SubredditRepository> _logger;
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
 
         public SubredditRepository(ILogger<SubredditRepository> logger,
-            Settings settings) : base(settings, logger)
+            ISettings settings) : base(settings, logger)
         {
             _logger = logger;
             _settings = settings;

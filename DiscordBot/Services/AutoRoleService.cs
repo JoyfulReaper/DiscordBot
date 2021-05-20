@@ -33,21 +33,30 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class AutoRoleService
+    /// <summary>
+    /// Auto Roles are roles that are assigned to users automaticly upon
+    /// joining the server.
+    /// </summary>
+    public class AutoRoleService : IAutoRoleService
     {
         private readonly IAutoRoleRepository _autoRoleRepository;
         private readonly IServerRepository _serverRepository;
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
 
         public AutoRoleService(IAutoRoleRepository autoRoleRepository,
             IServerRepository serverRepository,
-            Settings settings)
+            ISettings settings)
         {
             _autoRoleRepository = autoRoleRepository;
             _serverRepository = serverRepository;
             _settings = settings;
         }
 
+        /// <summary>
+        /// Get a list of auto roles for this server
+        /// </summary>
+        /// <param name="guild">The server for which to retereive the auto roles</param>
+        /// <returns>A list of auto roles for the given server</returns>
         public async Task<List<IRole>> GetAutoRoles(IGuild guild)
         {
             var roles = new List<IRole>();
@@ -61,6 +70,9 @@ namespace DiscordBot.Services
 
                 if (role == null)
                 {
+                    // If the role doesn't exist any more
+                    // Or isn't valid for some other reason
+                    // add it to a list to be removed.
                     invalidAutoRoles.Add(autoRole);
                 }
                 else
@@ -87,11 +99,22 @@ namespace DiscordBot.Services
             return roles;
         }
 
+        /// <summary>
+        /// Get a list of auto roles for this server
+        /// </summary>
+        /// <param name="serverId">The id of the server for which to retereive the auto roles</param>
+        /// <returns>A list of auto roles for the given server</returns>
         public async Task<List<AutoRole>> GetAutoRoles(ulong serverId)
         {
             return await _autoRoleRepository.GetAutoRoleByServerId(serverId);
         }
 
+        /// <summary>
+        /// Add an auto role for the given server
+        /// </summary>
+        /// <param name="serverId">The id of the sercer</param>
+        /// <param name="roleId">The id of the role to add</param>
+        /// <returns></returns>
         public async Task AddAutoRole(ulong serverId, ulong roleId)
         {
             var server = await _serverRepository.GetByServerId(serverId);
@@ -104,11 +127,22 @@ namespace DiscordBot.Services
             await _autoRoleRepository.AddAsync(new AutoRole { RoleId = roleId, ServerId = serverId });
         }
 
+        /// <summary>
+        /// Remove an auto role for the given server
+        /// </summary>
+        /// <param name="serverId">Id of the server</param>
+        /// <param name="roleId">Id of the role to remove</param>
+        /// <returns></returns>
         public async Task RemoveAutoRole(ulong serverId, ulong roleId)
         {
             await _autoRoleRepository.DeleteAutoRole(serverId, roleId);
         }
 
+        /// <summary>
+        /// Delete a list of auto roles from the DB
+        /// </summary>
+        /// <param name="autoRoles">The list of auto roles to delete</param>
+        /// <returns></returns>
         public async Task ClearAutoRoles(List<AutoRole> autoRoles)
         {
             foreach (AutoRole role in autoRoles)

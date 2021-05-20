@@ -25,7 +25,6 @@ SOFTWARE.
 
 using DiscordBot.DataAccess;
 using DiscordBot.Models;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Services
@@ -33,10 +32,10 @@ namespace DiscordBot.Services
     public class ServerService : IServerService
     {
         private readonly IServerRepository _serverRepository;
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
 
         public ServerService(IServerRepository serverRepository,
-            Settings settings)
+            ISettings settings)
         {
             _serverRepository = serverRepository;
             _settings = settings;

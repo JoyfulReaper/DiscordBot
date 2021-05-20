@@ -31,7 +31,7 @@ using System;
 
 namespace DiscordBot.Services
 {
-    public class Settings
+    public class Settings : ISettings
     {
         public DatabaseType DatabaseType { get; private set; }
         public string ConnectionString { get; private set; }
@@ -70,11 +70,12 @@ namespace DiscordBot.Services
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
             DefaultPrefix = _configuration.GetSection("DefaultPrefix").Value ?? "!";
 
-            SetEmbedColors();            
+            SetEmbedColors();
         }
 
         private void SetEmbedColors()
         {
+            // TODO allow per server embed color settings
             try
             {
                 ColorHelper.UseRandomColor = bool.Parse(_configuration.GetSection("RandomEmbedColor").Value);
@@ -86,12 +87,12 @@ namespace DiscordBot.Services
                 ColorHelper.UseRandomColor = false;
             }
 
-            if(!ColorHelper.UseRandomColor)
+            if (!ColorHelper.UseRandomColor)
             {
                 string color = _configuration.GetSection("EmbedColor").Value;
                 var colorValues = color.Split(',', StringSplitOptions.TrimEntries);
 
-                if(colorValues.Length != 3)
+                if (colorValues.Length != 3)
                 {
                     throw new InvalidOperationException("EmebedColor is not valid");
                 }
@@ -105,8 +106,8 @@ namespace DiscordBot.Services
                     }
                     ColorHelper.DefaultColor = new Discord.Color(iColorValues[0], iColorValues[1], iColorValues[2]);
                     _logger.LogDebug("Using Color({r},{g},{b})", iColorValues[0], iColorValues[1], iColorValues[2]);
-                } 
-                catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Exception while parsing EmbedColor. Using 33, 176, 252");
                     ColorHelper.DefaultColor = new Discord.Color(33, 176, 252);

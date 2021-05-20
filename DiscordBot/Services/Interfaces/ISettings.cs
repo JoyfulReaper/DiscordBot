@@ -23,12 +23,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
+using DiscordBot.DataAccess;
 
-namespace DiscordBot.Models
+namespace DiscordBot.Services
 {
-    public abstract class DatabaseEntity
+    public interface ISettings
     {
-        public ulong Id { get; set; }
+        string ConnectionString { get; }
+        DatabaseType DatabaseType { get; }
+        string DefaultPrefix { get; }
+        string OwnerDiscriminator { get; }
+        string OwnerName { get; }
+        string WelcomeMessage { get; }
     }
 }

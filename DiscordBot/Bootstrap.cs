@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.DataAccess;
@@ -85,7 +86,8 @@ namespace DiscordBot
             {
                 LogLevel = LogSeverity.Verbose,
                 MessageCacheSize = 1000,
-                AlwaysDownloadUsers = true
+                AlwaysDownloadUsers = true,
+                ExclusiveBulkDelete = true,
             });
 
             var serviceCollection = new ServiceCollection();
@@ -97,7 +99,10 @@ namespace DiscordBot
                     x.SelfDeaf = true;
                     x.LogSeverity = LogSeverity.Info;
                     x.Authorization = "notarealpassword";
+                    x.LogSeverity = LogSeverity.Verbose;
+                    x.UserAgent = "DiscordBot by Joyful";
                 })
+                .AddSingleton<InteractiveService>()
                 .AddSingleton<IServerRepository, ServerRepository>()
                 .AddSingleton(config)
                 .AddSingleton<LoggingService>()
@@ -105,11 +110,11 @@ namespace DiscordBot
                 .AddSingleton<IChatService, DiscordService>()
                 .AddSingleton(commandService)
                 .AddSingleton<CommandHandler>()
-                .AddSingleton<Settings>()
+                .AddSingleton<ISettings, Settings>()
                 .AddSingleton<IServerService, ServerService>()
                 .AddSingleton<ImageService>()
-                .AddSingleton<RankService>()
-                .AddSingleton<AutoRoleService>()
+                .AddSingleton<IRankService, RankService>()
+                .AddSingleton<IAutoRoleService, AutoRoleService>()
                 .AddSingleton<IRankRepository, RankRepository>()
                 .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
                 .AddSingleton<ISubredditRepository, SubredditRepository>()

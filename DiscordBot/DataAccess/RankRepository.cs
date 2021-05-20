@@ -34,10 +34,10 @@ namespace DiscordBot.DataAccess
 {
     class RankRepository : Repository<Rank>, IRankRepository
     {
-        private readonly Settings _settings;
+        private readonly ISettings _settings;
         private readonly ILogger<RankRepository> _logger;
 
-        public RankRepository(Settings settings,
+        public RankRepository(ISettings settings,
         ILogger<RankRepository> logger) : base(settings, logger)
         {
             _settings = settings;
