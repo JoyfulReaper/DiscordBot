@@ -93,6 +93,11 @@ namespace DiscordBot.Services
                 }
             }
 
+            if(message.Exception != null)
+            {
+                _logger.LogDebug(message.Exception, "Exception:");
+            }
+
             return Task.CompletedTask;
         }
     }
