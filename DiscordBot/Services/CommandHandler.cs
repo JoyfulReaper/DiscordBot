@@ -94,7 +94,7 @@ namespace DiscordBot.Services
         private async Task OnUserJoined(SocketGuildUser userJoining)
         {
             await AssignAutoRoles(userJoining);
-            await ShowWelcomeMessage(userJoining);
+            Task.Run(async () => await ShowWelcomeMessage(userJoining));
         }
 
         private async Task AssignAutoRoles(SocketGuildUser userJoining)
@@ -126,10 +126,24 @@ namespace DiscordBot.Services
             if (showMessage)
             {
                 _logger.LogInformation("Showing welcome message for {user} in {server}", userJoining.Username, userJoining.Guild.Name);
-                await userJoining.Guild.DefaultChannel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
 
-                var channel = userJoining.Guild.DefaultChannel as ISocketMessageChannel;
-                var memoryStream = await _images.CreateImage(userJoining);
+                var channelId = await _servers.GetWelcome(userJoining.Guild.Id);
+                if(channelId == 0)
+                {
+                    return;
+                }
+
+                ISocketMessageChannel channel = userJoining.Guild.GetTextChannel(channelId);
+                if(channel == null)
+                {
+                    await _servers.ClearWelcome(userJoining.Guild.Id);
+                    return;
+                }
+
+                await channel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
+
+                var background = await _servers.GetBackground(userJoining.Guild.Id);
+                var memoryStream = await _images.CreateImage(userJoining, background);
                 memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
                 await channel.SendFileAsync(memoryStream, $"{userJoining.Username}.png");
             }

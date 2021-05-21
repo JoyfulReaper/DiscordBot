@@ -32,5 +32,7 @@ namespace DiscordBot.Models
         public ulong GuildId { get; set; }
         public string Prefix { get; set; }
         public bool SubredditLearning { get; set; } = false;
+        public ulong WelcomeChannel { get; set; }
+        public string WelcomeBackground { get; set; }
     }
 }

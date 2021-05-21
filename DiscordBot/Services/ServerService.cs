@@ -25,6 +25,8 @@ SOFTWARE.
 
 using DiscordBot.DataAccess;
 using DiscordBot.Models;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Services
@@ -33,12 +35,15 @@ namespace DiscordBot.Services
     {
         private readonly IServerRepository _serverRepository;
         private readonly ISettings _settings;
+        private readonly ILogger<ServerService> _logger;
 
         public ServerService(IServerRepository serverRepository,
-            ISettings settings)
+            ISettings settings,
+            ILogger<ServerService> logger)
         {
             _serverRepository = serverRepository;
             _settings = settings;
+            _logger = logger;
         }
 
         public async Task ModifyGuildPrefix(ulong id, string prefix)
@@ -73,6 +78,94 @@ namespace DiscordBot.Services
             }
 
             return prefix;
+        }
+
+        public async Task ModifyWelcomeChannel(ulong id, ulong channelId)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(id);
+                server = await _serverRepository.GetByServerId(id);
+
+                if (server == null)
+                {
+                    throw new Exception("We tried to add the server but its not there!");
+                }
+
+                server.WelcomeChannel = channelId;
+                await _serverRepository.EditAsync(server);
+            }
+            else
+            {
+                server.WelcomeChannel = channelId;
+                await _serverRepository.EditAsync(server);
+            }
+        }
+
+        public async Task ClearWelcome(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+            if (server == null)
+            {
+                _logger.LogDebug("Tried to clear welcome channel for server not yet in the DB");
+                return;
+            }
+
+            server.WelcomeChannel = 0;
+            await _serverRepository.EditAsync(server);
+        }
+
+        public async Task<ulong> GetWelcome(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            return await Task.FromResult(server.WelcomeChannel);
+        }
+
+        public async Task ModifyWelcomeBackground(ulong id, string url)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(id);
+                server = await _serverRepository.GetByServerId(id);
+
+                if (server == null)
+                {
+                    throw new Exception("We tried to add the server but its not there!");
+                }
+
+                server.WelcomeBackground = url;
+                await _serverRepository.EditAsync(server);
+            }
+            else
+            {
+                server.WelcomeBackground = url;
+                await _serverRepository.EditAsync(server);
+            }
+        }
+
+        public async Task ClearBackground(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+            if (server == null)
+            {
+                _logger.LogDebug("Tried to clear welcome background for server not yet in the DB");
+                return;
+            }
+
+            server.WelcomeBackground = null;
+            await _serverRepository.EditAsync(server);
+        }
+
+        public async Task<string> GetBackground(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            return await Task.FromResult(server.WelcomeBackground);
         }
     }
 }

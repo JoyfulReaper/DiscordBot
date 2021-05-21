@@ -106,5 +106,82 @@ namespace DiscordBot.Commands
             await _servers.ModifyGuildPrefix(Context.Guild.Id, prefix);
             await ReplyAsync($"The prefix has been modified to `{prefix}`.");
         }
+
+        [Command("welcome")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task Welcome(string option = null, string value = null)
+        {
+            if (option == null && value == null)
+            {
+                var welcomeChannelId = await _servers.GetWelcome(Context.Guild.Id);
+                if (welcomeChannelId == 0)
+                {
+                    await ReplyAsync("The welcome channel has not yet been set!");
+                    return;
+                }
+
+                var welcomeChannel = Context.Guild.GetTextChannel(welcomeChannelId);
+                if (welcomeChannel == null)
+                {
+                    await ReplyAsync("The welcome channel has not yet been set!");
+                    await _servers.ClearWelcome(Context.Guild.Id);
+                    return;
+                }
+
+                var welcomeBackground = await _servers.GetBackground(Context.Guild.Id);
+                if (welcomeBackground != null)
+                {
+                    await ReplyAsync($"The welcome channel is {welcomeChannel.Mention}.\nThe background is {welcomeBackground}.");
+                }
+                else
+                {
+                    await ReplyAsync($"The welcome channel is {welcomeChannel.Mention}.\nThe background is not set.");
+                }
+
+                return;
+            }
+
+            if(option.ToLowerInvariant() == "channel" && value != null)
+            {
+                if(!MentionUtils.TryParseChannel(value, out ulong parserId))
+                {
+                    await ReplyAsync("Please pass in a valid channel!");
+                    return;
+                }
+
+                var parsedChannel = Context.Guild.GetTextChannel(parserId);
+                if(parsedChannel == null)
+                {
+                    await ReplyAsync("Please pass in a valid channel!");
+                    return;
+                }
+
+                await _servers.ModifyWelcomeChannel(Context.Guild.Id, parserId);
+                await ReplyAsync($"Successfully modified the welcome channel to {parsedChannel.Mention}");
+                return;
+            }
+
+            if (option.ToLowerInvariant() == "background" && value != null)
+            {
+                if(value == "clear")
+                {
+                    await _servers.ClearBackground(Context.Guild.Id);
+                    await ReplyAsync("Successfully cleared background!");
+                }
+
+                await _servers.ModifyWelcomeBackground(Context.Guild.Id, value);
+                await ReplyAsync($"Successfully modified the background to {value}");
+                return;
+            }
+
+            if(option.ToLowerInvariant() == "clear" && value == null)
+            {
+                await _servers.ClearWelcome(Context.Guild.Id);
+                await ReplyAsync("Successfully cleared the welcome channel!");
+                return;
+            }
+
+            await ReplyAsync("You did not use this command properly!");
+        }
     }
 }
