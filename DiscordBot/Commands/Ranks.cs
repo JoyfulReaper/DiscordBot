@@ -46,7 +46,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("ranks", RunMode = RunMode.Async)]
-        [Summary("show ranks")]
+        [Summary("Show available ranks")]
         public async Task ShowRanks()
         {
             var ranks = await _rankService.GetRanks(Context.Guild);
@@ -68,7 +68,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("addrank", RunMode = RunMode.Async)]
-        [Summary("add a rank")]
+        [Summary("Add a rank")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task AddRank([Remainder] string name)
@@ -127,6 +127,7 @@ namespace DiscordBot.Commands
 
         [Command("rank", RunMode = RunMode.Async)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
+        [Summary("Assign yourself a rank")]
         public async Task Rank([Remainder]string identifier = null)
         {
             await Context.Channel.TriggerTypingAsync();

@@ -128,7 +128,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("ping")]
-        [Summary ("Respongs with Pong!")]
+        [Summary ("Latency to server!")]
         public async Task Ping()
         {
             _logger.LogInformation("{username}#{discriminator} invoked ping", Context.User.Username, Context.User.Discriminator);
