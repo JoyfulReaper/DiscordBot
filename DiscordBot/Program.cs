@@ -47,8 +47,6 @@ using System.Threading.Tasks;
 // TODO: Write a logging helper than can be used with Task.Run and replace all logger calls with
 // this, or look into other solutions.
 
-// TODO Implement Embed color from appsettings.json
-
 namespace DiscordBot
 {
     class Program
@@ -80,12 +78,12 @@ namespace DiscordBot
 
                     // Start the DiscordBot
                     logger.Information("Starting chatService");
-
                     await Task.Run(chatService.Start, cts.Token);
                 }
                 catch (OperationCanceledException)
                 {
                     // I don't think this will ever hit, I think I'm doing this wrong.
+                    // TODO: Look into cancellation tokens more
                     logger.Warning("Cancelation was Requested");
                     Console.WriteLine("Cancelation was requested");
 
@@ -121,6 +119,7 @@ namespace DiscordBot
             while(true)
             {
                 // If the "Q" key is pressed quit the bot!
+                Console.WriteLine("Press 'Q' to quit!");
                 var key = Console.ReadKey(true).KeyChar;
 
                 if (char.ToLowerInvariant(key) == 'q')
@@ -131,6 +130,10 @@ namespace DiscordBot
             ExitCleanly();
         }
 
+        /// <summary>
+        /// Attempt to kill the bot cleanly.
+        /// </summary>
+        /// <param name="exitCode">Exit code to pass to the OS</param>
         public static void ExitCleanly(int exitCode = 0)
         {
             Console.WriteLine("Quiting!");

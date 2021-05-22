@@ -25,6 +25,8 @@ SOFTWARE.
 
 using DiscordBot.DataAccess;
 using DiscordBot.Models;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Services
@@ -33,14 +35,23 @@ namespace DiscordBot.Services
     {
         private readonly IServerRepository _serverRepository;
         private readonly ISettings _settings;
+        private readonly ILogger<ServerService> _logger;
 
         public ServerService(IServerRepository serverRepository,
-            ISettings settings)
+            ISettings settings,
+            ILogger<ServerService> logger)
         {
             _serverRepository = serverRepository;
             _settings = settings;
+            _logger = logger;
         }
 
+        /// <summary>
+        /// Modify the prefix the bot responds to
+        /// </summary>
+        /// <param name="id">The server/guild id</param>
+        /// <param name="prefix">The prefix to use</param>
+        /// <returns></returns>
         public async Task ModifyGuildPrefix(ulong id, string prefix)
         {
             var server = await _serverRepository.GetByServerId(id);
@@ -56,6 +67,11 @@ namespace DiscordBot.Services
             }
         }
 
+        /// <summary>
+        /// Get the prefix the bot responds to for the given guild
+        /// </summary>
+        /// <param name="id">The id of the server/guild</param>
+        /// <returns>The prefix the bot will respond to</returns>
         public async Task<string> GetGuildPrefix(ulong id)
         {
             string prefix;
@@ -73,6 +89,126 @@ namespace DiscordBot.Services
             }
 
             return prefix;
+        }
+
+        /// <summary>
+        /// Modify the channel to send welcome messages to
+        /// </summary>
+        /// <param name="id">The id of the server/guild</param>
+        /// <param name="channelId">The id of the welcome channel</param>
+        /// <returns></returns>
+        public async Task ModifyWelcomeChannel(ulong id, ulong channelId)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(id);
+                server = await _serverRepository.GetByServerId(id);
+
+                if (server == null)
+                {
+                    throw new Exception("We tried to add the server but its not there!");
+                }
+
+                server.WelcomeChannel = channelId;
+                await _serverRepository.EditAsync(server);
+            }
+            else
+            {
+                server.WelcomeChannel = channelId;
+                await _serverRepository.EditAsync(server);
+            }
+        }
+
+        /// <summary>
+        /// Clear the welcome channel
+        /// </summary>
+        /// <param name="id">The id of the server/guild to clear the welcome channel for</param>
+        /// <returns></returns>
+        public async Task ClearWelcome(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+            if (server == null)
+            {
+                _logger.LogDebug("Tried to clear welcome channel for server not yet in the DB");
+                return;
+            }
+
+            server.WelcomeChannel = 0;
+            await _serverRepository.EditAsync(server);
+        }
+
+        /// <summary>
+        /// Get the welcome channel for a server
+        /// </summary>
+        /// <param name="id">The id of the server/guild</param>
+        /// <returns>The id of the welcome channel</returns>
+        public async Task<ulong> GetWelcome(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            return await Task.FromResult(server.WelcomeChannel);
+        }
+
+        /// <summary>
+        /// Modify the background image for the welcome banner
+        /// </summary>
+        /// <param name="id">The is of the server/guild</param>
+        /// <param name="url">The url of the background image</param>
+        /// <returns></returns>
+        public async Task ModifyWelcomeBackground(ulong id, string url)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(id);
+                server = await _serverRepository.GetByServerId(id);
+
+                if (server == null)
+                {
+                    throw new Exception("We tried to add the server but its not there!");
+                }
+
+                server.WelcomeBackground = url;
+                await _serverRepository.EditAsync(server);
+            }
+            else
+            {
+                server.WelcomeBackground = url;
+                await _serverRepository.EditAsync(server);
+            }
+        }
+
+        /// <summary>
+        /// Clear the background image for the welcome banner
+        /// </summary>
+        /// <param name="id">The id of the server/guild</param>
+        /// <returns></returns>
+        public async Task ClearBackground(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+            if (server == null)
+            {
+                _logger.LogDebug("Tried to clear welcome background for server not yet in the DB");
+                return;
+            }
+
+            server.WelcomeBackground = null;
+            await _serverRepository.EditAsync(server);
+        }
+
+        /// <summary>
+        /// Get the background image for the welcome banner
+        /// </summary>
+        /// <param name="id">Id of the server/guild</param>
+        /// <returns>URL of the background image</returns>
+        public async Task<string> GetBackground(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            return await Task.FromResult(server.WelcomeBackground);
         }
     }
 }

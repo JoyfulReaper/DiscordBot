@@ -29,6 +29,9 @@ namespace DiscordBot.Models
 {
     public class Subreddit : DatabaseEntity
     {
+        /// <summary>
+        /// Name of the subreddit /r/Name
+        /// </summary>
         public string Name { get; set; }
     }
 }

@@ -45,16 +45,19 @@ namespace DiscordBot.Commands
         private readonly DiscordSocketClient _client;
         private readonly ISettings _settings;
         private readonly ImageService _images;
+        private readonly IServerService _servers;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
             ISettings settings,
-            ImageService images)
+            ImageService images,
+            IServerService servers)
         {
             _logger = logger;
             _client = client;
             _settings = settings;
             _images = images;
+            _servers = servers;
         }
 
         [Command("math")]
@@ -79,7 +82,7 @@ namespace DiscordBot.Commands
             {
                 await ReplyAsync("Syntax error");
             }
-            await Task.Delay(1500);
+            await Task.Delay(2500);
             await message.DeleteAsync();
         }
 
@@ -191,6 +194,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("image", RunMode = RunMode.Async)]
+        [Summary("Show the image banner thing")]
         public async Task Image(SocketGuildUser user = null)
         {
             if(user == null)
@@ -198,10 +202,11 @@ namespace DiscordBot.Commands
                 user = Context.Message.Author as SocketGuildUser;
             }
 
-            var memoryStream = await _images.CreateImage(user);
+            var background = await _servers.GetBackground(user.Guild.Id);
+
+            var memoryStream = await _images.CreateImage(user, background);
             memoryStream.Seek(0, SeekOrigin.Begin);
             await Context.Channel.SendFileAsync(memoryStream, $"{user.Username}.png");
-            //File.Delete(path);
         }
     }
 }
