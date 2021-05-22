@@ -26,21 +26,16 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Text;
+using DiscordBot.Helpers;
 
 namespace DiscordBot.Services
 {
     public class CommandHandler
     {
-        public static List<Mute> Mutes { private set; get; } = new List<Mute>();
-
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly ISettings _settings;
@@ -77,63 +72,7 @@ namespace DiscordBot.Services
 
             _commands.CommandExecuted += OnCommandExecuted;
 
-            Task.Run(async () => await MuteHandler());
-        }
-
-        private async Task MuteHandler()
-        {
-            List<Mute> remove = new List<Mute>();
-
-            foreach(var mute in Mutes)
-            {
-                if(DateTime.Now < mute.End)
-                {
-                    continue;
-                }
-
-                var guild = _client.GetGuild(mute.Guild.Id);
-
-                if (guild.GetRole(mute.Role.Id) == null)
-                {
-                    remove.Add(mute);
-                    continue;
-                }
-
-                var role = guild.GetRole(mute.Role.Id);
-
-                if(guild.GetUser(mute.User.Id) == null)
-                {
-                    remove.Add(mute);
-                    continue;
-                }
-
-                var user = guild.GetUser(mute.User.Id);
-
-                if(role.Position > guild.CurrentUser.Hierarchy)
-                {
-                    remove.Add(mute);
-                    continue;
-                }
-
-                await user.RemoveRoleAsync(mute.Role);
-                remove.Add(mute);
-            }
-
-            if (remove.Count > 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                foreach(var user in remove)
-                {
-                    sb.Append(user.User.Username);
-                    sb.Append(" ");
-                }
-                _logger.LogDebug("Unmuted: {unmutedList}", sb.ToString());
-            }
-
-            Mutes = Mutes.Except(remove).ToList();
-
-            await Task.Delay(TimeSpan.FromMinutes(1));
-            await MuteHandler();
+            Task.Run(async () => await MuteHandler.MuteWorker(client));
         }
 
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
@@ -157,21 +96,8 @@ namespace DiscordBot.Services
 
         private async Task OnUserJoined(SocketGuildUser userJoining)
         {
-            await AssignAutoRoles(userJoining);
+            await AutoRoleHelper.AssignAutoRoles(_autoRoleService, userJoining);
             Task.Run(async () => await ShowWelcomeMessage(userJoining));
-        }
-
-        private async Task AssignAutoRoles(SocketGuildUser userJoining)
-        {
-            var roles = await _autoRoleService.GetAutoRoles(userJoining.Guild);
-            if (roles.Count < 1)
-            {
-                _logger.LogInformation("No auto roles to assign to {user} in {server}", userJoining.Username, userJoining.Guild.Name);
-                return;
-            }
-
-            _logger.LogInformation("Assigning auto roles to {user}", userJoining.Username);
-            await userJoining.AddRolesAsync(roles);
         }
 
         private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
@@ -223,6 +149,8 @@ namespace DiscordBot.Services
                 return;
             }
 
+            CheckForServerInvites(message);
+
             var prefix = await _servers.GetGuildPrefix((message.Channel as SocketGuildChannel).Guild.Id);
 
             var context = new SocketCommandContext(_client, message);
@@ -240,6 +168,21 @@ namespace DiscordBot.Services
                 }
 
                await _commands.ExecuteAsync(context, position, _serviceProvider);
+            }
+        }
+
+        private async Task CheckForServerInvites(SocketUserMessage message)
+        {
+            // TODO make this a setting per server
+            if(message.Content.Contains("https://discord.gg/"))
+            {
+                if((message.Channel as SocketGuildChannel).Guild.GetUser(message.Author.Id).GuildPermissions.Administrator)
+                {
+                    return;
+                }
+
+                await message.DeleteAsync();
+                await message.Channel.SendMessageAsync($"{message.Author.Mention} You cannot send Discord Invite links!");
             }
         }
 

@@ -23,17 +23,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
 using Discord.WebSocket;
-using System;
+using DiscordBot.Services;
+using Serilog;
+using System.Threading.Tasks;
 
-namespace DiscordBot.Models
+namespace DiscordBot.Helpers
 {
-    public class Mute
+    public static class AutoRoleHelper
     {
-        public SocketGuild Guild { get; set; }
-        public SocketGuildUser User { get; set; }
-        public IRole Role { get; set; }
-        public DateTime End { get; set; }
+        internal static async Task AssignAutoRoles(IAutoRoleService autoRoleService, SocketGuildUser userJoining)
+        {
+            var roles = await autoRoleService.GetAutoRoles(userJoining.Guild);
+            if (roles.Count < 1)
+            {
+                Log.Information("AutoRoleHelper: No auto roles to assign to {user} in {server}", userJoining.Username, userJoining.Guild.Name);
+                return;
+            }
+
+            Log.Information("AutoRoleHelper: Assigning auto roles to {user}", userJoining.Username);
+            await userJoining.AddRolesAsync(roles);
+        }
     }
 }

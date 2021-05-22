@@ -150,7 +150,7 @@ namespace DiscordBot.Commands
         [Summary("mute a user")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Mute(SocketGuildUser user, int minutes, [Remainder]string reason = null)
+        public async Task Mute(SocketGuildUser user, int minutes=5, [Remainder]string reason = null)
         {
             if(user.Hierarchy > Context.Guild.CurrentUser.Hierarchy)
             {
@@ -188,7 +188,7 @@ namespace DiscordBot.Commands
                 }
             }
 
-            CommandHandler.Mutes.Add(new Mute { Guild = Context.Guild, User = user, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
+            MuteHandler.AddMute(new Mute { Guild = Context.Guild, User = user, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
             await user.AddRoleAsync(role);
             await Context.Channel.SendEmbedAsync($"Muted {user.Username}", $"Duration: {minutes} minutes\nReason: {reason ?? "None"}",
                 "https://image.freepik.com/free-vector/no-loud-sound-mute-icon_101884-1079.jpg");
@@ -224,6 +224,16 @@ namespace DiscordBot.Commands
             await user.RemoveRoleAsync(role);
             await Context.Channel.SendEmbedAsync($"Unmuted {user.Username}", "Succesfully unmuted the user",
                 "https://imgaz2.staticbg.com/thumb/large/oaupload/ser1/banggood/images/21/07/9474ae00-56ad-43ba-9bf1-97c7e80d34ee.jpg.webp");
+        }
+
+        [Command("slowmode")]
+        [RequireUserPermission(GuildPermission.ManageChannels)]
+        [RequireBotPermission(GuildPermission.ManageChannels)]
+        public async Task SlowMode(int interval = 0)
+        {
+            await Context.Channel.TriggerTypingAsync();
+            await (Context.Channel as SocketTextChannel).ModifyAsync(x => x.SlowModeInterval = interval);
+            await ReplyAsync($"The slowmode interval was adjusted to {interval} seconds.");
         }
 
         private async void SetWelcomeBannerBackgroundInformation(string value)
