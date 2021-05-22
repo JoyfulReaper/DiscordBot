@@ -47,7 +47,7 @@ namespace DiscordBot.Commands
         [Command("autoroles", RunMode = RunMode.Async)]
         [Summary("show autoroles")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task ShowRanks()
+        public async Task ShowAutoRoles()
         {
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
             if(autoRoles.Count == 0)
@@ -71,7 +71,7 @@ namespace DiscordBot.Commands
         [Summary("add an autorole")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task AddRank([Remainder] string name)
+        public async Task AddAutoRole([Remainder] string name)
         {
             await Context.Channel.TriggerTypingAsync();
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
@@ -103,7 +103,7 @@ namespace DiscordBot.Commands
         [Summary("Delete an autorole")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task DelRank([Remainder] string name)
+        public async Task DelAutoRole([Remainder] string name)
         {
             await Context.Channel.TriggerTypingAsync();
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
@@ -123,6 +123,28 @@ namespace DiscordBot.Commands
 
             await _autoRoleService.RemoveAutoRole(Context.Guild.Id, role.Id);
             await ReplyAsync($"The autorole {role.Mention} has been removed from the autoroles!");
+        }
+
+        [Command("runautoroles", RunMode = RunMode.Async)]
+        [Summary("Assign auto roles to all users")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireBotPermission(GuildPermission.ManageRoles)]
+        public async Task RunAutoRoles()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
+            if(autoRoles.Count == 0)
+            {
+                await ReplyAsync("No auto roles exists!");
+            }
+
+            foreach (var user in Context.Guild.Users)
+            {
+                await user.AddRolesAsync(autoRoles);
+            }
+
+            await ReplyAsync("AutoRoles have been added!");
         }
     }
 }

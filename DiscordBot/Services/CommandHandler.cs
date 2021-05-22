@@ -96,21 +96,8 @@ namespace DiscordBot.Services
 
         private async Task OnUserJoined(SocketGuildUser userJoining)
         {
-            await AssignAutoRoles(userJoining);
+            await AutoRoleHelper.AssignAutoRoles(_autoRoleService, userJoining);
             Task.Run(async () => await ShowWelcomeMessage(userJoining));
-        }
-
-        private async Task AssignAutoRoles(SocketGuildUser userJoining)
-        {
-            var roles = await _autoRoleService.GetAutoRoles(userJoining.Guild);
-            if (roles.Count < 1)
-            {
-                _logger.LogInformation("No auto roles to assign to {user} in {server}", userJoining.Username, userJoining.Guild.Name);
-                return;
-            }
-
-            _logger.LogInformation("Assigning auto roles to {user}", userJoining.Username);
-            await userJoining.AddRolesAsync(roles);
         }
 
         private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
