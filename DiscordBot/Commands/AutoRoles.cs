@@ -131,6 +131,7 @@ namespace DiscordBot.Commands
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task RunAutoRoles()
         {
+            await ReplyAsync("Please wait, this will hit API rate limiting...");
             await Context.Channel.TriggerTypingAsync();
 
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
