@@ -177,7 +177,7 @@ namespace DiscordBot.Commands
             }
 
             await player.ResumeAsync();
-            await ReplyAsync("Music is paused!");
+            await ReplyAsync("Music has resumed!");
         }
 
         private async Task<bool> CheckForValidState(IVoiceState voiceState)
