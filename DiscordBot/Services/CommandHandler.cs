@@ -149,7 +149,7 @@ namespace DiscordBot.Services
                 return;
             }
 
-            CheckForServerInvites(message);
+            // await CheckForServerInvites(message);
 
             var prefix = await _servers.GetGuildPrefix((message.Channel as SocketGuildChannel).Guild.Id);
 
