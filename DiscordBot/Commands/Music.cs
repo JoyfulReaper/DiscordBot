@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
@@ -16,6 +17,27 @@ namespace DiscordBot.Commands
             _lavaNode = lavaNode;
         }
 
+        [Command("search")]
+        [Summary("search youtube")]
+        public async Task Search([Remainder]string query)
+        {
+            var searchResponse = await _lavaNode.SearchYouTubeAsync(query);
+            if (searchResponse.LoadStatus == LoadStatus.LoadFailed ||
+                searchResponse.LoadStatus == LoadStatus.NoMatches)
+            {
+                await ReplyAsync($"I wasn't able to find anything for `{query}`.");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach(var track in searchResponse.Tracks)
+            {
+                sb.AppendLine($"{track.Author} - {track.Title} ({track.Duration})");
+            }
+
+            await ReplyAsync(sb.ToString());
+        }
+
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song from YouTube")]
         public async Task PlayAsync([Remainder] string query)
@@ -29,7 +51,8 @@ namespace DiscordBot.Commands
             if (!_lavaNode.HasPlayer(Context.Guild))
             {
                 await ReplyAsync("I'm not connected to a voice channel.");
-                return;
+                await ReplyAsync("Joining you ;-)");
+                await JoinAsync();
             }
 
             //var searchResponse = await _lavaNode.SearchAsync(query);
