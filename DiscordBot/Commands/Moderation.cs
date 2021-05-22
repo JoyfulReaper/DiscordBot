@@ -150,7 +150,7 @@ namespace DiscordBot.Commands
         [Summary("mute a user")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Mute(SocketGuildUser user, int minutes, [Remainder]string reason = null)
+        public async Task Mute(SocketGuildUser user, int minutes=5, [Remainder]string reason = null)
         {
             if(user.Hierarchy > Context.Guild.CurrentUser.Hierarchy)
             {
@@ -188,7 +188,7 @@ namespace DiscordBot.Commands
                 }
             }
 
-            CommandHandler.Mutes.Add(new Mute { Guild = Context.Guild, User = user, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
+            MuteHandler.AddMute(new Mute { Guild = Context.Guild, User = user, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
             await user.AddRoleAsync(role);
             await Context.Channel.SendEmbedAsync($"Muted {user.Username}", $"Duration: {minutes} minutes\nReason: {reason ?? "None"}",
                 "https://image.freepik.com/free-vector/no-loud-sound-mute-icon_101884-1079.jpg");

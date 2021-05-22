@@ -26,21 +26,16 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Text;
+using DiscordBot.Helpers;
 
 namespace DiscordBot.Services
 {
     public class CommandHandler
     {
-        public static List<Mute> Mutes { private set; get; } = new List<Mute>();
-
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly ISettings _settings;
@@ -77,63 +72,7 @@ namespace DiscordBot.Services
 
             _commands.CommandExecuted += OnCommandExecuted;
 
-            Task.Run(async () => await MuteHandler());
-        }
-
-        private async Task MuteHandler()
-        {
-            List<Mute> remove = new List<Mute>();
-
-            foreach(var mute in Mutes)
-            {
-                if(DateTime.Now < mute.End)
-                {
-                    continue;
-                }
-
-                var guild = _client.GetGuild(mute.Guild.Id);
-
-                if (guild.GetRole(mute.Role.Id) == null)
-                {
-                    remove.Add(mute);
-                    continue;
-                }
-
-                var role = guild.GetRole(mute.Role.Id);
-
-                if(guild.GetUser(mute.User.Id) == null)
-                {
-                    remove.Add(mute);
-                    continue;
-                }
-
-                var user = guild.GetUser(mute.User.Id);
-
-                if(role.Position > guild.CurrentUser.Hierarchy)
-                {
-                    remove.Add(mute);
-                    continue;
-                }
-
-                await user.RemoveRoleAsync(mute.Role);
-                remove.Add(mute);
-            }
-
-            if (remove.Count > 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                foreach(var user in remove)
-                {
-                    sb.Append(user.User.Username);
-                    sb.Append(" ");
-                }
-                _logger.LogDebug("Unmuted: {unmutedList}", sb.ToString());
-            }
-
-            Mutes = Mutes.Except(remove).ToList();
-
-            await Task.Delay(TimeSpan.FromMinutes(1));
-            await MuteHandler();
+            Task.Run(async () => await MuteHandler.MuteWorker(client));
         }
 
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
