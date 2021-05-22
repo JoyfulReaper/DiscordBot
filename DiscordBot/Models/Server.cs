@@ -29,10 +29,25 @@ namespace DiscordBot.Models
 {
     public class Server : DatabaseEntity
     {
+        /// <summary>
+        /// Id of the Discord server/Guild
+        /// </summary>
         public ulong GuildId { get; set; }
+        /// <summary>
+        /// Prefix the bot will respond to in the server/guild
+        /// </summary>
         public string Prefix { get; set; }
+        /// <summary>
+        /// Enable or disable learning subreddits
+        /// </summary>
         public bool SubredditLearning { get; set; } = false;
+        /// <summary>
+        /// Channel to send welcome messages to
+        /// </summary>
         public ulong WelcomeChannel { get; set; }
+        /// <summary>
+        /// The background image to use for the welcome banner image
+        /// </summary>
         public string WelcomeBackground { get; set; }
     }
 }

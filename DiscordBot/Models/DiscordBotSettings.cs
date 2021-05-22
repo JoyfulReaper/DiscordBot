@@ -29,7 +29,13 @@ namespace DiscordBot.Models
 {
     public class DiscordBotSettings : DatabaseEntity
     {
+        /// <summary>
+        /// The bot's token
+        /// </summary>
         public string Token { get; set; }
+        /// <summary>
+        /// The game the bot is playing
+        /// </summary>
         public string Game { get; set; }
     }
 }

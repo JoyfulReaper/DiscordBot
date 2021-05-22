@@ -29,6 +29,7 @@ namespace DiscordBot.Models
 {
     public abstract class DatabaseEntity
     {
+        // Id of the row in the database
         public ulong Id { get; set; }
     }
 }
