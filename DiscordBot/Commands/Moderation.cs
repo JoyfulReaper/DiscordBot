@@ -105,9 +105,13 @@ namespace DiscordBot.Commands
 
             await _servers.ModifyGuildPrefix(Context.Guild.Id, prefix);
             await ReplyAsync($"The prefix has been modified to `{prefix}`.");
+
+            _logger.LogInformation("{user}#{discriminator} changed the prefix for {server} to {prefix}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild.Name, prefix);
         }
 
         [Command("welcome")]
+        [Summary("Change user welcoming settings")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Welcome(string option = null, string value = null)
         {
