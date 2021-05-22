@@ -82,7 +82,7 @@ namespace DiscordBot.Commands
             {
                 await ReplyAsync("Syntax error");
             }
-            await Task.Delay(1500);
+            await Task.Delay(2500);
             await message.DeleteAsync();
         }
 
