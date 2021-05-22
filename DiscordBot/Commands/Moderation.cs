@@ -226,6 +226,16 @@ namespace DiscordBot.Commands
                 "https://imgaz2.staticbg.com/thumb/large/oaupload/ser1/banggood/images/21/07/9474ae00-56ad-43ba-9bf1-97c7e80d34ee.jpg.webp");
         }
 
+        [Command("slowmode")]
+        [RequireUserPermission(GuildPermission.ManageChannels)]
+        [RequireBotPermission(GuildPermission.ManageChannels)]
+        public async Task SlowMode(int interval = 0)
+        {
+            await Context.Channel.TriggerTypingAsync();
+            await (Context.Channel as SocketTextChannel).ModifyAsync(x => x.SlowModeInterval = interval);
+            await ReplyAsync($"The slowmode interval was adjusted to {interval} seconds.");
+        }
+
         private async void SetWelcomeBannerBackgroundInformation(string value)
         {
             if (value == "clear")
