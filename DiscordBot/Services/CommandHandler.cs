@@ -149,6 +149,8 @@ namespace DiscordBot.Services
                 return;
             }
 
+            CheckForServerInvites(message);
+
             var prefix = await _servers.GetGuildPrefix((message.Channel as SocketGuildChannel).Guild.Id);
 
             var context = new SocketCommandContext(_client, message);
@@ -166,6 +168,21 @@ namespace DiscordBot.Services
                 }
 
                await _commands.ExecuteAsync(context, position, _serviceProvider);
+            }
+        }
+
+        private async Task CheckForServerInvites(SocketUserMessage message)
+        {
+            // TODO make this a setting per server
+            if(message.Content.Contains("https://discord.gg/"))
+            {
+                if((message.Channel as SocketGuildChannel).Guild.GetUser(message.Author.Id).GuildPermissions.Administrator)
+                {
+                    return;
+                }
+
+                await message.DeleteAsync();
+                await message.Channel.SendMessageAsync($"{message.Author.Mention} You cannot send Discord Invite links!");
             }
         }
 
