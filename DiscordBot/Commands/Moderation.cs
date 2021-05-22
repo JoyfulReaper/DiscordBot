@@ -114,16 +114,19 @@ namespace DiscordBot.Commands
             if (option == null && value == null)
             {
                 SendWelcomeChannelInformation();
+                return;
             }
 
             if(option.ToLowerInvariant() == "channel" && value != null)
             {
                 SetWelcomeChannelInformation(value);
+                return;
             }
 
             if (option.ToLowerInvariant() == "background" && value != null)
             {
                 SetWelcomeBannerBackgroundInformation(value);
+                return;
             }
 
             if(option.ToLowerInvariant() == "clear" && value == null)
@@ -142,11 +145,11 @@ namespace DiscordBot.Commands
             {
                 await _servers.ClearBackground(Context.Guild.Id);
                 await ReplyAsync("Successfully cleared background!");
+                return;
             }
 
             await _servers.ModifyWelcomeBackground(Context.Guild.Id, value);
             await ReplyAsync($"Successfully modified the background to {value}");
-            return;
         }
 
         private async void SetWelcomeChannelInformation(string value)
@@ -166,7 +169,6 @@ namespace DiscordBot.Commands
 
             await _servers.ModifyWelcomeChannel(Context.Guild.Id, parserId);
             await ReplyAsync($"Successfully modified the welcome channel to {parsedChannel.Mention}");
-            return;
         }
 
         private async void SendWelcomeChannelInformation()
@@ -195,8 +197,6 @@ namespace DiscordBot.Commands
             {
                 await ReplyAsync($"The welcome channel is {welcomeChannel.Mention}.\nThe background is not set.");
             }
-
-            return;
         }
     }
 }
