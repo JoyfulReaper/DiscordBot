@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
+    [Name("help!")]
     public class Help : InteractiveBase
     {
         private readonly CommandService _commandService;
