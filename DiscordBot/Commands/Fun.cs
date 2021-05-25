@@ -35,6 +35,7 @@ namespace DiscordBot.Commands
 
         [Command("8ball")]
         [Alias("eightBall")]
+        [Summary("Ask the 8ball a question, get the answer!")]
         public async Task EightBall([Remainder]string question)
         {
             //var eightBallImage = await ImageHelper.SendImageAsync(Context.Channel, _eightBallImages.RandomItem());

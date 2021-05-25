@@ -148,7 +148,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("subredditlearning", RunMode = RunMode.Async)]
-        [Summary("enable or disable learning")]
+        [Summary("Enable or disable learning")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task SubredditLearning(string value = null)
         {

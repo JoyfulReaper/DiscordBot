@@ -149,8 +149,8 @@ namespace DiscordBot.Services
                 return;
             }
 
-            CheckForServerInvites(message);
-
+             await CheckForServerInvites(message);
+            //TODO Fix exception thrown when messaging bot
             var prefix = await _servers.GetGuildPrefix((message.Channel as SocketGuildChannel).Guild.Id);
 
             var context = new SocketCommandContext(_client, message);

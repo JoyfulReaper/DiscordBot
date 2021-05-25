@@ -195,7 +195,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("unmute")]
-        [Summary("mute a user")]
+        [Summary("unmute a user")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
         private async Task Unmute(SocketGuildUser user)
@@ -229,6 +229,7 @@ namespace DiscordBot.Commands
         [Command("slowmode")]
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [RequireBotPermission(GuildPermission.ManageChannels)]
+        [Summary("Enable slowmode")]
         public async Task SlowMode(int interval = 0)
         {
             await Context.Channel.TriggerTypingAsync();

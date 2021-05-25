@@ -45,7 +45,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("autoroles", RunMode = RunMode.Async)]
-        [Summary("show autoroles")]
+        [Summary("Show autoroles")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ShowAutoRoles()
         {
@@ -68,7 +68,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("addautorole", RunMode = RunMode.Async)]
-        [Summary("add an autorole")]
+        [Summary("Add an autorole")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task AddAutoRole([Remainder] string name)
