@@ -26,21 +26,25 @@ SOFTWARE.
 using Discord;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Services
+namespace DiscordBot.Helpers
 {
-    public interface IServerService
+    public static class LoggingChannelExtensions
     {
-        Task ClearBackground(ulong id);
-        Task ClearWelcomeChannel(ulong id);
-        Task<string> GetBackground(ulong id);
-        Task<string> GetGuildPrefix(ulong id);
-        Task<ulong> GetWelcomeChannel(ulong id);
-        Task ModifyGuildPrefix(ulong id, string prefix);
-        Task ModifyWelcomeBackground(ulong id, string url);
-        Task ModifyWelcomeChannel(ulong id, ulong channelId);
-        Task ModifyLoggingChannel(ulong id, ulong channelId);
-        Task ClearLoggingChannel(ulong id);
-        Task<ulong> GetLoggingChannel(ulong id);
-        Task SendLogsAsync(IGuild guild, string title, string description, string loggingThumbnail = null);
+        public static async Task<IMessage> SendLogAsync(this ITextChannel channel, string title, string description, string thumbImage = null)
+        {
+            var embed = new EmbedBuilder()
+                .WithTitle(title)
+                .WithDescription(description)
+                .WithColor(ColorHelper.GetColor())
+                .WithCurrentTimestamp();
+
+            if (thumbImage != null)
+            {
+                embed.WithThumbnailUrl(thumbImage);
+            }
+
+            var message = await channel.SendMessageAsync(embed: embed.Build());
+            return message;
+        }
     }
 }

@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using DiscordBot.DataAccess;
+using DiscordBot.Helpers;
 using DiscordBot.Models;
 using Microsoft.Extensions.Logging;
 using System;
@@ -126,7 +128,7 @@ namespace DiscordBot.Services
         /// </summary>
         /// <param name="id">The id of the server/guild to clear the welcome channel for</param>
         /// <returns></returns>
-        public async Task ClearWelcome(ulong id)
+        public async Task ClearWelcomeChannel(ulong id)
         {
             var server = await _serverRepository.GetByServerId(id);
             if (server == null)
@@ -144,7 +146,7 @@ namespace DiscordBot.Services
         /// </summary>
         /// <param name="id">The id of the server/guild</param>
         /// <returns>The id of the welcome channel</returns>
-        public async Task<ulong> GetWelcome(ulong id)
+        public async Task<ulong> GetWelcomeChannel(ulong id)
         {
             var server = await _serverRepository.GetByServerId(id);
 
@@ -209,6 +211,90 @@ namespace DiscordBot.Services
             var server = await _serverRepository.GetByServerId(id);
 
             return await Task.FromResult(server.WelcomeBackground);
+        }
+
+        /// <summary>
+        /// Modify the logging to send logging messages to
+        /// </summary>
+        /// <param name="id">The id of the server/guild</param>
+        /// <param name="channelId">The id of the logging channel</param>
+        /// <returns></returns>
+        public async Task ModifyLoggingChannel(ulong id, ulong channelId)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(id);
+                server = await _serverRepository.GetByServerId(id);
+
+                if (server == null)
+                {
+                    throw new Exception("We tried to add the server but its not there!");
+                }
+
+                server.LoggingChannel = channelId;
+                await _serverRepository.EditAsync(server);
+            }
+            else
+            {
+                server.LoggingChannel = channelId;
+                await _serverRepository.EditAsync(server);
+            }
+        }
+
+        /// <summary>
+        /// Clear the logging channel
+        /// </summary>
+        /// <param name="id">The id of the server/guild to clear the logging channel for</param>
+        /// <returns></returns>
+        public async Task ClearLoggingChannel(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+            if (server == null)
+            {
+                _logger.LogDebug("Tried to clear welcome channel for server not yet in the DB");
+                return;
+            }
+
+            server.LoggingChannel = 0;
+            await _serverRepository.EditAsync(server);
+        }
+
+        /// <summary>
+        /// Get the logging channel for a server
+        /// </summary>
+        /// <param name="id">The id of the server/guild</param>
+        /// <returns>The id of the logging channel</returns>
+        public async Task<ulong> GetLoggingChannel(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+
+            return await Task.FromResult(server.LoggingChannel);
+        }
+
+        private const string LOGGING_THUMBNAIL = "https://cdn.quotesgram.com/img/87/86/1090166097-captains_log_meme.jpg";
+        public async Task SendLogsAsync(IGuild guild, string title, string description, string thumbnailUrl = null)
+        {
+            if(thumbnailUrl == null)
+            {
+                thumbnailUrl = LOGGING_THUMBNAIL;
+            }
+
+            var channelId = await GetLoggingChannel(guild.Id);
+            if (channelId == 0)
+            {
+                return;
+            }
+
+            var channel = await guild.GetTextChannelAsync(channelId);
+            if (channel == null)
+            {
+                await ClearLoggingChannel(guild.Id);
+                return;
+            }
+
+            await channel.SendLogAsync(title, description, thumbnailUrl);
         }
     }
 }

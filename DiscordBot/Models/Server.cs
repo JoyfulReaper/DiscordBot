@@ -49,5 +49,7 @@ namespace DiscordBot.Models
         /// The background image to use for the welcome banner image
         /// </summary>
         public string WelcomeBackground { get; set; }
+
+        public ulong LoggingChannel { get; set; }
     }
 }

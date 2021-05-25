@@ -117,7 +117,7 @@ namespace DiscordBot.Services
             {
                 _logger.LogInformation("Showing welcome message for {user} in {server}", userJoining.Username, userJoining.Guild.Name);
 
-                var channelId = await _servers.GetWelcome(userJoining.Guild.Id);
+                var channelId = await _servers.GetWelcomeChannel(userJoining.Guild.Id);
                 if(channelId == 0)
                 {
                     return;
@@ -126,7 +126,7 @@ namespace DiscordBot.Services
                 ISocketMessageChannel channel = userJoining.Guild.GetTextChannel(channelId);
                 if(channel == null)
                 {
-                    await _servers.ClearWelcome(userJoining.Guild.Id);
+                    await _servers.ClearWelcomeChannel(userJoining.Guild.Id);
                     return;
                 }
 
