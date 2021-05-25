@@ -68,6 +68,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("quit")]
+        [RequireOwner]
         [Alias("stop")]
         [Summary("Make the bot quit!")]
         public async Task Quit(string imageUrl = null)
@@ -88,6 +89,7 @@ namespace DiscordBot.Commands
 
                 if(imageUrl != null)
                 {
+                    // Delete the quit command so the image isn't shown twice
                     await Context.Message.DeleteAsync();
                 }
 
@@ -112,6 +114,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("game")]
+        [RequireOwner]
         [Summary("Set the same the bot is playing")]
         public async Task SetGame([Remainder]string game)
         {
