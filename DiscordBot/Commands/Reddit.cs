@@ -37,6 +37,7 @@ using Microsoft.Extensions.Configuration;
 using DiscordBot.DataAccess;
 using DiscordBot.Models;
 using System.Linq;
+using DiscordBot.Attributes;
 
 namespace DiscordBot.Commands
 {
@@ -90,7 +91,6 @@ namespace DiscordBot.Commands
 
             if(!await AddSubRedditIfNotKnownAndLearningEnabled(subreddits, subreddit))
             {
-                await ReplyAsync("Subreddit is not known and learning is disabled for this server.");
                 return;
             }
 
@@ -128,6 +128,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("subredditremove", RunMode = RunMode.Async)]
+        [RequireRole("redditor")]
         [Summary("Remove a subreddit")]
         public async Task RemoveSubreddit([Summary("The subreddit to remove")]string subredditParam)
         {
@@ -239,6 +240,13 @@ namespace DiscordBot.Commands
                 var server = await _serverRepository.GetByServerId(Context.Guild.Id);
                 if (!server.SubredditLearning)
                 {
+                    await Context.Channel.SendMessageAsync("Subreddit is not known and learning is disabled for this server.");
+                    return false;
+                }
+                // TODO Make the role customizable
+                if(!RoleHelper.CheckForRole(Context.User as SocketGuildUser, "redditor"))
+                {
+                    await Context.Channel.SendMessageAsync("You must have the redditor role to add subreddits.");
                     return false;
                 }
 
