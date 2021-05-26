@@ -173,12 +173,16 @@ namespace DiscordBot.Commands
             if (value.ToLowerInvariant() == "on")
             {
                 server.SubredditLearning = true;
-                await ReplyAsync("Subreddit learning enabled");
+                //await ReplyAsync("Subreddit learning enabled");
+                await Context.Channel.SendEmbedAsync("Subreddit Learning", "Subreddit learning enabled", await _servers.GetEmbedColor(Context.Guild.Id));
+                await _servers.SendLogsAsync(Context.Guild, "Subreddit Learning", $"{Context.User.Mention} enabled subreddit learning");
             }
             else if (value.ToLowerInvariant() == "off")
             {
                 server.SubredditLearning = false;
-                await ReplyAsync("Subreddit learning disabled");
+                //await ReplyAsync("Subreddit learning disabled");
+                await Context.Channel.SendEmbedAsync("Subreddit Learning", "Subreddit learning disabled", await _servers.GetEmbedColor(Context.Guild.Id));
+                await _servers.SendLogsAsync(Context.Guild, "Subreddit Learning", $"{Context.User.Mention} disabled subreddit learning");
             }
             else
             {
