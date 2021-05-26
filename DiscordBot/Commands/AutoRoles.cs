@@ -102,7 +102,9 @@ namespace DiscordBot.Commands
 
             await _autoRoleService.AddAutoRole(Context.Guild.Id, role.Id);
             //await ReplyAsync($"The role {role.Mention} had been added to the autoroles!");
-            await Context.Channel.SendEmbedAsync("Auto Role added", "The role {role.Mention} had been added to the autoroles!");
+            await Context.Channel.SendEmbedAsync("Auto Role added", 
+                "The role {role.Mention} had been added to the autoroles!",
+                await _servers.GetEmbedColor(Context.Guild.Id));
             await _servers.SendLogsAsync(Context.Guild, "Auto Role Added", $"{Context.User.Mention} added {role.Mention} to the Auto Roles!");
             _logger.LogInformation("{user} added {role} to the auto roles for {server}",
                 Context.User.Username, role.Name, Context.Guild.Name);

@@ -31,12 +31,14 @@ namespace DiscordBot.Helpers
 {
     public static class EmbedHelper
     {
-        public static async Task<IMessage> SendEmbedAsync(this ISocketMessageChannel channel, string title, string description, string thumbImage = null)
+        // This really sucks with the color thing, makes is super hard to use
+        // TODO fix this color issue somehow.
+        public static async Task<IMessage> SendEmbedAsync(this ISocketMessageChannel channel, string title, string description, Color color, string thumbImage = null)
         {
             var embed = new EmbedBuilder()
                 .WithTitle(title)
                 .WithDescription(description)
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(color)
                 .WithCurrentTimestamp();
 
             if(thumbImage !=null)

@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using DiscordBot.Helpers;
+using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -49,10 +50,13 @@ namespace DiscordBot.Commands
             "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful."
         };
         private readonly ILogger<Fun> _logger;
+        private readonly IServerService _servers;
 
-        public Fun(ILogger<Fun> logger)
+        public Fun(ILogger<Fun> logger,
+            IServerService servers)
         {
             _logger = logger;
+            _servers = servers;
         }
 
         [Command("8ball")]
@@ -66,7 +70,7 @@ namespace DiscordBot.Commands
                 .WithThumbnailUrl(_eightBallImages.RandomItem())
                 .WithDescription($"{Context.User.Username} asked ***{question}***")
                 .AddField("Response", _eightBallResponses.RandomItem())
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
                 .WithCurrentTimestamp();
 
             await ReplyAsync(null, false, builder.Build());

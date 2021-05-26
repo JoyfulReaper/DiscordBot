@@ -14,10 +14,12 @@ namespace DiscordBot.Commands
     public class PaginationDemo : InteractiveBase
     {
         private readonly ISettings _settings;
+        private readonly IServerService _servers;
 
-        public PaginationDemo(ISettings settings)
+        public PaginationDemo(ISettings settings, IServerService servers)
         {
             _settings = settings;
+            _servers = servers;
         }
 
         // DeleteAfterAsync will send a message and asynchronously delete it after the timeout has popped
@@ -72,7 +74,7 @@ namespace DiscordBot.Commands
                     InformationText = "THIS IS A TEST!!",
                     Info = new Emoji("❓")
                 },
-                Color = ColorHelper.GetColor(),
+                Color = await _servers.GetEmbedColor(Context.Guild.Id),
                 Title = "Awesome Paginator"
             };
 

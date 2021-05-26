@@ -1,6 +1,7 @@
 ﻿// https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/dapper-limitations
 
 using Dapper;
+using Discord;
 using System;
 using System.Data;
 
@@ -29,5 +30,21 @@ namespace DiscordBot.DataAccess
     {
         public override TimeSpan Parse(object value)
             => TimeSpan.Parse((string)value);
+    }
+
+    class ColorHandler : SqliteTypeHandler<Color>
+    {
+        public override Color Parse(object value)
+        {
+            var rgb = (value as string).Split(',');
+            try
+            {
+                return new Color(byte.Parse(rgb[0]), byte.Parse(rgb[1]), byte.Parse(rgb[2]));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

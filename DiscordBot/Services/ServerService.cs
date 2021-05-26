@@ -35,6 +35,7 @@ namespace DiscordBot.Services
 {
     public class ServerService : IServerService
     {
+        private readonly Random _random = new();
         private readonly IServerRepository _serverRepository;
         private readonly ISettings _settings;
         private readonly ILogger<ServerService> _logger;
@@ -46,6 +47,49 @@ namespace DiscordBot.Services
             _serverRepository = serverRepository;
             _settings = settings;
             _logger = logger;
+        }
+
+        public async Task<Color> GetEmbedColor(ulong id)
+        {
+            var server = await _serverRepository.GetByServerId(id);
+            if (server.EmbedColor.RawValue == 0)
+            {
+                return new Color(_random.Next(256), _random.Next(256), _random.Next(256));
+            }
+            else
+            {
+                return server.EmbedColor;
+            }
+        }
+
+        public async Task ModifyEmbedColor(ulong id, string color)
+        {
+            var rgb = color.Split(",");
+            if(rgb.Length != 3)
+            {
+                throw new ArgumentException("Color must be in comma seperated RBG format", nameof(color));
+            }
+
+            Color discordColor;
+            try
+            {
+                discordColor = new Color(byte.Parse(rgb[0]), byte.Parse(rgb[1]), byte.Parse(rgb[2]));
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Unable to parse color", nameof(color), e);
+            }
+
+            var server = await _serverRepository.GetByServerId(id);
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(new Server { GuildId = id, EmbedColor = discordColor });
+            }
+            else
+            {
+                server.EmbedColor = discordColor;
+                await _serverRepository.EditAsync(server);
+            }
         }
 
         /// <summary>
@@ -269,6 +313,11 @@ namespace DiscordBot.Services
         public async Task<ulong> GetLoggingChannel(ulong id)
         {
             var server = await _serverRepository.GetByServerId(id);
+            if(server == null)
+            {
+                await _serverRepository.AddAsync(new Server { GuildId = id });
+                return 0;
+            }
 
             return await Task.FromResult(server.LoggingChannel);
         }
@@ -294,7 +343,7 @@ namespace DiscordBot.Services
                 return;
             }
 
-            await channel.SendLogAsync(title, description, thumbnailUrl);
+            await channel.SendLogAsync(title, description, await GetEmbedColor(guild.Id), thumbnailUrl);
         }
     }
 }

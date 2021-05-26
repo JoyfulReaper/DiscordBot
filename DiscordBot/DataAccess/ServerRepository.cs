@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Dapper;
 using DiscordBot.Models;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
@@ -44,18 +45,44 @@ namespace DiscordBot.DataAccess
 
         public async Task<Server> GetByServerId(ulong guildId)
         {
-            return await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE GuildId = @GuildId", new { GuildId = guildId });
+            //var parameters = GetDynamicParameters()
+            var queryResult = await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE GuildId = @GuildId;", new { GuildId = guildId });
+
+            //try
+            //{
+            //    queryResult.EmbedColor
+            //}
+
+            return queryResult;
         }
 
         public async override Task AddAsync(Server entity)
         {
+            var parameters = GetDynamicParameters(entity);
+
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} " +
-                $"(GuildId, Prefix, SubredditLearning, WelcomeChannel, WelcomeBackground, LoggingChannel)" +
-                "VALUES (@GuildId, @Prefix, @SubredditLearning, @WelcomeChannel, @WelcomeBackground, @LoggingChannel); " +
+                $"(GuildId, Prefix, SubredditLearning, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor)" +
+                "VALUES (@GuildId, @Prefix, @SubredditLearning, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor); " +
                 "SELECT last_insert_rowid();",
-                entity);
+                parameters);
 
             entity.Id = queryResult;
+        }
+
+        private DynamicParameters GetDynamicParameters(Server entity)
+        {
+            string color = $"{entity.EmbedColor.R},{entity.EmbedColor.B},{entity.EmbedColor.G}";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@GuildId", entity.GuildId);
+            parameters.Add("@Prefix", entity.Prefix);
+            parameters.Add("@SubredditLearning", entity.SubredditLearning);
+            parameters.Add("@WelcomeChannel", entity.WelcomeChannel);
+            parameters.Add("@WelcomeBackground", entity.WelcomeBackground);
+            parameters.Add("@LoggingChannel", entity.LoggingChannel);
+            parameters.Add("@EmbedColor", color);
+
+            return parameters;
         }
 
         public async Task AddAsync(ulong id)
@@ -71,9 +98,11 @@ namespace DiscordBot.DataAccess
 
         public async override Task EditAsync(Server entity)
         {
+            var parameters = GetDynamicParameters(entity);
+
             await ExecuteAsync($"UPDATE {TableName} " +
-                $"SET Prefix = @Prefix, GuildId = @GuildId, SubredditLearning = @SubredditLearning, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground," +
-                $" LoggingChannel = @LoggingChannel " +
+                $"SET Prefix = @Prefix, GuildId = @GuildId, SubredditLearning = @SubredditLearning, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground, " +
+                $"EmbedColor = @EmbedColor, LoggingChannel = @LoggingChannel " +
                 $"WHERE Id = @Id;",
                 entity);
         }

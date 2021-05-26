@@ -38,6 +38,7 @@ using DiscordBot.DataAccess;
 using DiscordBot.Models;
 using System.Linq;
 using DiscordBot.Attributes;
+using DiscordBot.Services;
 
 namespace DiscordBot.Commands
 {
@@ -47,6 +48,7 @@ namespace DiscordBot.Commands
         private readonly IConfiguration _configuration;
         private readonly ISubredditRepository _subredditRepository;
         private readonly IServerRepository _serverRepository;
+        private readonly IServerService _servers;
         private readonly Random _random = new();
 
         private static readonly List<string> _seedSubreddits = new List<string>() {"funny", "programmerhumor", "memes", "4PanelCringe", "AdviceAnimals",
@@ -61,12 +63,14 @@ namespace DiscordBot.Commands
         public Reddit(ILogger<Reddit> logger, 
             IConfiguration configuration,
             ISubredditRepository subredditRepository,
-            IServerRepository serverRepository)
+            IServerRepository serverRepository,
+            IServerService servers)
         {
             _logger = logger;
             _configuration = configuration;
             _subredditRepository = subredditRepository;
             _serverRepository = serverRepository;
+            _servers = servers;
         }
 
         [Command("reddit", RunMode = RunMode.Async)]
@@ -206,10 +210,11 @@ namespace DiscordBot.Commands
                 builder.WithImageUrl(postUrl);
             }
 
+
             builder
                 .WithDescription($"/r/{subreddit}")
                 .AddField("url:", postUrl.ToString(), true)
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
                 .WithTitle(postTitle.ToString())
                 .WithUrl("https://reddit.com" + post["permalink"].ToString())
                 .WithFooter($"🗨 {post["num_comments"]} ⬆️ {post["ups"]}")

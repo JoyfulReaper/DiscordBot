@@ -80,7 +80,7 @@ namespace DiscordBot.Commands
             await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
 
             var message = await Context.Channel.SendEmbedAsync("Purge Successful", $"{messages.Count()} messages deleted successfuly!",
-                "https://clipground.com/images/bye-clipart-17.jpg");
+                await _servers.GetEmbedColor(Context.Guild.Id), "https://clipground.com/images/bye-clipart-17.jpg");
 
             await Task.Delay(3000);
             await message.DeleteAsync();
@@ -102,7 +102,7 @@ namespace DiscordBot.Commands
             if (prefix == null)
             {
                 await Context.Channel.SendEmbedAsync("Prefix", $"My Prefix is {myPrefix}",
-                    "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
+                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
 
                 return;
             }
@@ -110,14 +110,14 @@ namespace DiscordBot.Commands
             if(prefix.Length > _prefixMaxLength)
             {
                 await Context.Channel.SendEmbedAsync("Invalid Prefix",$"Prefix must be less than {_prefixMaxLength} characters.",
-                    "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
+                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
 
                 return;
             }
 
             await _servers.ModifyGuildPrefix(Context.Guild.Id, prefix);
             await Context.Channel.SendEmbedAsync("Prefix Modified", $"The prefix has been modified to `{prefix}`.",
-                     "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
+                     await _servers.GetEmbedColor(Context.Guild.Id), "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
 
             await _servers.SendLogsAsync(Context.Guild, "Prefix adjusted", $"{Context.User.Mention} modifed the prefix to {prefix}");
 
@@ -177,7 +177,7 @@ namespace DiscordBot.Commands
             if (user.Hierarchy > Context.Guild.CurrentUser.Hierarchy)
             {
                 await Context.Channel.SendEmbedAsync("Invalid User", "That user has a higher position than the bot!",
-                    "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
+                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
                 return;
             }
 
@@ -191,14 +191,14 @@ namespace DiscordBot.Commands
             if(role.Position > Context.Guild.CurrentUser.Hierarchy)
             {
                 await Context.Channel.SendEmbedAsync("Invalid permissions", "the muted role has a higher position than the bot!",
-                "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
+                await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
                 return;
             }
 
             if(user.Roles.Contains(role))
             {
                 await Context.Channel.SendEmbedAsync("Already Muted", "That user is already muted!",
-                    "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
+                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
                 return;
             }
 
@@ -214,7 +214,7 @@ namespace DiscordBot.Commands
             MuteHandler.AddMute(new Mute { Guild = Context.Guild, User = user, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
             await user.AddRoleAsync(role);
             await Context.Channel.SendEmbedAsync($"Muted {user.Username}", $"Duration: {minutes} minutes\nReason: {reason ?? "None"}",
-                "https://image.freepik.com/free-vector/no-loud-sound-mute-icon_101884-1079.jpg");
+                await _servers.GetEmbedColor(Context.Guild.Id), "https://image.freepik.com/free-vector/no-loud-sound-mute-icon_101884-1079.jpg");
 
             await _servers.SendLogsAsync(Context.Guild, "Muted", $"{Context.User.Mention} muted {user.Mention}");
             _logger.LogInformation("{user} muted {target} in {server}", Context.User.Username, user.Username, Context.Guild.Name);
@@ -229,27 +229,27 @@ namespace DiscordBot.Commands
             var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
             if (role == null)
             {
-                await Context.Channel.SendEmbedAsync("Not Muted", "This person has not been muted!");
+                await Context.Channel.SendEmbedAsync("Not Muted", "This person has not been muted!", await _servers.GetEmbedColor(Context.Guild.Id));
                 return;
             }
 
             if (role.Position > Context.Guild.CurrentUser.Hierarchy)
             {
                 await Context.Channel.SendEmbedAsync("Invalid permissions", "the muted role has a higher position than the bot!",
-                "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
+                await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
                 return;
             }
 
             if (!user.Roles.Contains(role))
             {
                 await Context.Channel.SendEmbedAsync("Not Muted", "This person has not been muted!",
-                    "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
+                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
                 return;
             }
 
             await user.RemoveRoleAsync(role);
             await Context.Channel.SendEmbedAsync($"Unmuted {user.Username}", "Succesfully unmuted the user",
-                "https://imgaz2.staticbg.com/thumb/large/oaupload/ser1/banggood/images/21/07/9474ae00-56ad-43ba-9bf1-97c7e80d34ee.jpg.webp");
+                await _servers.GetEmbedColor(Context.Guild.Id), "https://imgaz2.staticbg.com/thumb/large/oaupload/ser1/banggood/images/21/07/9474ae00-56ad-43ba-9bf1-97c7e80d34ee.jpg.webp");
 
             await _servers.SendLogsAsync(Context.Guild, "Un-muted", $"{Context.User.Mention} unmuted {user.Mention}");
             _logger.LogInformation("{user} unmuted {target} in {server}", Context.User.Username, user.Username, Context.Guild.Name);
@@ -263,7 +263,7 @@ namespace DiscordBot.Commands
         {
             await Context.Channel.TriggerTypingAsync();
             await (Context.Channel as SocketTextChannel).ModifyAsync(x => x.SlowModeInterval = interval);
-            await Context.Channel.SendEmbedAsync("Slowmode", $"The slowmode interval was adjusted to {interval} seconds!");
+            await Context.Channel.SendEmbedAsync("Slowmode", $"The slowmode interval was adjusted to {interval} seconds!", await _servers.GetEmbedColor(Context.Guild.Id));
 
             await _servers.SendLogsAsync(Context.Guild, "Slow Mode", $"{Context.User.Mention} set slowmode interval to {interval} for {Context.Channel.Name}");
 
@@ -388,20 +388,31 @@ namespace DiscordBot.Commands
 
         private async void SendLoggingChannelInformation()
         {
-            var welcomeChannelId = await _servers.GetLoggingChannel(Context.Guild.Id);
-            if (welcomeChannelId == 0)
+            var loggingChannelId = await _servers.GetLoggingChannel(Context.Guild.Id);
+            if (loggingChannelId == 0)
             {
                 await ReplyAsync("The logging channel has not yet been set!");
                 return;
             }
 
-            var welcomeChannel = Context.Guild.GetTextChannel(welcomeChannelId);
+            var welcomeChannel = Context.Guild.GetTextChannel(loggingChannelId);
             if (welcomeChannel == null)
             {
                 await ReplyAsync("The logging channel has not yet been set!");
                 await _servers.ClearLoggingChannel(Context.Guild.Id);
                 return;
             }
+        }
+
+        [Command("embedcolor")]
+        [Summary("Change embed colot")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task EmbedColor([Remainder]string color)
+        {
+            await Context.Channel.TriggerTypingAsync();
+            // TODO logging and shit
+            await _servers.ModifyEmbedColor(Context.Guild.Id, color);
+            await ReplyAsync("done");
         }
     }
 }

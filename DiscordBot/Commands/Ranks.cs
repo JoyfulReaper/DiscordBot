@@ -102,7 +102,7 @@ namespace DiscordBot.Commands
 
             await _rankService.AddRank(Context.Guild.Id, role.Id);
             //await ReplyAsync($"The role {role.Mention} had been added to the ranks!");
-            await Context.Channel.SendEmbedAsync("Rank added", "The role {role.Mention} had been added to the ranks!");
+            await Context.Channel.SendEmbedAsync("Rank added", "The role {role.Mention} had been added to the ranks!", await _servers.GetEmbedColor(Context.Guild.Id));
 
             await _servers.SendLogsAsync(Context.Guild, "Rank Added", $"{Context.User.Mention} added {role.Mention} to the ranks!");
             _logger.LogInformation("{user} added {role} to the ranks for {server}",
