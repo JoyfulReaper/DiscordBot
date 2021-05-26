@@ -71,9 +71,10 @@ namespace DiscordBot.DataAccess
 
         private DynamicParameters GetDynamicParameters(Server entity)
         {
-            string color = $"{entity.EmbedColor.R},{entity.EmbedColor.B},{entity.EmbedColor.G}";
+            string color = $"{entity.EmbedColor.R},{entity.EmbedColor.G},{entity.EmbedColor.B}";
 
             var parameters = new DynamicParameters();
+            parameters.Add("@Id", entity.Id);
             parameters.Add("@GuildId", entity.GuildId);
             parameters.Add("@Prefix", entity.Prefix);
             parameters.Add("@SubredditLearning", entity.SubredditLearning);
@@ -104,7 +105,7 @@ namespace DiscordBot.DataAccess
                 $"SET Prefix = @Prefix, GuildId = @GuildId, SubredditLearning = @SubredditLearning, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground, " +
                 $"EmbedColor = @EmbedColor, LoggingChannel = @LoggingChannel " +
                 $"WHERE Id = @Id;",
-                entity);
+                parameters);
         }
     }
 }
