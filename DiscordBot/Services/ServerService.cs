@@ -49,6 +49,17 @@ namespace DiscordBot.Services
             _logger = logger;
         }
 
+        public async Task<bool> UsingRandomEmbedColor(ulong serverId)
+        {
+            var server = await _serverRepository.GetByServerId(serverId);
+            if (server.EmbedColor.RawValue != 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public async Task<Color> GetEmbedColor(ulong id)
         {
             var server = await _serverRepository.GetByServerId(id);

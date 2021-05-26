@@ -405,14 +405,44 @@ namespace DiscordBot.Commands
         }
 
         [Command("embedcolor")]
-        [Summary("Change embed colot")]
+        [Summary("Change embed color")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task EmbedColor([Remainder]string color)
+        public async Task EmbedColor([Summary("Comma seperated RGB value or random")][Remainder] string color = null)
         {
             await Context.Channel.TriggerTypingAsync();
-            // TODO logging and shit
-            await _servers.ModifyEmbedColor(Context.Guild.Id, color);
-            await ReplyAsync("done");
+            var embedColor = await _servers.GetEmbedColor(Context.Guild.Id);
+
+            if (color == null)
+            {
+                string message = string.Empty;
+                if (await _servers.UsingRandomEmbedColor(Context.Guild.Id))
+                {
+                    message = $"The embed color is `random`"; 
+                }
+                else
+                {
+                    message = $"The embed color is `{embedColor.R}, {embedColor.B}, {embedColor.G}`";
+                }
+                await Context.Channel.SendEmbedAsync("Embed Color", message, embedColor);
+                return;
+            }
+
+            if (color.ToLowerInvariant() == "random")
+            {
+                await _servers.ModifyEmbedColor(Context.Guild.Id, "0,0,0");
+            }
+            else if (!ColorHelper.isValidColor(color))
+            {
+                await ReplyAsync("Unable to parse input as a color!");
+                return;
+            }
+            else
+            {
+                await _servers.ModifyEmbedColor(Context.Guild.Id, color);
+            }
+
+            embedColor = await _servers.GetEmbedColor(Context.Guild.Id);
+            await Context.Channel.SendEmbedAsync("Embed Color Set", $"The embed color has been modified to `{color}`", embedColor);
         }
     }
 }

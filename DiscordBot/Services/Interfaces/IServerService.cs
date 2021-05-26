@@ -44,6 +44,6 @@ namespace DiscordBot.Services
         Task SendLogsAsync(IGuild guild, string title, string description, string loggingThumbnail = null);
         Task ModifyEmbedColor(ulong id, string color);
         Task<Color> GetEmbedColor(ulong id);
-
+        Task<bool> UsingRandomEmbedColor(ulong serverId);
     }
 }
