@@ -30,12 +30,12 @@ namespace DiscordBot.Helpers
 {
     public static class LoggingChannelExtensions
     {
-        public static async Task<IMessage> SendLogAsync(this ITextChannel channel, string title, string description, string thumbImage = null)
+        public static async Task<IMessage> SendLogAsync(this ITextChannel channel, string title, string description, Color color, string thumbImage = null)
         {
             var embed = new EmbedBuilder()
                 .WithTitle(title)
                 .WithDescription(description)
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(color)
                 .WithCurrentTimestamp();
 
             if (thumbImage != null)

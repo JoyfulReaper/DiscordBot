@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using System.Collections.Generic;
 
 namespace DiscordBot.Models
@@ -51,5 +52,7 @@ namespace DiscordBot.Models
         public string WelcomeBackground { get; set; }
 
         public ulong LoggingChannel { get; set; }
+
+        public Color EmbedColor { get; set; }
     }
 }

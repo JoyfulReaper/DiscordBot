@@ -69,50 +69,6 @@ namespace DiscordBot.Services
             OwnerDiscriminator = _configuration.GetSection("OwnerDiscriminator").Value ?? "7485";
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
             DefaultPrefix = _configuration.GetSection("DefaultPrefix").Value ?? "!";
-
-            SetEmbedColors();
-        }
-
-        private void SetEmbedColors()
-        {
-            // TODO allow per server embed color settings
-            try
-            {
-                ColorHelper.UseRandomColor = bool.Parse(_configuration.GetSection("RandomEmbedColor").Value);
-                _logger.LogDebug("Using random embed colors: {Value}", ColorHelper.UseRandomColor);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Exception while parsing RandomEmbedColor");
-                ColorHelper.UseRandomColor = false;
-            }
-
-            if (!ColorHelper.UseRandomColor)
-            {
-                string color = _configuration.GetSection("EmbedColor").Value;
-                var colorValues = color.Split(',', StringSplitOptions.TrimEntries);
-
-                if (colorValues.Length != 3)
-                {
-                    throw new InvalidOperationException("EmebedColor is not valid");
-                }
-
-                int[] iColorValues = new int[3];
-                try
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        iColorValues[i] = int.Parse(colorValues[i]);
-                    }
-                    ColorHelper.DefaultColor = new Discord.Color(iColorValues[0], iColorValues[1], iColorValues[2]);
-                    _logger.LogDebug("Using Color({r},{g},{b})", iColorValues[0], iColorValues[1], iColorValues[2]);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Exception while parsing EmbedColor. Using 33, 176, 252");
-                    ColorHelper.DefaultColor = new Discord.Color(33, 176, 252);
-                }
-            }
         }
     }
 }

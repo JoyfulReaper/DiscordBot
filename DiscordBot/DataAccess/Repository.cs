@@ -54,6 +54,7 @@ namespace DiscordBot.DataAccess
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
             SqlMapper.AddTypeHandler(new GuidHandler());
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
+            SqlMapper.AddTypeHandler(new ColorHandler());
         }
 
         //public abstract void Add(T entity);

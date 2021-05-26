@@ -153,7 +153,7 @@ namespace DiscordBot.Commands
                                 var builder = new EmbedBuilder()
                                     .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl())
                                     .WithDescription($"DiscordBot Stopped by {Context.User.Username}\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
-                                    .WithColor(ColorHelper.GetColor())
+                                    .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
                                     .WithCurrentTimestamp();
 
                                 var embed = builder.Build();

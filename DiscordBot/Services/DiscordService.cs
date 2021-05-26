@@ -49,6 +49,7 @@ namespace DiscordBot.Services
         private readonly ILogger _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
+        private readonly IServerService _servers;
 
         public DiscordService(IServiceProvider serviceProvider,
             DiscordSocketClient client,
@@ -56,7 +57,8 @@ namespace DiscordBot.Services
             CommandService commands,
             ILogger<DiscordService> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
-            LavaNode lavaNode)
+            LavaNode lavaNode,
+            IServerService servers)
         {
             _serviceProvider = serviceProvider;
             _client = client;
@@ -65,7 +67,7 @@ namespace DiscordBot.Services
             _logger = logger;
             _discordBotSettingsRepository = discordBotSettingsRepository;
             _lavaNode = lavaNode;
-
+            _servers = servers;
             _client.Ready += OnReady;
             _client.MessageReceived += OnMessageReceived;
             _client.Disconnected += OnDisconncted;
@@ -117,7 +119,7 @@ namespace DiscordBot.Services
                                 var builder = new EmbedBuilder()
                                     .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                                     .WithDescription("DiscordBot Starting\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
-                                    .WithColor(ColorHelper.GetColor())
+                                    .WithColor(await _servers.GetEmbedColor(guild.Id))
                                     .WithCurrentTimestamp();
 
                                 var embed = builder.Build();

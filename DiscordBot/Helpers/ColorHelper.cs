@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// TODO Finish implementing this
+// Dead code I think
 
 using Discord;
 using System;
@@ -33,22 +33,44 @@ namespace DiscordBot.Helpers
     public static class ColorHelper
     {
         private static Random _random = new();
-        public static Color DefaultColor { get; set; }
-        public static bool UseRandomColor { get; set; } = false;
+
+        public static bool isValidColor (string color)
+        {
+            var rgb = color.Split(",");
+            if (rgb.Length != 3)
+            {
+                return false;
+            }
+
+            Color discordColor;
+            try
+            {
+                discordColor = new Color(byte.Parse(rgb[0]), byte.Parse(rgb[1]), byte.Parse(rgb[2]));
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         public static Color RandomColor()
         {
             return new Color(_random.Next(256), _random.Next(256), _random.Next(256));
         }
 
-        public static Color GetColor()
-        {
-            if (UseRandomColor)
-            {
-                return RandomColor();
-            }
+        //public static Color DefaultColor { get; set; }
+        //public static bool UseRandomColor { get; set; } = false;
 
-            return DefaultColor;
-        }
+        //public static Color GetColor()
+        //{
+        //    if (UseRandomColor)
+        //    {
+        //        return RandomColor();
+        //    }
+
+        //    return DefaultColor;
+        //}
     }
 }

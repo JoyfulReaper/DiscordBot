@@ -92,7 +92,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                 .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
                 .WithCurrentTimestamp();
 
             var embed = builder.Build();
@@ -108,7 +108,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(Context?.Guild?.Owner.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                 .WithDescription($"{Context?.Guild?.Owner.Username} is the owner of {Context.Guild.Name}")
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
                 .WithCurrentTimestamp();
 
             var embed = builder.Build();
@@ -136,7 +136,7 @@ namespace DiscordBot.Commands
                 .WithTitle("Ping Results")
                 .WithDescription("Pong!")
                 .AddField("Round-trip latency to the WebSocket server (ms):", _client.Latency, false)
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
                 .WithCurrentTimestamp();
 
             await ReplyAsync(null, false, builder.Build());
@@ -157,7 +157,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(mentionedUser.GetAvatarUrl() ?? mentionedUser.GetDefaultAvatarUrl())
                 .WithDescription("User information:")
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
                 .AddField("User ID", mentionedUser.Id, true)
                 .AddField("Discriminator", mentionedUser.Discriminator, true)
                 .AddField("Created at", mentionedUser.CreatedAt.ToString("MM/dd/yyyy"), true)
@@ -179,7 +179,7 @@ namespace DiscordBot.Commands
                 .WithThumbnailUrl(Context.Guild.IconUrl)
                 .WithDescription("Server information:")
                 .WithTitle($"{Context.Guild.Name} Information")
-                .WithColor(ColorHelper.GetColor())
+                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
                 .AddField("Created at", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
                 .AddField("Member count", (Context.Guild as SocketGuild).MemberCount + " members", true)
                 .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
