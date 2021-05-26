@@ -443,6 +443,8 @@ namespace DiscordBot.Commands
 
             embedColor = await _servers.GetEmbedColor(Context.Guild.Id);
             await Context.Channel.SendEmbedAsync("Embed Color Set", $"The embed color has been modified to `{color}`", embedColor);
+            await _servers.SendLogsAsync(Context.Guild, "Embed Color Changed", $"{Context.User.Mention} changed the embed color to `{color}`");
+            _logger.LogInformation("{user} changed the embed color to {color} in {server}", Context.User.Username, color, Context.Guild.Name);
         }
     }
 }
