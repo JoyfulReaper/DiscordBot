@@ -103,7 +103,7 @@ namespace DiscordBot.Commands
             await _autoRoleService.AddAutoRole(Context.Guild.Id, role.Id);
             //await ReplyAsync($"The role {role.Mention} had been added to the autoroles!");
             await Context.Channel.SendEmbedAsync("Auto Role added", 
-                "The role {role.Mention} had been added to the autoroles!",
+                $"The role {role.Mention} had been added to the autoroles!",
                 await _servers.GetEmbedColor(Context.Guild.Id));
             await _servers.SendLogsAsync(Context.Guild, "Auto Role Added", $"{Context.User.Mention} added {role.Mention} to the Auto Roles!");
             _logger.LogInformation("{user} added {role} to the auto roles for {server}",
@@ -126,16 +126,17 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            if (autoRoles.Any(x => x.Id != role.Id))
+            if (autoRoles.All(x => x.Id != role.Id))
             {
                 await ReplyAsync("That role is not a autorole yet!");
                 return;
             }
 
             await _autoRoleService.RemoveAutoRole(Context.Guild.Id, role.Id);
-            await ReplyAsync($"The autorole {role.Mention} has been removed from the autoroles!");
-            
-            await _servers.SendLogsAsync(Context.Guild, "Auto role removed", $"{Context.User} removed the auto role {role.Mention}.");
+            //await ReplyAsync($"The autorole {role.Mention} has been removed from the autoroles!");
+            await Context.Channel.SendEmbedAsync("Auto Role added", $"The role {role.Mention} had been remove from the auto roles!", await _servers.GetEmbedColor(Context.Guild.Id));
+
+            await _servers.SendLogsAsync(Context.Guild, "Auto role removed", $"{Context.User.Mention} removed the auto role {role.Mention}.");
             _logger.LogInformation("{user} removed {role} from the autoroles in {server}",
                 Context.User.Username, role.Name, Context.Guild.Name);
         }
