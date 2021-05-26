@@ -37,6 +37,7 @@ using Victoria;
 
 namespace DiscordBot.Commands
 {
+    [Name("OwnerHidden")]
     public class Owner : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient _client;
@@ -44,6 +45,7 @@ namespace DiscordBot.Commands
         private readonly ILogger<Owner> _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
+        private readonly IServerService _servers;
         private readonly Random _random = new Random();
 
         //TODO store these in the database
@@ -58,13 +60,15 @@ namespace DiscordBot.Commands
             ISettings settings,
             ILogger<Owner> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
-            LavaNode lavaNode)
+            LavaNode lavaNode,
+            IServerService servers)
         {
             _client = client;
             _settings = settings;
             _logger = logger;
             _discordBotSettingsRepository = discordBotSettingsRepository;
             _lavaNode = lavaNode;
+            _servers = servers;
         }
 
         [Command("quit")]
@@ -107,6 +111,7 @@ namespace DiscordBot.Commands
                 await message.DeleteAsync();
 
                 ShowQuitMessageIfEnabled();
+                await _servers.SendLogsAsync(Context.Guild, "Bot quitting", $"{Context.User.Mention} has requested the bot terminates.");
 
                 await _client.StopAsync(); // Allow the client to cleanup
                 Program.ExitCleanly();

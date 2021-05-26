@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
+    [Name("PaginationDemoHidden")]
     public class PaginationDemo : InteractiveBase
     {
         private readonly ISettings _settings;

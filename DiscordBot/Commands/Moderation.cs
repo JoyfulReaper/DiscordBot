@@ -37,6 +37,7 @@ using System;
 
 namespace DiscordBot.Commands
 {
+    [Name("Moderation")]
     public class Moderation : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient _client;
@@ -54,7 +55,6 @@ namespace DiscordBot.Commands
             _logger = logger;
             _servers = servers;
             _configuration = configuration;
-
 
             var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
             if (int.TryParse(prefixConfigValue, out int maxLength))
@@ -79,9 +79,13 @@ namespace DiscordBot.Commands
             var messages = await Context.Channel.GetMessagesAsync(amount + 1).FlattenAsync();
             await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
 
-            var message = await Context.Channel.SendMessageAsync($"{messages.Count()} messages deleted successfuly!");
-            await Task.Delay(2500);
+            var message = await Context.Channel.SendEmbedAsync("Purge Successful", $"{messages.Count()} messages deleted successfuly!",
+                "https://clipground.com/images/bye-clipart-17.jpg");
+
+            await Task.Delay(3000);
             await message.DeleteAsync();
+
+            await _servers.SendLogsAsync(Context.Guild, "Messages Purged", $"{Context.User.Mention} purged {messages.Count()} messages in {Context.Channel}");
 
             _logger.LogInformation("{user}#{discriminator} purged {number} messages in {channel} on {server}",
                 Context.User.Username, Context.User.Discriminator, amount, Context.Channel.Name, Context.Guild.Name);
@@ -90,34 +94,45 @@ namespace DiscordBot.Commands
         [Command("prefix", RunMode = RunMode.Async)]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Change the prefix")]
-        public async Task Prefix(string prefix = null)
+        public async Task Prefix([Summary("The prefix to use to address the bot")]string prefix = null)
         {
+            await Context.Channel.TriggerTypingAsync();
             var myPrefix = await _servers.GetGuildPrefix(Context.Guild.Id);
 
             if (prefix == null)
             {
-                await ReplyAsync($"My prefix is: `{myPrefix}`");
+                await Context.Channel.SendEmbedAsync("Prefix", $"My Prefix is {myPrefix}",
+                    "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
+
                 return;
             }
 
             if(prefix.Length > _prefixMaxLength)
             {
-                await ReplyAsync("Prefix must be less than " + _prefixMaxLength + " characters.");
+                await Context.Channel.SendEmbedAsync("Invalid Prefix",$"Prefix must be less than {_prefixMaxLength} characters.",
+                    "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
+
                 return;
             }
 
             await _servers.ModifyGuildPrefix(Context.Guild.Id, prefix);
-            await ReplyAsync($"The prefix has been modified to `{prefix}`.");
+            await Context.Channel.SendEmbedAsync("Prefix Modified", $"The prefix has been modified to `{prefix}`.",
+                     "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
 
-            _logger.LogInformation("{user}#{discriminator} changed the prefix for {server} to {prefix}",
+            await _servers.SendLogsAsync(Context.Guild, "Prefix adjusted", $"{Context.User.Mention} modifed the prefix to {prefix}");
+
+            _logger.LogInformation("{user}#{discriminator} changed the prefix for {server} to '{prefix}'",
                 Context.User.Username, Context.User.Discriminator, Context.Guild.Name, prefix);
         }
 
         [Command("welcome")]
         [Summary("Change user welcoming settings")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task Welcome(string option = null, string value = null)
+        public async Task Welcome([Summary("Option to change: channel, background or clear")]string option = null,
+            [Summary("Value to assign to the option")]string value = null)
         {
+            await Context.Channel.TriggerTypingAsync();
+
             if (option == null && value == null)
             {
                 SendWelcomeChannelInformation();
@@ -138,8 +153,11 @@ namespace DiscordBot.Commands
 
             if(option.ToLowerInvariant() == "clear" && value == null)
             {
-                await _servers.ClearWelcome(Context.Guild.Id);
+                await _servers.ClearWelcomeChannel(Context.Guild.Id);
                 await ReplyAsync("Successfully cleared the welcome channel!");
+
+                await _servers.SendLogsAsync(Context.Guild, "Welcome channel cleared", $"{Context.User.Mention} cleared the welcome channel");
+                _logger.LogInformation("Welcome channel cleared by {user} in server {server}", Context.User.Username, Context.Guild.Name);
                 return;
             }
 
@@ -150,15 +168,20 @@ namespace DiscordBot.Commands
         [Summary("mute a user")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Mute(SocketGuildUser user, int minutes=5, [Remainder]string reason = null)
+        public async Task Mute([Summary("The user to mute")]SocketGuildUser user, 
+            [Summary("Number of minutes to mute for")]int minutes=5, 
+            [Summary("The reason for muting")][Remainder]string reason = null)
         {
-            if(user.Hierarchy > Context.Guild.CurrentUser.Hierarchy)
+            await Context.Channel.TriggerTypingAsync();
+
+            if (user.Hierarchy > Context.Guild.CurrentUser.Hierarchy)
             {
                 await Context.Channel.SendEmbedAsync("Invalid User", "That user has a higher position than the bot!",
                     "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
                 return;
             }
 
+            // Check for muted role, attempt to create it if it doesn't exist
             var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
             if(role == null)
             {
@@ -192,13 +215,16 @@ namespace DiscordBot.Commands
             await user.AddRoleAsync(role);
             await Context.Channel.SendEmbedAsync($"Muted {user.Username}", $"Duration: {minutes} minutes\nReason: {reason ?? "None"}",
                 "https://image.freepik.com/free-vector/no-loud-sound-mute-icon_101884-1079.jpg");
+
+            await _servers.SendLogsAsync(Context.Guild, "Muted", $"{Context.User.Mention} muted {user.Mention}");
+            _logger.LogInformation("{user} muted {target} in {server}", Context.User.Username, user.Username, Context.Guild.Name);
         }
 
         [Command("unmute")]
         [Summary("unmute a user")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        private async Task Unmute(SocketGuildUser user)
+        private async Task Unmute([Summary("The user to unmute")]SocketGuildUser user)
         {
             var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
             if (role == null)
@@ -224,6 +250,9 @@ namespace DiscordBot.Commands
             await user.RemoveRoleAsync(role);
             await Context.Channel.SendEmbedAsync($"Unmuted {user.Username}", "Succesfully unmuted the user",
                 "https://imgaz2.staticbg.com/thumb/large/oaupload/ser1/banggood/images/21/07/9474ae00-56ad-43ba-9bf1-97c7e80d34ee.jpg.webp");
+
+            await _servers.SendLogsAsync(Context.Guild, "Un-muted", $"{Context.User.Mention} unmuted {user.Mention}");
+            _logger.LogInformation("{user} unmuted {target} in {server}", Context.User.Username, user.Username, Context.Guild.Name);
         }
 
         [Command("slowmode")]
@@ -234,7 +263,11 @@ namespace DiscordBot.Commands
         {
             await Context.Channel.TriggerTypingAsync();
             await (Context.Channel as SocketTextChannel).ModifyAsync(x => x.SlowModeInterval = interval);
-            await ReplyAsync($"The slowmode interval was adjusted to {interval} seconds.");
+            await Context.Channel.SendEmbedAsync("Slowmode", $"The slowmode interval was adjusted to {interval} seconds!");
+
+            await _servers.SendLogsAsync(Context.Guild, "Slow Mode", $"{Context.User.Mention} set slowmode interval to {interval} for {Context.Channel.Name}");
+
+            _logger.LogInformation("{user} set slowmode to {value} in {server}", Context.User.Username, interval, Context.Guild.Name);
         }
 
         private async void SetWelcomeBannerBackgroundInformation(string value)
@@ -243,10 +276,13 @@ namespace DiscordBot.Commands
             {
                 await _servers.ClearBackground(Context.Guild.Id);
                 await ReplyAsync("Successfully cleared background!");
+                await _servers.SendLogsAsync(Context.Guild, "Background cleared", $"{Context.User} cleared the welcome image background.");
                 return;
             }
 
             await _servers.ModifyWelcomeBackground(Context.Guild.Id, value);
+            await _servers.SendLogsAsync(Context.Guild, "Background Modified", $"{Context.User} modified the welcome image background to {value}");
+            _logger.LogInformation("Background image modified to {image} by {user} in {server}", value, Context.User, Context.Guild.Name);
             await ReplyAsync($"Successfully modified the background to {value}");
         }
 
@@ -267,11 +303,15 @@ namespace DiscordBot.Commands
 
             await _servers.ModifyWelcomeChannel(Context.Guild.Id, parserId);
             await ReplyAsync($"Successfully modified the welcome channel to {parsedChannel.Mention}");
+            await _servers.SendLogsAsync(Context.Guild, "Welcome Channel Modified", $"{Context.User} modified the welcome channel to {value}");
+
+            _logger.LogInformation("Welcome channel modified to {channel} by {user} in {server}", 
+                value, Context.Channel.Name, Context.User);
         }
 
         private async void SendWelcomeChannelInformation()
         {
-            var welcomeChannelId = await _servers.GetWelcome(Context.Guild.Id);
+            var welcomeChannelId = await _servers.GetWelcomeChannel(Context.Guild.Id);
             if (welcomeChannelId == 0)
             {
                 await ReplyAsync("The welcome channel has not yet been set!");
@@ -282,7 +322,7 @@ namespace DiscordBot.Commands
             if (welcomeChannel == null)
             {
                 await ReplyAsync("The welcome channel has not yet been set!");
-                await _servers.ClearWelcome(Context.Guild.Id);
+                await _servers.ClearWelcomeChannel(Context.Guild.Id);
                 return;
             }
 
@@ -294,6 +334,73 @@ namespace DiscordBot.Commands
             else
             {
                 await ReplyAsync($"The welcome channel is {welcomeChannel.Mention}.\nThe background is not set.");
+            }
+        }
+
+        [Command("logs")]
+        [Summary("Change logging settings")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task Logs(string option = null, string value = null)
+        {
+            if (option == null && value == null)
+            {
+                SendLoggingChannelInformation();
+                return;
+            }
+
+            if (option.ToLowerInvariant() == "channel" && value != null)
+            {
+                SetLoggingChannelInformation(value);
+                return;
+            }
+
+            if (option.ToLowerInvariant() == "clear" && value == null)
+            {
+                await _servers.ClearLoggingChannel(Context.Guild.Id);
+                await ReplyAsync("Successfully cleared the logging channel!");
+                _logger.LogInformation("{user} cleared the logging channel for {server}", Context.User.Username, Context.Guild.Name);
+                return;
+            }
+
+            await ReplyAsync("You did not use this command properly!");
+        }
+
+        private async void SetLoggingChannelInformation(string value)
+        {
+            if (!MentionUtils.TryParseChannel(value, out ulong parserId))
+            {
+                await ReplyAsync("Please pass in a valid channel!");
+                return;
+            }
+
+            var parsedChannel = Context.Guild.GetTextChannel(parserId);
+            if (parsedChannel == null)
+            {
+                await ReplyAsync("Please pass in a valid channel!");
+                return;
+            }
+
+            await _servers.ModifyLoggingChannel(Context.Guild.Id, parserId);
+            await ReplyAsync($"Successfully modified the logging channel to {parsedChannel.Mention}");
+            _logger.LogInformation("{user} set the logging channel to {value} for {server}",
+                Context.User.Username, value, Context.Guild.Name);
+        }
+
+        private async void SendLoggingChannelInformation()
+        {
+            var welcomeChannelId = await _servers.GetLoggingChannel(Context.Guild.Id);
+            if (welcomeChannelId == 0)
+            {
+                await ReplyAsync("The logging channel has not yet been set!");
+                return;
+            }
+
+            var welcomeChannel = Context.Guild.GetTextChannel(welcomeChannelId);
+            if (welcomeChannel == null)
+            {
+                await ReplyAsync("The logging channel has not yet been set!");
+                await _servers.ClearLoggingChannel(Context.Guild.Id);
+                return;
             }
         }
     }

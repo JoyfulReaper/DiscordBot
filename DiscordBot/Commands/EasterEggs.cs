@@ -23,24 +23,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
+using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Services
+namespace DiscordBot.Commands
 {
-    public interface IServerService
+    [Name("EasterEggsHidden")]
+    public class EasterEggs : ModuleBase<SocketCommandContext>
     {
-        Task ClearBackground(ulong id);
-        Task ClearWelcomeChannel(ulong id);
-        Task<string> GetBackground(ulong id);
-        Task<string> GetGuildPrefix(ulong id);
-        Task<ulong> GetWelcomeChannel(ulong id);
-        Task ModifyGuildPrefix(ulong id, string prefix);
-        Task ModifyWelcomeBackground(ulong id, string url);
-        Task ModifyWelcomeChannel(ulong id, ulong channelId);
-        Task ModifyLoggingChannel(ulong id, ulong channelId);
-        Task ClearLoggingChannel(ulong id);
-        Task<ulong> GetLoggingChannel(ulong id);
-        Task SendLogsAsync(IGuild guild, string title, string description, string loggingThumbnail = null);
+        private readonly ILogger<EasterEggs> _logger;
+
+        public EasterEggs(ILogger<EasterEggs> logger)
+        {
+            _logger = logger;
+        }
+
+        [Command("shelly")]
+        [Summary("A picture of the bot programmer's dog")]
+        public async Task Shelly()
+        {
+            //TODO make this an embed
+            await ReplyAsync("Enjoy this photo of JoyfulReaper's dog!");
+            await ReplyAsync("https://kgivler.com/images/Shelly/Shelly.jpg");
+
+            _logger.LogInformation("{user} used the shelly command in {server}", Context.User.Username, Context.Guild.Name);
+        }
     }
 }

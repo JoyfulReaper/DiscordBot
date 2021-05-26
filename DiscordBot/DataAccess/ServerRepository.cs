@@ -49,8 +49,9 @@ namespace DiscordBot.DataAccess
 
         public async override Task AddAsync(Server entity)
         {
-            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (GuildId, Prefix, SubredditLearning, WelcomeChannel, WelcomeBackground)" +
-                "VALUES (@GuildId, @Prefix, @SubredditLearning, @WelcomeChannel, @WelcomeBackground); " +
+            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} " +
+                $"(GuildId, Prefix, SubredditLearning, WelcomeChannel, WelcomeBackground, LoggingChannel)" +
+                "VALUES (@GuildId, @Prefix, @SubredditLearning, @WelcomeChannel, @WelcomeBackground, @LoggingChannel); " +
                 "SELECT last_insert_rowid();",
                 entity);
 
@@ -71,7 +72,8 @@ namespace DiscordBot.DataAccess
         public async override Task EditAsync(Server entity)
         {
             await ExecuteAsync($"UPDATE {TableName} " +
-                $"SET Prefix = @Prefix, GuildId = @GuildId, SubredditLearning = @SubredditLearning, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground " +
+                $"SET Prefix = @Prefix, GuildId = @GuildId, SubredditLearning = @SubredditLearning, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground," +
+                $" LoggingChannel = @LoggingChannel " +
                 $"WHERE Id = @Id;",
                 entity);
         }
