@@ -282,6 +282,7 @@ namespace DiscordBot.Commands
 
             await _servers.ModifyWelcomeBackground(Context.Guild.Id, value);
             await _servers.SendLogsAsync(Context.Guild, "Background Modified", $"{Context.User} modified the welcome image background to {value}");
+            _logger.LogInformation("Background image modified to {image} by {user} in {server}", value, Context.User, Context.Guild.Name);
             await ReplyAsync($"Successfully modified the background to {value}");
         }
 
@@ -303,6 +304,9 @@ namespace DiscordBot.Commands
             await _servers.ModifyWelcomeChannel(Context.Guild.Id, parserId);
             await ReplyAsync($"Successfully modified the welcome channel to {parsedChannel.Mention}");
             await _servers.SendLogsAsync(Context.Guild, "Welcome Channel Modified", $"{Context.User} modified the welcome channel to {value}");
+
+            _logger.LogInformation("Welcome channel modified to {channel} by {user} in {server}", 
+                value, Context.Channel.Name, Context.User);
         }
 
         private async void SendWelcomeChannelInformation()
@@ -354,6 +358,7 @@ namespace DiscordBot.Commands
             {
                 await _servers.ClearLoggingChannel(Context.Guild.Id);
                 await ReplyAsync("Successfully cleared the logging channel!");
+                _logger.LogInformation("{user} cleared the logging channel for {server}", Context.User.Username, Context.Guild.Name);
                 return;
             }
 
@@ -377,6 +382,8 @@ namespace DiscordBot.Commands
 
             await _servers.ModifyLoggingChannel(Context.Guild.Id, parserId);
             await ReplyAsync($"Successfully modified the logging channel to {parsedChannel.Mention}");
+            _logger.LogInformation("{user} set the logging channel to {value} for {server}",
+                Context.User.Username, value, Context.Guild.Name);
         }
 
         private async void SendLoggingChannelInformation()
