@@ -26,7 +26,9 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Helpers;
 using DiscordBot.Services;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,12 +39,15 @@ namespace DiscordBot.Commands
     {
         private readonly IRankService _rankService;
         private readonly IServerService _servers;
+        private readonly ILogger<Ranks> _logger;
 
         public Ranks(IRankService rankService,
-            IServerService servers)
+            IServerService servers,
+            ILogger<Ranks> logger)
         {
             _rankService = rankService;
             _servers = servers;
+            _logger = logger;
         }
 
         [Command("ranks", RunMode = RunMode.Async)]
@@ -71,7 +76,7 @@ namespace DiscordBot.Commands
         [Summary("Add a rank")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task AddRank([Remainder] string name)
+        public async Task AddRank([Summary("Name of the rank to add")][Remainder] string name)
         {
             await Context.Channel.TriggerTypingAsync();
             var ranks = await _rankService.GetRanks(Context.Guild);
@@ -96,14 +101,19 @@ namespace DiscordBot.Commands
             }
 
             await _rankService.AddRank(Context.Guild.Id, role.Id);
-            await ReplyAsync($"The role {role.Mention} had been added to the ranks!");
+            //await ReplyAsync($"The role {role.Mention} had been added to the ranks!");
+            await Context.Channel.SendEmbedAsync("Rank added", "The role {role.Mention} had been added to the ranks!");
+
+            await _servers.SendLogsAsync(Context.Guild, "Rank Added", $"{Context.User.Mention} added {role.Mention} to the ranks!");
+            _logger.LogInformation("{user} added {role} to the ranks for {server}",
+                Context.User.Username, role.Name, Context.Guild.Name);
         }
 
         [Command("delrank", RunMode = RunMode.Async)]
         [Summary("Delete a rank")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task DelRank([Remainder]string name)
+        public async Task DelRank([Summary("Name of the rank to delete")][Remainder]string name)
         {
             await Context.Channel.TriggerTypingAsync();
             var ranks = await _rankService.GetRanks(Context.Guild);
@@ -123,6 +133,10 @@ namespace DiscordBot.Commands
 
             await _rankService.RemoveRank(Context.Guild.Id, role.Id);
             await ReplyAsync($"The role {role.Mention} has been removed from the ranks!");
+
+            await _servers.SendLogsAsync(Context.Guild, "Rank removed", $"{Context.User} removed the rank {role.Mention}.");
+            _logger.LogInformation("{user} removed {role} from the ranks in {server}",
+           Context.User.Username, role.Name, Context.Guild.Name);
         }
 
         [Command("rank", RunMode = RunMode.Async)]

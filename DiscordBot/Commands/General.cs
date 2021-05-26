@@ -43,19 +43,16 @@ namespace DiscordBot.Commands
     {
         private readonly ILogger<General> _logger;
         private readonly DiscordSocketClient _client;
-        private readonly ISettings _settings;
         private readonly ImageService _images;
         private readonly IServerService _servers;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
-            ISettings settings,
             ImageService images,
             IServerService servers)
         {
             _logger = logger;
             _client = client;
-            _settings = settings;
             _images = images;
             _servers = servers;
         }
@@ -124,7 +121,7 @@ namespace DiscordBot.Commands
         public async Task Echo([Remainder] [Summary("The text to echo")] string message)
         {
             _logger.LogInformation("{username}#{discriminator} echoed: {message}", Context.User.Username, Context.User.Discriminator, message);
-            await ReplyAsync(message);
+            await ReplyAsync($"`{message}`");
         }
 
         [Command("ping")]
@@ -143,7 +140,6 @@ namespace DiscordBot.Commands
                 .WithCurrentTimestamp();
 
             await ReplyAsync(null, false, builder.Build());
-            //await ReplyAsync($"Pong!\nRound-trip latency to the WebSocket server: {_client.Latency} ms");
         }
 
         [Command("info")]
@@ -207,6 +203,8 @@ namespace DiscordBot.Commands
             var memoryStream = await _images.CreateImage(user, background);
             memoryStream.Seek(0, SeekOrigin.Begin);
             await Context.Channel.SendFileAsync(memoryStream, $"{user.Username}.png");
+
+            _logger.LogInformation("{username}#{discriminator} invoked image on {target}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
         }
     }
 }

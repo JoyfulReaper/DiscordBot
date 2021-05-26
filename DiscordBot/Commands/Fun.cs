@@ -70,7 +70,7 @@ namespace DiscordBot.Commands
                 .WithCurrentTimestamp();
 
             await ReplyAsync(null, false, builder.Build());
-            _logger.LogInformation("{user} asked the 8ball {question}", Context.User.Username, Context.Guild.Name);
+            _logger.LogInformation("{user} asked the 8ball {question} in {server}", Context.User.Username, question, Context.Guild.Name);
         }
     }
 }

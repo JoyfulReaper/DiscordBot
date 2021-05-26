@@ -131,7 +131,8 @@ namespace DiscordBot.Commands
             }
 
             await _autoRoleService.RemoveAutoRole(Context.Guild.Id, role.Id);
-            //await ReplyAsync($"The autorole {role.Mention} has been removed from the autoroles!");
+            await ReplyAsync($"The autorole {role.Mention} has been removed from the autoroles!");
+            
             await _servers.SendLogsAsync(Context.Guild, "Auto role removed", $"{Context.User} removed the auto role {role.Mention}.");
             _logger.LogInformation("{user} removed {role} from the autoroles in {server}",
                 Context.User.Username, role.Name, Context.Guild.Name);

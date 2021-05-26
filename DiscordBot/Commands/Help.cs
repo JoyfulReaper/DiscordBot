@@ -2,15 +2,12 @@
 using Discord.Commands;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
-    [Name("help!")]
+    [Name("Help!")]
     public class Help : InteractiveBase
     {
         private readonly CommandService _commandService;
@@ -36,6 +33,10 @@ namespace DiscordBot.Commands
 
             foreach(var module in _commandService.Modules)
             {
+                if(module.Name.EndsWith("Hidden"))
+                {
+                    continue;
+                }
                 string page = $"Command Module: ***{module.Name}***\n";
                 foreach(var command in module.Commands)
                 {
@@ -45,6 +46,9 @@ namespace DiscordBot.Commands
             }
 
             await PagedReplyAsync(pages);
+
+            _logger.LogInformation("{user} invoked the help command in {server}",
+                Context.User.Username, Context.Guild.Name);
         }
     }
 }
