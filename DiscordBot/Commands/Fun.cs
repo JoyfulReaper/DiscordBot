@@ -64,17 +64,23 @@ namespace DiscordBot.Commands
         [Summary("Ask the 8ball a question, get the answer!")]
         public async Task EightBall([Summary("The question to ask")][Remainder]string question)
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed 8ball ({question}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, question, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var server = await _servers.GetServer(Context.Guild);
+
             var builder = new EmbedBuilder();
             builder
                 .WithTitle("Magic 8ball")
                 .WithThumbnailUrl(_eightBallImages.RandomItem())
                 .WithDescription($"{Context.User.Username} asked ***{question}***")
                 .AddField("Response", _eightBallResponses.RandomItem())
-                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
+                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
                 .WithCurrentTimestamp();
 
             await ReplyAsync(null, false, builder.Build());
-            _logger.LogInformation("{user} asked the 8ball {question} in {server}", Context.User.Username, question, Context.Guild.Name);
         }
     }
 }
