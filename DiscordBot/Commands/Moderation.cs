@@ -68,6 +68,28 @@ namespace DiscordBot.Commands
             }
         }
 
+        [Command("kick")]
+        [RequireBotPermission(GuildPermission.KickMembers)]
+        [RequireUserPermission(GuildPermission.KickMembers)]
+        [Summary("Kick a user")]
+        public async Task Kick([Summary("user to kick")] SocketGuildUser user = null)
+        {
+            if (user == null)
+            {
+                await ReplyAsync("Please specify the user the kick");
+                return;
+            }
+
+            await user.KickAsync();
+
+            await Context.Channel.SendEmbedAsync("Kicked", $"{user.Mention} was kicked to the curb!", 
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://www.nydailynews.com/resizer/vwH9gF1tqmXVFcROKQqcar7mL3U=/800x608/top/arc-anglerfish-arc2-prod-tronc.s3.amazonaws.com/public/CZ5U3VRUGH74ETHW7KVB7OZZTY.jpg");
+            await _servers.SendLogsAsync(Context.Guild, "User kicked", $"{Context.User.Mention} kicked {user.Mention}.");
+
+            _logger.LogInformation("{user}#{discriminator} kicked {user} messages in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, user.Username, Context.Channel.Name, Context.Guild.Name);
+        }
+
         [Command("purge")]
         [RequireUserPermission(GuildPermission.ManageMessages)]
         [RequireBotPermission(GuildPermission.ManageMessages)]

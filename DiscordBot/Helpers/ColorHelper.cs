@@ -26,6 +26,7 @@ SOFTWARE.
 // Dead code I think
 
 using Discord;
+using DiscordBot.Models;
 using System;
 
 namespace DiscordBot.Helpers
@@ -60,17 +61,16 @@ namespace DiscordBot.Helpers
             return new Color(_random.Next(256), _random.Next(256), _random.Next(256));
         }
 
-        //public static Color DefaultColor { get; set; }
-        //public static bool UseRandomColor { get; set; } = false;
-
-        //public static Color GetColor()
-        //{
-        //    if (UseRandomColor)
-        //    {
-        //        return RandomColor();
-        //    }
-
-        //    return DefaultColor;
-        //}
+        public static Color GetColor(Server server)
+        {
+            if (server == null || server.EmbedColor.RawValue == 0)
+            {
+                return RandomColor();
+            }
+            else
+            {
+                return server.EmbedColor;
+            }
+        }
     }
 }
