@@ -78,6 +78,7 @@ namespace DiscordBot.Commands
         public async Task Quit(string imageUrl = null)
         {
             await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} invoked quit on {server}/{channel}", 
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
@@ -124,7 +125,10 @@ namespace DiscordBot.Commands
         [Summary("Set the same the bot is playing")]
         public async Task SetGame([Remainder]string game)
         {
-            _logger.LogInformation("{username}#{discriminator} invoked game of {game}", Context.User.Username, Context.User.Discriminator, game);
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} invoked game ({game}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, game, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             if (Context.User.Username != _settings.OwnerName || Context.User.Discriminator != _settings.OwnerDiscriminator)
             {

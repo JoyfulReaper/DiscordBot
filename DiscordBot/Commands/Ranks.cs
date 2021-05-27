@@ -54,6 +54,16 @@ namespace DiscordBot.Commands
         [Summary("Show available ranks")]
         public async Task ShowRanks()
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} invoked ranks on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if(await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
             var ranks = await _rankService.GetRanks(Context.Guild);
             if(ranks.Count == 0)
             {
