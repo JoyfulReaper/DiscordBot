@@ -49,6 +49,16 @@ namespace DiscordBot.Services
             _logger = logger;
         }
 
+        public async Task<Server> GetServer(IGuild guild)
+        {
+            if(guild == null)
+            {
+                return null;
+            }
+
+            return await _serverRepository.GetByServerId(guild.Id);
+        }
+
         public async Task<bool> UsingRandomEmbedColor(ulong serverId)
         {
             var server = await _serverRepository.GetByServerId(serverId);
@@ -336,6 +346,11 @@ namespace DiscordBot.Services
         private const string LOGGING_THUMBNAIL = "https://cdn.quotesgram.com/img/87/86/1090166097-captains_log_meme.jpg";
         public async Task SendLogsAsync(IGuild guild, string title, string description, string thumbnailUrl = null)
         {
+            if(guild == null)
+            {
+                return;
+            }
+
             if(thumbnailUrl == null)
             {
                 thumbnailUrl = LOGGING_THUMBNAIL;

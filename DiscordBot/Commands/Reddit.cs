@@ -77,25 +77,45 @@ namespace DiscordBot.Commands
         [Summary("Show a reddit post")]
         public async Task RedditPost([Summary("The subreddit from which to show a post")]string subreddit = null)
         {
-            _logger.LogInformation("{username}#{discriminator} invoked reddit with subreddit {subreddit}", Context.User.Username, Context.User.Discriminator, subreddit);
             await Context.Channel.TriggerTypingAsync();
 
+            _logger.LogInformation("{username}#{discriminator} invoked reddit ({subreddit}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, subreddit ?? "random", Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var CommandWasDirectMessaged = await ServerHelper.CheckIfContextIsDM(Context, false);
+
             SocketTextChannel channel = Context.Channel as SocketTextChannel;
-            if(channel == null)
+            if(channel == null && !CommandWasDirectMessaged)
             {
                 _logger.LogWarning("Channel {channel} is not a text channel.", channel);
                 return;
             }
 
-            var subreddits = await GetSubreddits();
+            List<Subreddit> subreddits;
+            if (CommandWasDirectMessaged)
+            {
+                subreddits = new List<Subreddit>();
+                foreach(string sub in _seedSubreddits)
+                {
+                    subreddits.Add(new Subreddit { Name = sub });
+                }
+            }
+            else
+            {
+                subreddits = await GetSubreddits();
+            }
+
             if (subreddit == null)
             {
                 subreddit = subreddits[_random.Next(subreddits.Count)].Name;
             }
 
-            if(!await AddSubRedditIfNotKnownAndLearningEnabled(subreddits, subreddit))
+            if (!CommandWasDirectMessaged)
             {
-                return;
+                if (!await AddSubRedditIfNotKnownAndLearningEnabled(subreddits, subreddit))
+                {
+                    return;
+                }
             }
 
             HttpClient httpClient = new HttpClient();
@@ -110,19 +130,12 @@ namespace DiscordBot.Commands
                 await ReplyAsync($"HttpClient encountered an error: {ex.StatusCode}");
             }
 
-            //bool showNSFW = channel.IsNsfw;
-            //if(httpResult.ToLowerInvariant().Contains("nsfw") && showNSFW != true)
-            //{
-            //    await ReplyAsync("NSFW Posts only shown on NSFW channels");
-            //    return;
-            //}
-
             await RemoveSubredditIfNonexistant(httpResult, subreddit);
 
             JArray arr = JArray.Parse(httpResult);
             JObject post = JObject.Parse(arr[0]["data"]["children"][0]["data"].ToString());
 
-            if(post["over_18"].ToString() == "True" && !channel.IsNsfw)
+            if(!CommandWasDirectMessaged && post["over_18"].ToString() == "True" && !channel.IsNsfw)
             {
                 await ReplyAsync("NSFW Posts only shown on NSFW channels");
                 return;
@@ -173,12 +186,16 @@ namespace DiscordBot.Commands
             if (value.ToLowerInvariant() == "on")
             {
                 server.SubredditLearning = true;
-                await ReplyAsync("Subreddit learning enabled");
+                //await ReplyAsync("Subreddit learning enabled");
+                await Context.Channel.SendEmbedAsync("Subreddit Learning", "Subreddit learning enabled", await _servers.GetEmbedColor(Context.Guild.Id));
+                await _servers.SendLogsAsync(Context.Guild, "Subreddit Learning", $"{Context.User.Mention} enabled subreddit learning");
             }
             else if (value.ToLowerInvariant() == "off")
             {
                 server.SubredditLearning = false;
-                await ReplyAsync("Subreddit learning disabled");
+                //await ReplyAsync("Subreddit learning disabled");
+                await Context.Channel.SendEmbedAsync("Subreddit Learning", "Subreddit learning disabled", await _servers.GetEmbedColor(Context.Guild.Id));
+                await _servers.SendLogsAsync(Context.Guild, "Subreddit Learning", $"{Context.User.Mention} disabled subreddit learning");
             }
             else
             {
@@ -210,11 +227,12 @@ namespace DiscordBot.Commands
                 builder.WithImageUrl(postUrl);
             }
 
+            var server = await _servers.GetServer(Context.Guild);
 
             builder
                 .WithDescription($"/r/{subreddit}")
                 .AddField("url:", postUrl.ToString(), true)
-                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
+                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
                 .WithTitle(postTitle.ToString())
                 .WithUrl("https://reddit.com" + post["permalink"].ToString())
                 .WithFooter($"🗨 {post["num_comments"]} ⬆️ {post["ups"]}")

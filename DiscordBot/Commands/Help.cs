@@ -27,7 +27,12 @@ namespace DiscordBot.Commands
         [Summary("Get some help!")]
         public async Task HelpCommand()
         {
-            var prefix = await _servers.GetGuildPrefix(Context.Guild.Id);
+            // Changing pages seems a little broken when DMing the bot, TODO: Look into later
+            string prefix = string.Empty;
+            if(Context.Guild != null)
+            {
+                prefix = await _servers.GetGuildPrefix(Context.Guild.Id);
+            }
 
             List<string> pages = new List<string>();
 
@@ -47,8 +52,8 @@ namespace DiscordBot.Commands
 
             await PagedReplyAsync(pages);
 
-            _logger.LogInformation("{user} invoked the help command in {server}",
-                Context.User.Username, Context.Guild.Name);
+            _logger.LogInformation("{username}#{discriminator} executed help on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
         }
     }
 }

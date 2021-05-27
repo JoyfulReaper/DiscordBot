@@ -54,6 +54,16 @@ namespace DiscordBot.Commands
         [Summary("Show available ranks")]
         public async Task ShowRanks()
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} invoked ranks on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if(await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
             var ranks = await _rankService.GetRanks(Context.Guild);
             if(ranks.Count == 0)
             {
@@ -102,7 +112,7 @@ namespace DiscordBot.Commands
 
             await _rankService.AddRank(Context.Guild.Id, role.Id);
             //await ReplyAsync($"The role {role.Mention} had been added to the ranks!");
-            await Context.Channel.SendEmbedAsync("Rank added", "The role {role.Mention} had been added to the ranks!", await _servers.GetEmbedColor(Context.Guild.Id));
+            await Context.Channel.SendEmbedAsync("Rank added", $"The role {role.Mention} had been added to the ranks!", await _servers.GetEmbedColor(Context.Guild.Id));
 
             await _servers.SendLogsAsync(Context.Guild, "Rank Added", $"{Context.User.Mention} added {role.Mention} to the ranks!");
             _logger.LogInformation("{user} added {role} to the ranks for {server}",
@@ -125,16 +135,17 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            if (!ranks.Any(x => x.Id == role.Id))
+            if (ranks.All(x => x.Id != role.Id))
             {
                 await ReplyAsync("That role is not a rank yet!");
                 return;
             }
 
             await _rankService.RemoveRank(Context.Guild.Id, role.Id);
-            await ReplyAsync($"The role {role.Mention} has been removed from the ranks!");
+            //await ReplyAsync($"The role {role.Mention} has been removed from the ranks!");
+            await Context.Channel.SendEmbedAsync("Rank Removed", $"The role {role.Mention} had been removed from the ranks!", await _servers.GetEmbedColor(Context.Guild.Id));
 
-            await _servers.SendLogsAsync(Context.Guild, "Rank removed", $"{Context.User} removed the rank {role.Mention}.");
+            await _servers.SendLogsAsync(Context.Guild, "Rank removed", $"{Context.User.Mention} removed the rank {role.Mention}.");
             _logger.LogInformation("{user} removed {role} from the ranks in {server}",
            Context.User.Username, role.Name, Context.Guild.Name);
         }
@@ -179,7 +190,7 @@ namespace DiscordBot.Commands
                 role = roleByName;
             }
 
-            if (!ranks.Any(x => x.Id == role.Id))
+            if (ranks.All(x => x.Id != role.Id))
             {
                 await ReplyAsync("That rank does not exist!");
                 return;

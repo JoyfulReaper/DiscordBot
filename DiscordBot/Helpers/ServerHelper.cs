@@ -24,28 +24,29 @@ SOFTWARE.
 */
 
 using Discord;
-using DiscordBot.Models;
+using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Services
+namespace DiscordBot.Helpers
 {
-    public interface IServerService
+    public static class ServerHelper
     {
-        Task<Server> GetServer(IGuild guild);
-        Task ClearBackground(ulong id);
-        Task ClearWelcomeChannel(ulong id);
-        Task<string> GetBackground(ulong id);
-        Task<string> GetGuildPrefix(ulong id);
-        Task<ulong> GetWelcomeChannel(ulong id);
-        Task ModifyGuildPrefix(ulong id, string prefix);
-        Task ModifyWelcomeBackground(ulong id, string url);
-        Task ModifyWelcomeChannel(ulong id, ulong channelId);
-        Task ModifyLoggingChannel(ulong id, ulong channelId);
-        Task ClearLoggingChannel(ulong id);
-        Task<ulong> GetLoggingChannel(ulong id);
-        Task SendLogsAsync(IGuild guild, string title, string description, string loggingThumbnail = null);
-        Task ModifyEmbedColor(ulong id, string color);
-        Task<Color> GetEmbedColor(ulong id);
-        Task<bool> UsingRandomEmbedColor(ulong serverId);
+        public async static Task<bool> CheckIfContextIsDM(SocketCommandContext context, bool requireGuild = true)
+        {
+            if (context.Guild == null && requireGuild)
+            {
+                await context.Channel.SendEmbedAsync("You aren't in a server!", "This command only works from within a server...",
+                    ColorHelper.RandomColor(), "https://3.bp.blogspot.com/-QQeOVVtLV2I/VWCVLRT7LeI/AAAAAAAABNc/9cXvdV9W7qg/s1600/dumb-face.jpg");
+
+                return true;
+            }
+
+            if(context.Message.Channel is IDMChannel)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

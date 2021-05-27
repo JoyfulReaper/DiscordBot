@@ -56,6 +56,9 @@ namespace DiscordBot.Commands
         {
             await Context.Channel.TriggerTypingAsync();
 
+            _logger.LogInformation("{username}#{discriminator} executed autoroles on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
             if(autoRoles.Count == 0)
             {
@@ -79,6 +82,10 @@ namespace DiscordBot.Commands
         public async Task AddAutoRole([Summary("Name of the autorole to add")][Remainder] string name)
         {
             await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed addautorole ({role}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, name, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
 
             var role = Context.Guild.Roles.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase));
@@ -101,11 +108,13 @@ namespace DiscordBot.Commands
             }
 
             await _autoRoleService.AddAutoRole(Context.Guild.Id, role.Id);
-            //await ReplyAsync($"The role {role.Mention} had been added to the autoroles!");
+
             await Context.Channel.SendEmbedAsync("Auto Role added", 
-                "The role {role.Mention} had been added to the autoroles!",
+                $"The role {role.Mention} had been added to the autoroles!",
                 await _servers.GetEmbedColor(Context.Guild.Id));
+
             await _servers.SendLogsAsync(Context.Guild, "Auto Role Added", $"{Context.User.Mention} added {role.Mention} to the Auto Roles!");
+
             _logger.LogInformation("{user} added {role} to the auto roles for {server}",
                 Context.User.Username, role.Name, Context.Guild.Name);
         }
@@ -117,6 +126,10 @@ namespace DiscordBot.Commands
         public async Task DelAutoRole([Summary("Name of auto role to delete")][Remainder] string name)
         {
             await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed delautorole ({role}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, name, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
 
             var role = Context.Guild.Roles.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase));
@@ -126,16 +139,18 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            if (autoRoles.Any(x => x.Id != role.Id))
+            if (autoRoles.All(x => x.Id != role.Id))
             {
                 await ReplyAsync("That role is not a autorole yet!");
                 return;
             }
 
             await _autoRoleService.RemoveAutoRole(Context.Guild.Id, role.Id);
-            await ReplyAsync($"The autorole {role.Mention} has been removed from the autoroles!");
-            
-            await _servers.SendLogsAsync(Context.Guild, "Auto role removed", $"{Context.User} removed the auto role {role.Mention}.");
+
+            await Context.Channel.SendEmbedAsync("Auto Role added", $"The role {role.Mention} had been remove from the auto roles!", await _servers.GetEmbedColor(Context.Guild.Id));
+
+            await _servers.SendLogsAsync(Context.Guild, "Auto role removed", $"{Context.User.Mention} removed the auto role {role.Mention}.");
+
             _logger.LogInformation("{user} removed {role} from the autoroles in {server}",
                 Context.User.Username, role.Name, Context.Guild.Name);
         }
@@ -146,6 +161,9 @@ namespace DiscordBot.Commands
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task RunAutoRoles()
         {
+            _logger.LogInformation("{username}#{discriminator} executed runautoroles ({role}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             await ReplyAsync("Please wait, this will hit API rate limiting...");
             await Context.Channel.TriggerTypingAsync();
 
@@ -161,7 +179,9 @@ namespace DiscordBot.Commands
             }
 
             await ReplyAsync("AutoRoles have been added!");
+
             await _servers.SendLogsAsync(Context.Guild, "Autoroles run", $"{Context.User} assigned the auto roles to all users on the server.");
+
             _logger.LogInformation("{user} assinged auto roles to all usered on {server}",
                 Context.User.Username, Context.Guild.Name);
         }
