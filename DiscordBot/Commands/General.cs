@@ -62,7 +62,9 @@ namespace DiscordBot.Commands
         [Summary("Do math")]
         public async Task Math([Remainder] string math)
         {
-            _logger.LogInformation("{username}#{discriminator} executed math: {math}", Context.User.Username, Context.User.Discriminator, math);
+            _logger.LogInformation("{username}#{discriminator} executed math: {math} on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, math, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             var dt = new DataTable();
 
             var message = await ReplyAsync("https://i.pinimg.com/originals/97/a3/b9/97a3b92384b62eb04566a457f6d76f6c.gif");
@@ -87,12 +89,15 @@ namespace DiscordBot.Commands
         [Summary("Information about the bot itself")]
         public async Task About()
         {
-            _logger.LogInformation("{username}#{discriminator} invoked about", Context.User.Username, Context.User.Discriminator);
+            _logger.LogInformation("{username}#{discriminator} executed about on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var server = await _servers.GetServer(Context.Guild);
 
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                 .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
-                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
+                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
                 .WithCurrentTimestamp();
 
             var embed = builder.Build();
@@ -103,12 +108,21 @@ namespace DiscordBot.Commands
         [Summary("Retreive the server owner")]
         public async Task Owner()
         {
-            _logger.LogInformation("{username}#{discriminator} invoked owner on: {server}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
+            _logger.LogInformation("{username}#{discriminator} executed owner on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var server = await _servers.GetServer(Context.Guild);
+            if(Context.Guild == null)
+            {
+                await Context.Channel.SendEmbedAsync("Discord Bot", "DiscordBot was written by JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot", 
+                    ColorHelper.RandomColor(), _client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl());
+                return;
+            }
 
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(Context?.Guild?.Owner.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                 .WithDescription($"{Context?.Guild?.Owner.Username} is the owner of {Context.Guild.Name}")
-                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
+                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
                 .WithCurrentTimestamp();
 
             var embed = builder.Build();
@@ -120,7 +134,9 @@ namespace DiscordBot.Commands
         // The remainder attribute parses until the end of a command
         public async Task Echo([Remainder] [Summary("The text to echo")] string message)
         {
-            _logger.LogInformation("{username}#{discriminator} echoed: {message}", Context.User.Username, Context.User.Discriminator, message);
+            _logger.LogInformation("{username}#{discriminator} executed echo {message} on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, message, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             await ReplyAsync($"`{message}`");
         }
 
@@ -128,7 +144,10 @@ namespace DiscordBot.Commands
         [Summary ("Latency to server!")]
         public async Task Ping()
         {
-            _logger.LogInformation("{username}#{discriminator} invoked ping", Context.User.Username, Context.User.Discriminator);
+            _logger.LogInformation("{username}#{discriminator} executed ping on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var server = await _servers.GetServer(Context.Guild);
 
             var builder = new EmbedBuilder();
             builder
@@ -136,7 +155,7 @@ namespace DiscordBot.Commands
                 .WithTitle("Ping Results")
                 .WithDescription("Pong!")
                 .AddField("Round-trip latency to the WebSocket server (ms):", _client.Latency, false)
-                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
+                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor )
                 .WithCurrentTimestamp();
 
             await ReplyAsync(null, false, builder.Build());
@@ -145,25 +164,34 @@ namespace DiscordBot.Commands
         [Command("info")]
         [Summary("Retervies some basic information about a user")]
         [Alias("user", "whois")]
-        public async Task Info([Summary("Optional user to get info about")]SocketGuildUser mentionedUser = null)
+        public async Task Info([Summary("Optional user to get info about")]SocketUser mentionedUser = null)
         {
             if (mentionedUser == null)
             {
-                mentionedUser = Context.User as SocketGuildUser;
+                mentionedUser = Context.User; //as SocketGuildUser;
             }
 
-            _logger.LogInformation("{username}#{discriminator} invoked info on {target}", Context.User.Username, Context.User.Discriminator, mentionedUser);
+            _logger.LogInformation("{username}#{discriminator} executed info ({target}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, mentionedUser?.Username ?? "self", Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var server = await _servers.GetServer(Context.Guild);
 
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(mentionedUser.GetAvatarUrl() ?? mentionedUser.GetDefaultAvatarUrl())
                 .WithDescription("User information:")
-                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
+                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
                 .AddField("User ID", mentionedUser.Id, true)
                 .AddField("Discriminator", mentionedUser.Discriminator, true)
                 .AddField("Created at", mentionedUser.CreatedAt.ToString("MM/dd/yyyy"), true)
-                .AddField("Joined at", mentionedUser.JoinedAt.Value.ToString("MM/dd/yyyy"), true)
-                .AddField("Roles", string.Join(" ", mentionedUser.Roles.Select(x => x.Mention)))
-                .WithCurrentTimestamp();
+                .WithCurrentTimestamp(); ;
+
+            SocketGuildUser guildUser = mentionedUser as SocketGuildUser;
+            if (guildUser != null)
+            {
+                builder
+                    .AddField("Joined at", guildUser.JoinedAt.Value.ToString("MM/dd/yyyy"), true)
+                    .AddField("Roles", string.Join(" ", guildUser.Roles.Select(x => x.Mention)));
+            }
 
             var embed = builder.Build();
             await ReplyAsync(null, false, embed);
@@ -173,7 +201,13 @@ namespace DiscordBot.Commands
         [Summary("Retervies some basic information about a server")]
         public async Task Server()
         {
-            _logger.LogInformation("{username}#{discriminator} invoked server on {target}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
+            _logger.LogInformation("{username}#{discriminator} executed server on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if(await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
 
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(Context.Guild.IconUrl)
@@ -193,7 +227,15 @@ namespace DiscordBot.Commands
         [Summary("Show the image banner thing")]
         public async Task Image(SocketGuildUser user = null)
         {
-            if(user == null)
+            _logger.LogInformation("{username}#{discriminator} executed image on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
+            if (user == null)
             {
                 user = Context.Message.Author as SocketGuildUser;
             }
@@ -203,8 +245,6 @@ namespace DiscordBot.Commands
             var memoryStream = await _images.CreateImage(user, background);
             memoryStream.Seek(0, SeekOrigin.Begin);
             await Context.Channel.SendFileAsync(memoryStream, $"{user.Username}.png");
-
-            _logger.LogInformation("{username}#{discriminator} invoked image on {target}", Context.User.Username, Context.User.Discriminator, Context.Guild.Name);
         }
     }
 }
