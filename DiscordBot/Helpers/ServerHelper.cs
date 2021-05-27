@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
 
@@ -40,9 +41,9 @@ namespace DiscordBot.Helpers
                 return true;
             }
 
-            if(context.Guild == null)
+            if(context.Message.Channel is IDMChannel)
             {
-                return false;
+                return true;
             }
 
             return false;
