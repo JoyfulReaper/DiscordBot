@@ -1,5 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
+using DiscordBot.Helpers;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,16 +13,24 @@ namespace DiscordBot.Commands
     public class Music : ModuleBase<SocketCommandContext>
     {
         private readonly LavaNode _lavaNode;
+        private readonly ILogger<Music> _logger;
 
-        public Music(LavaNode lavaNode)
+        public Music(LavaNode lavaNode,
+            ILogger<Music> logger)
         {
             _lavaNode = lavaNode;
+            _logger = logger;
         }
 
         [Command("search")]
         [Summary("search youtube")]
         public async Task Search([Remainder]string query)
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed search ({query}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, query, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             var searchResponse = await _lavaNode.SearchYouTubeAsync(query);
             if (searchResponse.LoadStatus == LoadStatus.LoadFailed ||
                 searchResponse.LoadStatus == LoadStatus.NoMatches)
@@ -42,6 +52,16 @@ namespace DiscordBot.Commands
         [Summary("Play a song from YouTube")]
         public async Task PlayAsync([Remainder] string query)
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed play ({query}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, query, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if(await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(query))
             {
                 await ReplyAsync("Please provide search terms.");
@@ -117,6 +137,16 @@ namespace DiscordBot.Commands
         [Summary("Join voice channel")]
         public async Task JoinAsync()
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed join on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
             if (_lavaNode.HasPlayer(Context.Guild))
             {
                 await ReplyAsync("I'm already connected to a voice channel!");
@@ -144,6 +174,16 @@ namespace DiscordBot.Commands
         [Summary("Skip the currently playing track")]
         public async Task Skip()
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed skip on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
             var voiceState = Context.User as IVoiceState;
             if (!await CheckForValidState(voiceState))
             {
@@ -165,6 +205,16 @@ namespace DiscordBot.Commands
         [Summary("Pause the currently playing track")]
         public async Task Pause()
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed pause on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
             var voiceState = Context.User as IVoiceState;
             if (!await CheckForValidState(voiceState))
             {
@@ -186,6 +236,16 @@ namespace DiscordBot.Commands
         [Summary("Resume track")]
         public async Task Resume()
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed resume on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
             var voiceState = Context.User as IVoiceState;
             if (!await CheckForValidState(voiceState))
             {
