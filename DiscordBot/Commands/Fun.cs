@@ -86,6 +86,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("coinflip")]
+        [Alias("flipcoin")]
         [Summary("Flip a coin!")]
         public async Task CoinFlip()
         {
@@ -119,6 +120,27 @@ namespace DiscordBot.Commands
 
             await Context.Channel.SendEmbedAsync($"{sides} Sided Die Roll", $"You rolled a {result}",
                 ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://miro.medium.com/max/1920/0*bLJxMZ_YS0RxF-82.jpg");
+        }
+
+        [Command("RussianRoulette")]
+        [Alias("rr")]
+        [Summary("Are you feeling lucky punk?")]
+        public async Task RussianRoulette()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed RussianRoulette on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var result = _random.Next(1, 7);
+            var message = "Click! Nothing happened...";
+            if(result == 6)
+            {
+                message = "🔫 The revolver fires 🔫. Your brains leak out of your ears :(";
+            }
+
+            await Context.Channel.SendEmbedAsync("Russian Roulette", $"You pull the trigger: {message}",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://www.wealthmanagement.com/sites/wealthmanagement.com/files/styles/article_featured_standard/public/gun-one-bullet-russian-roulette.jpg?itok=Q55CNN7q");
         }
 
         [Command("lmgtfy")]
