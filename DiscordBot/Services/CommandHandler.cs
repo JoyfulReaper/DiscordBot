@@ -33,7 +33,6 @@ using System.Threading.Tasks;
 using DiscordBot.Helpers;
 using Discord.Addons.Hosting;
 using System.Threading;
-using System.Reflection;
 
 namespace DiscordBot.Services
 {
@@ -227,21 +226,15 @@ namespace DiscordBot.Services
             }
         }
 
-        public override async Task InitializeAsync(CancellationToken cancellationToken)
+        public override Task InitializeAsync(CancellationToken cancellationToken)
         {
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
             _client.ReactionAdded += OnReactionAdded;
             _commands.CommandExecuted += OnCommandExecuted;
 
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
-
             Task.Run(async () => await MuteHandler.MuteWorker(_client));
-        }
 
-        public override Task StopAsync(CancellationToken cancellationToken)
-        {
-            //Program.ExitCleanly(0);
             return Task.CompletedTask;
         }
     }

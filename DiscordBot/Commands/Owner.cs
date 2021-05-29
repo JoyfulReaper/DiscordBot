@@ -34,7 +34,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Victoria;
 
 namespace DiscordBot.Commands
 {
@@ -45,7 +44,6 @@ namespace DiscordBot.Commands
         private readonly ISettings _settings;
         private readonly ILogger<Owner> _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
-        private readonly LavaNode _lavaNode;
         private readonly IServerService _servers;
         private readonly IHostApplicationLifetime _lifetime;
         private readonly Random _random = new Random();
@@ -62,7 +60,6 @@ namespace DiscordBot.Commands
             ISettings settings,
             ILogger<Owner> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
-            LavaNode lavaNode,
             IServerService servers,
             IHostApplicationLifetime lifetime)
         {
@@ -70,7 +67,6 @@ namespace DiscordBot.Commands
             _settings = settings;
             _logger = logger;
             _discordBotSettingsRepository = discordBotSettingsRepository;
-            _lavaNode = lavaNode;
             _servers = servers;
             _lifetime = lifetime;
         }
@@ -94,7 +90,6 @@ namespace DiscordBot.Commands
             else
             {
                 IUserMessage message;
-                //await _lavaNode.DisconnectAsync();
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
 
                 if(imageUrl != null)
@@ -119,8 +114,6 @@ namespace DiscordBot.Commands
                 ShowQuitMessageIfEnabled();
                 await _servers.SendLogsAsync(Context.Guild, "Bot quitting", $"{Context.User.Mention} has requested the bot terminates.");
                 _lifetime.StopApplication();
-                //await _client.StopAsync(); // Allow the client to cleanup
-                //Program.ExitCleanly();
             }
         }
 

@@ -31,7 +31,6 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Victoria;
 
 namespace DiscordBot.Services
 {
@@ -39,26 +38,22 @@ namespace DiscordBot.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
-        private readonly LavaNode _lavaNode;
         private readonly ILogger<LoggingService> _logger;
 
         public LoggingService(DiscordSocketClient client, 
             CommandService commandService,
-            LavaNode lavaNode,
             ILogger<LoggingService> logger)
         {
             _client = client;
             _commandService = commandService;
-            _lavaNode = lavaNode;
             _logger = logger;
-
-            client.Log += Log;
-            commandService.Log += Log;
-            lavaNode.OnLog += Log;
         }
 
         public override Task InitializeAsync(CancellationToken cancellationToken)
         {
+            _client.Log += Log;
+            _commandService.Log += Log;
+
             return Task.CompletedTask;
         }
 

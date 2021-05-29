@@ -37,7 +37,6 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
 using System.IO;
-using Victoria;
 
 namespace DiscordBot
 {
@@ -78,22 +77,11 @@ namespace DiscordBot
                 .ConfigureServices((context, services) =>
                 {
                     services
+                        .AddHostedService<DiscordService>()
                         .AddHostedService<CommandHandler>()
                         .AddHostedService<LoggingService>()
-                        .AddHostedService<DiscordService>()
-                        .AddLavaNode(x =>
-                        {
-                            x.SelfDeaf = true;
-                            x.LogSeverity = LogSeverity.Info;
-                            x.Authorization = "notarealpassword";
-                            x.LogSeverity = LogSeverity.Verbose;
-                            x.UserAgent = "DiscordBot by JoyfulReaper";
-                        })
                         .AddSingleton<InteractiveService>()
                         .AddSingleton<IServerRepository, ServerRepository>()
-                        .AddSingleton<LoggingService>()
-                        .AddSingleton<IChatService, DiscordService>()
-                        .AddSingleton<CommandHandler>()
                         .AddSingleton<ISettings, Settings>()
                         .AddSingleton<IServerService, ServerService>()
                         .AddSingleton<ImageService>()
@@ -128,80 +116,5 @@ namespace DiscordBot
         {
             return "";
         }
-
-
-
-        ///// <summary>
-        ///// Setup Dependency Injection
-        ///// </summary>
-        ///// <param name="args">Command Line arguments</param>
-        ///// <returns>The DI Container</returns>
-        //internal static ServiceProvider Initialize(string[] args)
-        //{
-        //    //IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
-
-        //    IConfigurationBuilder configBuilder = new ConfigurationBuilder()
-        //        .SetBasePath(Directory.GetCurrentDirectory())
-        //        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        //        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true);
-        //        //.AddEnvironmentVariables();
-        //    IConfiguration config = configBuilder.Build();
-
-        //    CommandService commandService = new CommandService(new CommandServiceConfig
-        //    {
-        //        LogLevel = LogSeverity.Verbose,
-        //        DefaultRunMode = RunMode.Async,
-        //        CaseSensitiveCommands = false,
-        //    });
-
-        //    DiscordSocketClient socketClient = new DiscordSocketClient(new DiscordSocketConfig
-        //    {
-        //        LogLevel = LogSeverity.Verbose,
-        //        MessageCacheSize = 1000,
-        //        AlwaysDownloadUsers = true,
-        //        ExclusiveBulkDelete = true,
-        //    });
-
-        //    var serviceCollection = new ServiceCollection();
-        //    serviceCollection
-        //        .AddLogging(loggingBuilder =>
-        //            loggingBuilder.AddSerilog(dispose: true))
-        //        .AddLavaNode(x =>
-        //        {
-        //            x.SelfDeaf = true;
-        //            x.LogSeverity = LogSeverity.Info;
-        //            x.Authorization = "notarealpassword";
-        //            x.LogSeverity = LogSeverity.Verbose;
-        //            x.UserAgent = "DiscordBot by Joyful";
-        //        })
-        //        .AddSingleton<InteractiveService>()
-        //        .AddSingleton<IServerRepository, ServerRepository>()
-        //        .AddSingleton(config)
-        //        .AddSingleton<LoggingService>()
-        //        .AddSingleton(socketClient)
-        //        .AddSingleton<IChatService, DiscordService>()
-        //        .AddSingleton(commandService)
-        //        .AddSingleton<CommandHandler>()
-        //        .AddSingleton<ISettings, Settings>()
-        //        .AddSingleton<IServerService, ServerService>()
-        //        .AddSingleton<ImageService>()
-        //        .AddSingleton<IRankService, RankService>()
-        //        .AddSingleton<IAutoRoleService, AutoRoleService>()
-        //        .AddSingleton<IRankRepository, RankRepository>()
-        //        .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
-        //        .AddSingleton<ISubredditRepository, SubredditRepository>()
-        //        .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>();
-
-        //    var serviceProvider = serviceCollection.BuildServiceProvider();
-
-        //    //TODO I'm not a big fan of this
-        //    // We need this so the ctor gets called and the commandHandler actually gets instantiated
-        //    // This way the events get hooked up
-        //    // I don't think this is the place to do this, or there must be a better way
-        //    serviceProvider.GetRequiredService<CommandHandler>();
-        //    serviceProvider.GetRequiredService<LoggingService>();
-
-        //    return serviceProvider;
-        //}
     }
 }

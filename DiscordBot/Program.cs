@@ -32,11 +32,12 @@ https://github.com/Directoire/dnbds
 */
 
 
+using DiscordBot.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,16 +60,18 @@ namespace DiscordBot
             Bootstrap.SetupLogging();
             var host = Bootstrap.Initialize(args);
 
-            //StartLavaLink();
-
             using (host)
             {
                 logger.Information("Starting DiscordBot");
 
                 try
                 {
+                    StartLavaLink();
+
                     await host.StartAsync(cts.Token);
                     await host.WaitForShutdownAsync();
+
+                    ExitCleanly();
                 }
                 catch (Exception ex)
                 {
@@ -85,10 +88,7 @@ namespace DiscordBot
                         Console.WriteLine(ex.Message);
                         Console.WriteLine(ex.StackTrace);
                     }
-
-                    //ExitCleanly();
                 }
-                //ExitCleanly();
             }
         }
 
@@ -100,8 +100,9 @@ namespace DiscordBot
         {
             logger.Warning("Stopping DiscordBot");
             Console.WriteLine("DiscordBot Quitting");
+
             logger.Information("Killing Lavalink Proccess");
-            lavaLink.Kill(true);
+            //lavaLink.Kill(true);
 
             cts.Cancel();
             //Environment.Exit(exitCode);
@@ -109,88 +110,13 @@ namespace DiscordBot
 
         private static void StartLavaLink()
         {
-            logger.Information("Starting LavaLink");
-            lavaLink.StartInfo.UseShellExecute = false;
-            lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-            lavaLink.StartInfo.FileName = "java";
-            lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
-            lavaLink.StartInfo.CreateNoWindow = true;
-            lavaLink.Start();
+            //logger.Information("Starting LavaLink");
+            //lavaLink.StartInfo.UseShellExecute = false;
+            //lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            //lavaLink.StartInfo.FileName = "java";
+            //lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
+            //lavaLink.StartInfo.CreateNoWindow = true;
+            //lavaLink.Start();
         }
-
-        //static async Task Main(string[] args)
-        //{
-        //    // Initial Logging for before the Dependency Injection is setup
-        //    Bootstrap.SetupLogging();
-
-        //    // Set up Dependency Injection
-        //    var serviceProvider = Bootstrap.Initialize(args);
-        //    var chatService = serviceProvider.GetRequiredService<IChatService>();
-
-        //    if (chatService != null)
-        //    {
-        //        try
-        //        {
-        //            logger.Information("Starting LavaLink");
-        //            lavaLink.StartInfo.UseShellExecute = false;
-        //            lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-        //            lavaLink.StartInfo.FileName = "java";
-        //            lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
-        //            lavaLink.StartInfo.CreateNoWindow = true;
-        //            lavaLink.Start();
-
-        //            // Start the DiscordBot
-        //            logger.Information("Starting chatService");
-        //            await Task.Run(chatService.Start, cts.Token);
-        //        }
-        //        catch (OperationCanceledException)
-        //        {
-        //            // I don't think this will ever hit, I think I'm doing this wrong.
-        //            // TODO: Look into cancellation tokens more
-        //            logger.Warning("Cancelation was Requested");
-        //            Console.WriteLine("Cancelation was requested");
-
-        //            ExitCleanly();
-        //        }
-        //        catch(Exception e)
-        //        {
-        //            // Catch all exceptions if they aren't handeled anywhere else, log and exit.
-        //            logger.Error(e, "Unhandeled Exception Caught!");
-
-        //            Console.WriteLine("Unhandeled Exception Caught!");
-        //            Console.WriteLine(e.Message);
-        //            Console.WriteLine(e.StackTrace);
-
-        //            while(e.InnerException != null)
-        //            {
-        //                e = e.InnerException;
-        //                Console.WriteLine(e.Message);
-        //                Console.WriteLine(e.StackTrace);
-        //            }
-
-        //            ExitCleanly();
-        //        }
-        //    }
-        //    else
-        //    {
-        //        logger.Fatal("Failed to retrieve ChatService!");
-        //        Console.WriteLine("Failed to retrieve ChatService!");
-
-        //        ExitCleanly();
-        //    }
-
-        //    while(true)
-        //    {
-        //        // If the "Q" key is pressed quit the bot!
-        //        Console.WriteLine("Press 'Q' to quit!");
-        //        var key = Console.ReadKey(true).KeyChar;
-
-        //        if (char.ToLowerInvariant(key) == 'q')
-        //        {
-        //            break;
-        //        }
-        //    }
-        //    ExitCleanly();
-        //}
     }
 }

@@ -28,19 +28,16 @@ using Discord.Addons.Hosting;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.DataAccess;
-using DiscordBot.Helpers;
-using DiscordBot.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Victoria;
 
 namespace DiscordBot.Services
 {
-    class DiscordService : InitializedService, IChatService
+    class DiscordService : InitializedService
     {
         public static bool ShowJoinAndPartMessages { get; set; }
 
@@ -50,7 +47,6 @@ namespace DiscordBot.Services
         private readonly CommandService _commands;
         private readonly ILogger _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
-        private readonly LavaNode _lavaNode;
         private readonly IServerService _servers;
 
         public DiscordService(IServiceProvider serviceProvider,
@@ -59,7 +55,6 @@ namespace DiscordBot.Services
             CommandService commands,
             ILogger<DiscordService> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
-            LavaNode lavaNode,
             IServerService servers)
         {
             _serviceProvider = serviceProvider;
@@ -68,7 +63,6 @@ namespace DiscordBot.Services
             _commands = commands;
             _logger = logger;
             _discordBotSettingsRepository = discordBotSettingsRepository;
-            _lavaNode = lavaNode;
             _servers = servers;
         }
 
@@ -98,19 +92,21 @@ namespace DiscordBot.Services
 
         private async Task OnReady()
         {
+            _logger.LogInformation("SocketClient is Ready!");
             _logger.LogInformation("Connected as {username}#{discriminator}", _client.CurrentUser.Username, _client.CurrentUser.Discriminator);
 
-            if (!_lavaNode.IsConnected)
+            try
             {
-                _logger.LogDebug("Connecting to Lavalink");
-                await _lavaNode.ConnectAsync();
+                ShowJoinAndPartMessages = bool.Parse(_configuration.GetSection("ShowBotJoinMessages").Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to parse ShowBotJoinMessages. Using false.");
+                ShowJoinAndPartMessages = false;
             }
 
             var settings = await _discordBotSettingsRepository.Get();
             await _client.SetGameAsync(settings.Game);
-
-            Console.WriteLine("SocketClient is ready");
-            Console.WriteLine($"Connected as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator}");
 
             if (ShowJoinAndPartMessages)
             {
@@ -137,84 +133,13 @@ namespace DiscordBot.Services
             }
         }
 
-        public async Task Start()
-        {
-            try
-            {
-                ShowJoinAndPartMessages = bool.Parse(_configuration.GetSection("ShowBotJoinMessages").Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to parse ShowBotJoinMessages. Using false.");
-                ShowJoinAndPartMessages = false;
-            }
-
-            var settings = await _discordBotSettingsRepository.Get();
-            if(settings == null)
-            {
-                settings = GetTokenFromConsole();
-            }
-
-            try
-            {
-                await _client.LoginAsync(TokenType.Bot, settings.Token);
-            }
-            catch (Discord.Net.HttpException ex)
-            {
-                if(ex.Reason == "401: Unauthorized")
-                {
-                    _logger.LogCritical("Token is not correct!");
-                    Console.WriteLine("\nToken is incorrect.");
-                    Console.Write("Enter Token: ");
-                    settings.Token = Console.ReadLine();
-
-                    await _discordBotSettingsRepository.EditAsync(settings);
-                    Start();
-                }
-                else
-                {
-                    _logger.LogCritical(ex, "An unhandeled HttpException has occured!");
-                    Console.WriteLine("An unhandeled HttpException has occured!");
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(ex.StackTrace);
-
-                    Program.ExitCleanly(-1);
-                }
-            }
-
-            await _client.StartAsync();
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
-        }
-
-        private DiscordBotSettings GetTokenFromConsole()
-        {
-            Console.WriteLine("\nToken has not yet been saved.");
-            Console.Write("Please enter the bot's token: ");
-            var token = Console.ReadLine();
-
-            DiscordBotSettings settings = new DiscordBotSettings { Token = token, Game = "https://github.com/JoyfulReaper" };
-            _discordBotSettingsRepository.AddAsync(settings);
-
-            return settings;
-        }
-
-        public override Task InitializeAsync(CancellationToken cancellationToken)
+        public override async Task InitializeAsync(CancellationToken cancellationToken)
         {
             _client.Ready += OnReady;
             _client.MessageReceived += OnMessageReceived;
             _client.Disconnected += OnDisconncted;
 
-            try
-            {
-                ShowJoinAndPartMessages = bool.Parse(_configuration.GetSection("ShowBotJoinMessages").Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to parse ShowBotJoinMessages. Using false.");
-                ShowJoinAndPartMessages = false;
-            }
-
-            return Task.CompletedTask;
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
         }
     }
 }
