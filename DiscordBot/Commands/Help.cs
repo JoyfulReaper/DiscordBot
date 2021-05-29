@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
-    [Name("Help!")]
+    [Name("HelpHidden")]
     public class Help : InteractiveBase
     {
         private readonly CommandService _commandService;

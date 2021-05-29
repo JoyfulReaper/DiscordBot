@@ -31,6 +31,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace DiscordBot.Commands
 {
@@ -49,6 +50,7 @@ namespace DiscordBot.Commands
             "Reply hazy, try again.", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.",
             "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful."
         };
+        private readonly Random _random = new();
         private readonly ILogger<Fun> _logger;
         private readonly IServerService _servers;
 
@@ -81,6 +83,85 @@ namespace DiscordBot.Commands
                 .WithCurrentTimestamp();
 
             await ReplyAsync(null, false, builder.Build());
+        }
+
+        [Command("coinflip")]
+        [Alias("flipcoin")]
+        [Summary("Flip a coin!")]
+        public async Task CoinFlip()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed coinflip on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            string outcome = "tails";
+            if(_random.Next(2) == 1)
+            {
+                outcome = "heads";
+            }
+
+            var server = await _servers.GetServer(Context.Guild);
+
+            await Context.Channel.SendEmbedAsync("Coin flip", $"The coin landed {outcome} up.",
+                server == null ? ColorHelper.RandomColor() : server.EmbedColor, "https://www.bellevuerarecoins.com/wp-content/uploads/2013/11/bigstock-Coin-Flip-5807921.jpg");
+        }
+
+        [Command("rolldie")]
+        [Summary("Roll a die")]
+        public async Task CoinFlip([Summary("The number of side the die has")] int sides = 6)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed rolldie ({sides}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, sides, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var result = _random.Next(1, sides + 1);
+
+            await Context.Channel.SendEmbedAsync($"{sides} Sided Die Roll", $"You rolled a {result}",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://miro.medium.com/max/1920/0*bLJxMZ_YS0RxF-82.jpg");
+        }
+
+        [Command("RussianRoulette")]
+        [Alias("rr")]
+        [Summary("Are you feeling lucky punk?")]
+        public async Task RussianRoulette()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed RussianRoulette on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var result = _random.Next(1, 7);
+            var message = "Click! Nothing happened...";
+            if(result == 6)
+            {
+                message = "🔫 The revolver fires 🔫. Your brains leak out of your ears :(";
+            }
+
+            await Context.Channel.SendEmbedAsync("Russian Roulette", $"You pull the trigger: {message}",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://www.wealthmanagement.com/sites/wealthmanagement.com/files/styles/article_featured_standard/public/gun-one-bullet-russian-roulette.jpg?itok=Q55CNN7q");
+        }
+
+        [Command("lmgtfy")]
+        [Summary("Ask google, not me")]
+        public async Task LetMeGoogleThat([Summary("What to google")] [Remainder]string query = null)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed lmgtfy ({query}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, query, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var embedColor = ColorHelper.GetColor(await _servers.GetServer(Context.Guild));
+
+            if (query == null)
+            {
+                await Context.Channel.SendEmbedAsync("Bad Request", "You didn't tell me what to search for!", embedColor);
+                return;
+            }
+
+            var url = "https://lmgtfy.com/?q=" + HttpUtility.UrlEncode(query);
+            await Context.Channel.SendEmbedAsync("Let me Google that for you", $"Here is it: {url}", embedColor);
         }
     }
 }
