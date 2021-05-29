@@ -31,10 +31,13 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using DiscordBot.Helpers;
+using Discord.Addons.Hosting;
+using System.Threading;
+using System.Reflection;
 
 namespace DiscordBot.Services
 {
-    public class CommandHandler
+    public class CommandHandler : InitializedService
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
@@ -65,14 +68,6 @@ namespace DiscordBot.Services
             _images = images;
             _configuration = configuration;
             _autoRoleService = autoRoleService;
-
-            _client.MessageReceived += OnMessageReceived;
-            _client.UserJoined += OnUserJoined;
-            _client.ReactionAdded += OnReactionAdded;
-
-            _commands.CommandExecuted += OnCommandExecuted;
-
-            Task.Run(async () => await MuteHandler.MuteWorker(client));
         }
 
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
@@ -139,17 +134,34 @@ namespace DiscordBot.Services
             }
         }
 
-        private async Task OnMessageReceived(SocketMessage messageParam)
+        private async Task OnMessageReceived(SocketMessage socketMessage)
         {
-            var message = messageParam as SocketUserMessage;
+            if(!(socketMessage is SocketUserMessage message))
+            {
+                _logger.LogWarning("socketMessage not is not a SocketUserMessage");
+                return;
+            }
 
             if(message == null)
             {
-                _logger.LogDebug("message was null");
+                _logger.LogWarning("message was null");
+                return;
+            }
+
+            var guildName = (message.Channel as SocketGuildChannel)?.Name;
+            _logger.LogInformation("Message was received from {user} on: {server}/{channel}: {message}",
+                 message.Author.Username, guildName ?? "DM", message.Channel, message.Content);
+
+            if (message.Source != MessageSource.User)
+            {
+                _logger.LogInformation("Command {command} was not send by a user (Sender: {bot}). Ignoring",
+                    message.Content, message.Author.Username);
+
                 return;
             }
 
             var channel = message.Channel as SocketGuildChannel;
+
             string prefix = string.Empty;
             if (channel != null)
             {
@@ -157,25 +169,18 @@ namespace DiscordBot.Services
                 await CheckForServerInvites(message);
             }
 
-            var context = new SocketCommandContext(_client, message);
-            int position = 0;
-
-            if(message.HasStringPrefix(prefix, ref position) 
-                || message.HasMentionPrefix(_client.CurrentUser, ref position))
+            int argPosition = 0;
+            if(!message.HasStringPrefix(prefix, ref argPosition) && !message.HasMentionPrefix(_client.CurrentUser, ref argPosition))
             {
-                _logger.LogInformation("Command received: {command}", message.Content);
-
-                if (message.Author.IsBot)
-                {
-                    _logger.LogDebug("Command ({command}) was sent by another bot, ignoring", message.Content);
-                    return;
-                }
-
-               await _commands.ExecuteAsync(context, position, _serviceProvider);
+                return;
             }
+
+            var context = new SocketCommandContext(_client, message);
+            _logger.LogInformation("Command received: {command}", message.Content);
+            await _commands.ExecuteAsync(context, argPosition, _serviceProvider);
         }
 
-        private async Task CheckForServerInvites(SocketUserMessage message)
+        public static async Task CheckForServerInvites(SocketUserMessage message)
         {
             // TODO make this a setting per server
             if(message.Content.Contains("https://discord.gg/"))
@@ -223,6 +228,24 @@ namespace DiscordBot.Services
                 _logger.LogError("Error Occured for command {command}: {error}", context.Message.Content, result.Error);
                 Console.WriteLine($"The following error occured: {result.Error}");
             }
+        }
+
+        public override async Task InitializeAsync(CancellationToken cancellationToken)
+        {
+            _client.MessageReceived += OnMessageReceived;
+            _client.UserJoined += OnUserJoined;
+            _client.ReactionAdded += OnReactionAdded;
+            _commands.CommandExecuted += OnCommandExecuted;
+
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
+
+            Task.Run(async () => await MuteHandler.MuteWorker(_client));
+        }
+
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            Program.ExitCleanly(0);
+            return Task.CompletedTask;
         }
     }
 }

@@ -24,16 +24,18 @@ SOFTWARE.
 */
 
 using Discord;
+using Discord.Addons.Hosting;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Victoria;
 
 namespace DiscordBot.Services
 {
-    public class LoggingService
+    public class LoggingService : InitializedService
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
@@ -53,6 +55,11 @@ namespace DiscordBot.Services
             client.Log += Log;
             commandService.Log += Log;
             lavaNode.OnLog += Log;
+        }
+
+        public override Task InitializeAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
 
         private Task Log(LogMessage message)
