@@ -108,7 +108,7 @@ namespace DiscordBot.Commands
                 {
                     await ReplyAsync("Quit Image could not be fetched! Bye anyway!");
                     ShowQuitMessageIfEnabled();
-                    Program.ExitCleanly();
+                    //Program.ExitCleanly();
                 }
                 memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
                 message = await Context.Channel.SendFileAsync(memoryStream, "quitimage.png");

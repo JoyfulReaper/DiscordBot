@@ -241,7 +241,7 @@ namespace DiscordBot.Services
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
-            Program.ExitCleanly(0);
+            //Program.ExitCleanly(0);
             return Task.CompletedTask;
         }
     }
