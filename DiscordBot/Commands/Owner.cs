@@ -29,6 +29,7 @@ using Discord.WebSocket;
 using DiscordBot.DataAccess;
 using DiscordBot.Helpers;
 using DiscordBot.Services;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,7 @@ namespace DiscordBot.Commands
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
         private readonly IServerService _servers;
+        private readonly IHostApplicationLifetime _lifetime;
         private readonly Random _random = new Random();
 
         //TODO store these in the database
@@ -61,7 +63,8 @@ namespace DiscordBot.Commands
             ILogger<Owner> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
             LavaNode lavaNode,
-            IServerService servers)
+            IServerService servers,
+            IHostApplicationLifetime lifetime)
         {
             _client = client;
             _settings = settings;
@@ -69,6 +72,7 @@ namespace DiscordBot.Commands
             _discordBotSettingsRepository = discordBotSettingsRepository;
             _lavaNode = lavaNode;
             _servers = servers;
+            _lifetime = lifetime;
         }
 
         [Command("quit")]
@@ -114,9 +118,10 @@ namespace DiscordBot.Commands
 
                 ShowQuitMessageIfEnabled();
                 await _servers.SendLogsAsync(Context.Guild, "Bot quitting", $"{Context.User.Mention} has requested the bot terminates.");
-
-                await _client.StopAsync(); // Allow the client to cleanup
-                Program.ExitCleanly();
+                _lifetime.StopApplication();
+                await _lavaNode.DisconnectAsync();
+                //await _client.StopAsync(); // Allow the client to cleanup
+                //Program.ExitCleanly();
             }
         }
 

@@ -97,6 +97,7 @@ namespace DiscordBot.Services
 
         private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
         {
+            // TODO make this per server
             bool showMessage = false;
 
             try
@@ -148,14 +149,10 @@ namespace DiscordBot.Services
                 return;
             }
 
-            var guildName = (message.Channel as SocketGuildChannel)?.Name;
-            _logger.LogInformation("Message was received from {user} on: {server}/{channel}: {message}",
-                 message.Author.Username, guildName ?? "DM", message.Channel, message.Content);
-
             if (message.Source != MessageSource.User)
             {
-                _logger.LogInformation("Command {command} was not send by a user (Sender: {bot}). Ignoring",
-                    message.Content, message.Author.Username);
+                //_logger.LogInformation("Command {command} was not send by a user (Sender: {bot}). Ignoring",
+                //    message.Content, message.Author.Username);
 
                 return;
             }

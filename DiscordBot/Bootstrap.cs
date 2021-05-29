@@ -80,6 +80,7 @@ namespace DiscordBot
                     services
                         .AddHostedService<CommandHandler>()
                         .AddHostedService<LoggingService>()
+                        .AddHostedService<DiscordService>()
                         .AddLavaNode(x =>
                         {
                             x.SelfDeaf = true;

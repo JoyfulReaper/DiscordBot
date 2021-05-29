@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using Discord;
+using Discord.Addons.Hosting;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.DataAccess;
@@ -33,12 +34,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Victoria;
 
 namespace DiscordBot.Services
 {
-    class DiscordService : IChatService
+    class DiscordService : InitializedService, IChatService
     {
         public static bool ShowJoinAndPartMessages { get; set; }
 
@@ -68,16 +70,20 @@ namespace DiscordBot.Services
             _discordBotSettingsRepository = discordBotSettingsRepository;
             _lavaNode = lavaNode;
             _servers = servers;
-            _client.Ready += OnReady;
-            _client.MessageReceived += OnMessageReceived;
-            _client.Disconnected += OnDisconncted;
         }
 
-        private Task OnMessageReceived(SocketMessage arg)
+        private Task OnMessageReceived(SocketMessage socketMessage)
         {
-            //TODO replace this with logging / Possibly keep a database of all messages received
-            Console.WriteLine($"Message received: {arg.Author.Username} : {arg.Channel.Name} : {arg.Content}");
-            _logger.LogInformation("Message Received: {author} : {channel} : {message}", arg.Author.Username, arg.Channel.Name, arg.Content);
+            if (!(socketMessage is SocketUserMessage message))
+            {
+                _logger.LogWarning("socketMessage not is not a SocketUserMessage");
+                return Task.CompletedTask;
+            }
+
+            var guildName = (message.Channel as SocketGuildChannel)?.Name;
+
+            _logger.LogInformation("Message was received from {user} on: {server}/{channel}: {message}",
+                 message.Author.Username, guildName ?? "DM", message.Channel, message.Content);
 
             return Task.CompletedTask;
         }
@@ -190,6 +196,25 @@ namespace DiscordBot.Services
             _discordBotSettingsRepository.AddAsync(settings);
 
             return settings;
+        }
+
+        public override Task InitializeAsync(CancellationToken cancellationToken)
+        {
+            _client.Ready += OnReady;
+            _client.MessageReceived += OnMessageReceived;
+            _client.Disconnected += OnDisconncted;
+
+            try
+            {
+                ShowJoinAndPartMessages = bool.Parse(_configuration.GetSection("ShowBotJoinMessages").Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to parse ShowBotJoinMessages. Using false.");
+                ShowJoinAndPartMessages = false;
+            }
+
+            return Task.CompletedTask;
         }
     }
 }
