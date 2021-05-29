@@ -37,6 +37,7 @@ using Serilog;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 // See https://docs.stillu.cc/guides/concepts/logging.html for some information about logging
@@ -51,22 +52,43 @@ namespace DiscordBot
     {
         private static readonly Process lavaLink = new Process();
         private static readonly ILogger logger = Log.ForContext<Program>();
+        private static readonly CancellationTokenSource cts = new CancellationTokenSource();
 
         static async Task Main(string[] args)
         {
             Bootstrap.SetupLogging();
-
             var host = Bootstrap.Initialize(args);
 
-            StartLavaLink();
+            //StartLavaLink();
 
             using (host)
             {
                 logger.Information("Starting DiscordBot");
-                //await host.RunAsync();
-                await host.StartAsync();
-                await host.WaitForShutdownAsync();
-                ExitCleanly();
+
+                try
+                {
+                    await host.StartAsync(cts.Token);
+                    await host.WaitForShutdownAsync();
+                }
+                catch (Exception ex)
+                {
+                    // Catch all exceptions if they aren't handeled anywhere else, log and exit.
+                    logger.Error(ex, "Unhandeled Exception Caught!");
+
+                    Console.WriteLine("Unhandeled Exception Caught!");
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.StackTrace);
+
+                    while (ex.InnerException != null)
+                    {
+                        ex = ex.InnerException;
+                        Console.WriteLine(ex.Message);
+                        Console.WriteLine(ex.StackTrace);
+                    }
+
+                    //ExitCleanly();
+                }
+                //ExitCleanly();
             }
         }
 
@@ -81,6 +103,7 @@ namespace DiscordBot
             logger.Information("Killing Lavalink Proccess");
             lavaLink.Kill(true);
 
+            cts.Cancel();
             //Environment.Exit(exitCode);
         }
 

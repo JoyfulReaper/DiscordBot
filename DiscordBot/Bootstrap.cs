@@ -87,7 +87,7 @@ namespace DiscordBot
                             x.LogSeverity = LogSeverity.Info;
                             x.Authorization = "notarealpassword";
                             x.LogSeverity = LogSeverity.Verbose;
-                            x.UserAgent = "DiscordBot by Joyful";
+                            x.UserAgent = "DiscordBot by JoyfulReaper";
                         })
                         .AddSingleton<InteractiveService>()
                         .AddSingleton<IServerRepository, ServerRepository>()
@@ -126,7 +126,7 @@ namespace DiscordBot
 
         private static string GetToken()
         {
-            return "TOKENHERE";
+            return "";
         }
 
 

@@ -94,7 +94,7 @@ namespace DiscordBot.Commands
             else
             {
                 IUserMessage message;
-                await _lavaNode.DisconnectAsync();
+                //await _lavaNode.DisconnectAsync();
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
 
                 if(imageUrl != null)
@@ -119,7 +119,6 @@ namespace DiscordBot.Commands
                 ShowQuitMessageIfEnabled();
                 await _servers.SendLogsAsync(Context.Guild, "Bot quitting", $"{Context.User.Mention} has requested the bot terminates.");
                 _lifetime.StopApplication();
-                await _lavaNode.DisconnectAsync();
                 //await _client.StopAsync(); // Allow the client to cleanup
                 //Program.ExitCleanly();
             }
