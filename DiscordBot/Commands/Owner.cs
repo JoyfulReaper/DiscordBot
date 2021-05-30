@@ -117,7 +117,7 @@ namespace DiscordBot.Commands
                 await message.DeleteAsync();
 
                 ShowQuitMessageIfEnabled();
-                await _servers.SendLogsAsync(Context.Guild, "Bot quitting", $"{Context.User.Mention} has requested the bot terminates.");
+                await _servers.SendLogsAsync(Context.Guild, "Bot quitting", $"{Context.User.Mention} has requested the bot to terminate.");
 
                 await _client.StopAsync(); // Allow the client to cleanup
                 Program.ExitCleanly();
@@ -144,6 +144,9 @@ namespace DiscordBot.Commands
                 await _client.SetGameAsync(game);
                 settings.Game = game;
                 await _discordBotSettingsRepository.EditAsync(settings);
+
+                await ReplyAsync("Game changed!");
+                await _servers.SendLogsAsync(Context.Guild, "Game Updated", $"{Context.User.Mention} has changed the game to {game}.");
             }
         }
 
