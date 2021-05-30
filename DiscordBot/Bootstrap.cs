@@ -97,10 +97,9 @@ namespace DiscordBot
                 .AddLavaNode(x =>
                 {
                     x.SelfDeaf = true;
-                    x.LogSeverity = LogSeverity.Info;
                     x.Authorization = "notarealpassword";
                     x.LogSeverity = LogSeverity.Verbose;
-                    x.UserAgent = "DiscordBot by Joyful";
+                    x.UserAgent = "DiscordBot by JoyfulReaper";
                 })
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<IServerRepository, ServerRepository>()
