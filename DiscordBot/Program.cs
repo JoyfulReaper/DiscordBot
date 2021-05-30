@@ -41,12 +41,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-// See https://docs.stillu.cc/guides/concepts/logging.html for some information about logging
-// It's advised to wrap logging in a Task.Run so Discord.NET's gateway thread is not blocked
-// while waiting for logging data to be written
-// TODO: Write a logging helper than can be used with Task.Run and replace all logger calls with
-// this, or look into other solutions.
-
 namespace DiscordBot
 {
     class Program
@@ -71,17 +65,8 @@ namespace DiscordBot
                     StartLavaLink();
 
                     // Start the DiscordBot
-                    logger.Information("Starting chatService");
+                    logger.Information("DiscordBot Starting");
                     await Task.Run(chatService.Start, cts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    // I don't think this will ever hit, I think I'm doing this wrong.
-                    // TODO: Look into cancellation tokens more
-                    logger.Warning("Cancelation was Requested");
-                    Console.WriteLine("Cancelation was requested");
-
-                    ExitCleanly();
                 }
                 catch(Exception e)
                 {
@@ -105,7 +90,7 @@ namespace DiscordBot
             else
             {
                 logger.Fatal("Failed to retrieve ChatService!");
-                Console.WriteLine("Failed to retrieve ChatService!");
+                Console.WriteLine("Failed to start DiscordBot!");
 
                 ExitCleanly();
             }
@@ -130,7 +115,7 @@ namespace DiscordBot
         /// <param name="exitCode">Exit code to pass to the OS</param>
         public static void ExitCleanly(int exitCode = 0)
         {
-            Console.WriteLine("Quiting!");
+            Console.WriteLine("Discord Bot is quiting!");
             cts.Cancel();
             logger.Information("Killing Lavalink Proccess");
             lavaLink.Kill(true);
