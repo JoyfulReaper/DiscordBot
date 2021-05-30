@@ -23,8 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBot.DataAccess;
-using DiscordBot.Helpers;
+using DiscordBot.DataAccess.SQLite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;

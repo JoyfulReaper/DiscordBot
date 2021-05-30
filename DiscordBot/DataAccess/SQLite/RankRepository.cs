@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DiscordBot.DataAccess
+namespace DiscordBot.DataAccess.SQLite
 {
     class RankRepository : Repository<Rank>, IRankRepository
     {

@@ -34,7 +34,7 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DiscordBot.DataAccess
+namespace DiscordBot.DataAccess.SQLite
 {
     public abstract class Repository<T> : IRepository<T> where T: DatabaseEntity
     {

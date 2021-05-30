@@ -29,7 +29,7 @@ using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace DiscordBot.DataAccess
+namespace DiscordBot.DataAccess.SQLite
 {
     public class ServerRepository : Repository<Server>, IServerRepository
     {
