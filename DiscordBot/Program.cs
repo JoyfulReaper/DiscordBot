@@ -68,13 +68,7 @@ namespace DiscordBot
             {
                 try
                 {
-                    logger.Information("Starting LavaLink");
-                    lavaLink.StartInfo.UseShellExecute = false;
-                    lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-                    lavaLink.StartInfo.FileName = "java";
-                    lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
-                    lavaLink.StartInfo.CreateNoWindow = true;
-                    lavaLink.Start();
+                    StartLavaLink();
 
                     // Start the DiscordBot
                     logger.Information("Starting chatService");
@@ -142,6 +136,17 @@ namespace DiscordBot
             lavaLink.Kill(true);
 
             Environment.Exit(exitCode);
+        }
+
+        private static void StartLavaLink()
+        {
+            logger.Information("Starting LavaLink");
+            lavaLink.StartInfo.UseShellExecute = false;
+            lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            lavaLink.StartInfo.FileName = "java";
+            lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
+            lavaLink.StartInfo.CreateNoWindow = true;
+            lavaLink.Start();
         }
     }
 }
