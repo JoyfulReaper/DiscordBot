@@ -66,27 +66,27 @@ namespace DiscordBot.Services
             }
             else
             {
-                var logMessage = "[General/" + message.Severity +"] {message}";
+                var logMessage = "[{source}/" + message.Severity +"] {message}";
 
                 switch (message.Severity)
                 {
                     case LogSeverity.Critical:
-                        _logger.LogCritical(logMessage, message.Message);
+                        _logger.LogCritical(logMessage, message.Source, message.Message);
                         break;
                     case LogSeverity.Error:
-                        _logger.LogError(logMessage, message.Message);
+                        _logger.LogError(logMessage, message.Source, message.Message);
                         break;
                     case LogSeverity.Warning:
-                        _logger.LogWarning(logMessage, message.Message);
+                        _logger.LogWarning(logMessage, message.Source, message.Message);
                         break;
                     case LogSeverity.Info:
-                        _logger.LogInformation(logMessage, message.Message);
+                        _logger.LogInformation(logMessage, message.Source, message.Message);
                         break;
                     case LogSeverity.Verbose:
-                        _logger.LogInformation(logMessage, message.Message);
+                        _logger.LogInformation(logMessage, message.Source, message.Message);
                         break;
                     case LogSeverity.Debug:
-                        _logger.LogDebug(logMessage, message.Message);
+                        _logger.LogDebug(logMessage, message.Source, message.Message);
                         break;
                     default:
                         break;
