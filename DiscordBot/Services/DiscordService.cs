@@ -34,6 +34,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Victoria;
 
 namespace DiscordBot.Services
 {
@@ -48,6 +49,7 @@ namespace DiscordBot.Services
         private readonly ILogger _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly IServerService _servers;
+        private readonly LavaNode _lavaNode;
 
         public DiscordService(IServiceProvider serviceProvider,
             DiscordSocketClient client,
@@ -55,7 +57,8 @@ namespace DiscordBot.Services
             CommandService commands,
             ILogger<DiscordService> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
-            IServerService servers)
+            IServerService servers,
+            LavaNode lavaNode)
         {
             _serviceProvider = serviceProvider;
             _client = client;
@@ -64,6 +67,7 @@ namespace DiscordBot.Services
             _logger = logger;
             _discordBotSettingsRepository = discordBotSettingsRepository;
             _servers = servers;
+            _lavaNode = lavaNode;
         }
 
         private Task OnMessageReceived(SocketMessage socketMessage)
@@ -103,6 +107,12 @@ namespace DiscordBot.Services
             {
                 _logger.LogWarning(ex, "Failed to parse ShowBotJoinMessages. Using false.");
                 ShowJoinAndPartMessages = false;
+            }
+
+            if (!_lavaNode.IsConnected)
+            {
+                _logger.LogInformation("Connecting to LavaLink!");
+                _lavaNode.ConnectAsync();
             }
 
             var settings = await _discordBotSettingsRepository.Get();

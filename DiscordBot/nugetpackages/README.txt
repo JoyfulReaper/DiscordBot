@@ -1,1 +1,1 @@
-The offical package is currently broken, so I built it myself
+I had issues with these nuget packages, and had to make modifications.

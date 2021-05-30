@@ -32,12 +32,11 @@ https://github.com/Directoire/dnbds
 */
 
 
-using DiscordBot.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -102,7 +101,7 @@ namespace DiscordBot
             Console.WriteLine("DiscordBot Quitting");
 
             logger.Information("Killing Lavalink Proccess");
-            //lavaLink.Kill(true);
+            lavaLink.Kill(true);
 
             cts.Cancel();
             //Environment.Exit(exitCode);
@@ -110,13 +109,13 @@ namespace DiscordBot
 
         private static void StartLavaLink()
         {
-            //logger.Information("Starting LavaLink");
-            //lavaLink.StartInfo.UseShellExecute = false;
-            //lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-            //lavaLink.StartInfo.FileName = "java";
-            //lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
-            //lavaLink.StartInfo.CreateNoWindow = true;
-            //lavaLink.Start();
+            logger.Information("Starting LavaLink");
+            lavaLink.StartInfo.UseShellExecute = false;
+            lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            lavaLink.StartInfo.FileName = "java";
+            lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
+            lavaLink.StartInfo.CreateNoWindow = true;
+            lavaLink.Start();
         }
     }
 }

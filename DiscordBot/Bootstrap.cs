@@ -37,6 +37,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
 using System.IO;
+using Victoria;
 
 namespace DiscordBot
 {
@@ -90,7 +91,12 @@ namespace DiscordBot
                         .AddSingleton<IRankRepository, RankRepository>()
                         .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
                         .AddSingleton<ISubredditRepository, SubredditRepository>()
-                        .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>();
+                        .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>()
+                        .AddLavaNode(x =>
+                        {
+                            x.SelfDeaf = true;
+                            x.Authorization = "notarealpassword";
+                        });
                 })
                 .UseConsoleLifetime();
 
@@ -114,7 +120,7 @@ namespace DiscordBot
 
         private static string GetToken()
         {
-            return "";
+            return "TOKENHERE";
         }
     }
 }
