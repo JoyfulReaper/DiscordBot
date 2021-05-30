@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using DiscordBot.Helpers;
+using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Text;
@@ -14,12 +15,15 @@ namespace DiscordBot.Commands
     {
         private readonly LavaNode _lavaNode;
         private readonly ILogger<Music> _logger;
+        private readonly ISettings _settings;
 
         public Music(LavaNode lavaNode,
-            ILogger<Music> logger)
+            ILogger<Music> logger,
+            ISettings settings)
         {
             _lavaNode = lavaNode;
             _logger = logger;
+            _settings = settings;
         }
 
         [Command("search")]
@@ -30,6 +34,11 @@ namespace DiscordBot.Commands
 
             _logger.LogInformation("{username}#{discriminator} executed search ({query}) on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, query, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if(!CheckIfLavaLinkIsEnabled())
+            {
+                return;
+            }
 
             var searchResponse = await _lavaNode.SearchYouTubeAsync(query);
             if (searchResponse.LoadStatus == LoadStatus.LoadFailed ||
@@ -57,7 +66,12 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed play ({query}) on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, query, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            if(await ServerHelper.CheckIfContextIsDM(Context))
+            if (!CheckIfLavaLinkIsEnabled())
+            {
+                return;
+            }
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
             {
                 return;
             }
@@ -142,6 +156,11 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed join on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
+            if (!CheckIfLavaLinkIsEnabled())
+            {
+                return;
+            }
+
             if (await ServerHelper.CheckIfContextIsDM(Context))
             {
                 return;
@@ -179,6 +198,11 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed skip on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
+            if (!CheckIfLavaLinkIsEnabled())
+            {
+                return;
+            }
+
             if (await ServerHelper.CheckIfContextIsDM(Context))
             {
                 return;
@@ -210,6 +234,11 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed pause on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
+            if (!CheckIfLavaLinkIsEnabled())
+            {
+                return;
+            }
+
             if (await ServerHelper.CheckIfContextIsDM(Context))
             {
                 return;
@@ -240,6 +269,11 @@ namespace DiscordBot.Commands
 
             _logger.LogInformation("{username}#{discriminator} executed resume on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if (!CheckIfLavaLinkIsEnabled())
+            {
+                return;
+            }
 
             if (await ServerHelper.CheckIfContextIsDM(Context))
             {
@@ -291,6 +325,17 @@ namespace DiscordBot.Commands
             if (voiceState?.VoiceChannel == null)
             {
                 await ReplyAsync("You must be connected to a voice channel!");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool CheckIfLavaLinkIsEnabled()
+        {
+            if(!_settings.EnableLavaLink)
+            {
+                ReplyAsync("Lavalink is not running :(");
                 return false;
             }
 

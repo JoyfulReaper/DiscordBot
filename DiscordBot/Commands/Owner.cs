@@ -89,8 +89,12 @@ namespace DiscordBot.Commands
             }
             else
             {
+                if (_settings.EnableLavaLink)
+                {
+                    await _lavaNode.DisconnectAsync();
+                }
+
                 IUserMessage message;
-                await _lavaNode.DisconnectAsync();
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
 
                 if(imageUrl != null)

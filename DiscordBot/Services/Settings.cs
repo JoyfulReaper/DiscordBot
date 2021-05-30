@@ -38,7 +38,13 @@ namespace DiscordBot.Services
         public string OwnerDiscriminator { get; private set; }
         public string WelcomeMessage { get; private set; }
         public string DefaultPrefix { get; private set; }
+        public bool EnableLavaLink
+        {
+            get => enableLavaLink;
+            set { enableLavaLink = value; }
+        }
 
+        private bool enableLavaLink;
         private readonly IConfiguration _configuration;
         private readonly ILogger<Settings> _logger;
 
@@ -47,6 +53,7 @@ namespace DiscordBot.Services
         {
             _configuration = configuration;
             _logger = logger;
+
             Initialize();
         }
 
@@ -62,6 +69,11 @@ namespace DiscordBot.Services
             else
             {
                 throw new InvalidOperationException("DatabaseType is not valid.");
+            }
+
+            if (!bool.TryParse(_configuration.GetSection("StartLavaLink").Value, out enableLavaLink))
+            {
+                _logger.LogWarning("Unable to parse StartLavaLink, using {value}", EnableLavaLink);
             }
 
             OwnerName = _configuration.GetSection("OwnerName").Value ?? "JoyfulReaper";

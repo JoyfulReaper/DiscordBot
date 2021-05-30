@@ -35,5 +35,6 @@ namespace DiscordBot.Services
         string OwnerDiscriminator { get; }
         string OwnerName { get; }
         string WelcomeMessage { get; }
+        bool EnableLavaLink { get; }
     }
 }

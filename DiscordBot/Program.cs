@@ -128,8 +128,12 @@ namespace DiscordBot
         {
             Console.WriteLine("Discord Bot is quiting!");
             _cts.Cancel();
-            _logger.Information("Killing Lavalink Proccess");
-            _lavaLink.Kill(true);
+
+            if (_startLavaLink)
+            {
+                _logger.Information("Killing Lavalink Proccess");
+                _lavaLink.Kill(true);
+            }
 
             Environment.Exit(exitCode);
         }

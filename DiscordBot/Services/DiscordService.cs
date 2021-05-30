@@ -50,6 +50,7 @@ namespace DiscordBot.Services
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
         private readonly IServerService _servers;
+        private readonly ISettings _settings;
 
         public DiscordService(IServiceProvider serviceProvider,
             DiscordSocketClient client,
@@ -58,7 +59,8 @@ namespace DiscordBot.Services
             ILogger<DiscordService> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
             LavaNode lavaNode,
-            IServerService servers)
+            IServerService servers,
+            ISettings settings)
         {
             _serviceProvider = serviceProvider;
             _client = client;
@@ -68,6 +70,8 @@ namespace DiscordBot.Services
             _discordBotSettingsRepository = discordBotSettingsRepository;
             _lavaNode = lavaNode;
             _servers = servers;
+            _settings = settings;
+
             _client.Ready += OnReady;
             _client.MessageReceived += OnMessageReceived;
             _client.Disconnected += OnDisconncted;
@@ -94,7 +98,7 @@ namespace DiscordBot.Services
         {
             _logger.LogInformation("Connected as {username}#{discriminator}", _client.CurrentUser.Username, _client.CurrentUser.Discriminator);
 
-            if (!_lavaNode.IsConnected)
+            if (_settings.EnableLavaLink && !_lavaNode.IsConnected)
             {
                 _logger.LogDebug("Connecting to Lavalink");
                 await _lavaNode.ConnectAsync();
