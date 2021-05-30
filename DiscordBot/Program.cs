@@ -33,6 +33,7 @@ https://github.com/Directoire/dnbds
 
 
 using DiscordBot.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
@@ -45,9 +46,10 @@ namespace DiscordBot
 {
     class Program
     {
-        private static readonly CancellationTokenSource cts = new CancellationTokenSource();
-        private static readonly Process lavaLink = new Process();
-        private static readonly ILogger logger = Log.ForContext<Program>();
+        private static readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private static readonly Process _lavaLink = new Process();
+        private static readonly ILogger _logger = Log.ForContext<Program>();
+        private static bool _startLavaLink = false;
 
         static async Task Main(string[] args)
         {
@@ -57,21 +59,30 @@ namespace DiscordBot
             // Set up Dependency Injection
             var serviceProvider = Bootstrap.Initialize(args);
             var chatService = serviceProvider.GetRequiredService<IChatService>();
+            var config = serviceProvider.GetRequiredService<IConfiguration>();
+
+            if (!bool.TryParse(config.GetSection("StartLavaLink").Value, out _startLavaLink))
+            {
+                _logger.Warning("Unable to parse StartLavaLink, using {value}", _startLavaLink);
+            }
 
             if (chatService != null)
             {
                 try
                 {
-                    StartLavaLink();
+                    if (_startLavaLink)
+                    {
+                        StartLavaLink();
+                    }
 
                     // Start the DiscordBot
-                    logger.Information("DiscordBot Starting");
-                    await Task.Run(chatService.Start, cts.Token);
+                    _logger.Information("DiscordBot Starting");
+                    await Task.Run(chatService.Start, _cts.Token);
                 }
                 catch(Exception e)
                 {
                     // Catch all exceptions if they aren't handeled anywhere else, log and exit.
-                    logger.Error(e, "Unhandeled Exception Caught!");
+                    _logger.Error(e, "Unhandeled Exception Caught!");
 
                     Console.WriteLine("Unhandeled Exception Caught!");
                     Console.WriteLine(e.Message);
@@ -89,7 +100,7 @@ namespace DiscordBot
             }
             else
             {
-                logger.Fatal("Failed to retrieve ChatService!");
+                _logger.Fatal("Failed to retrieve ChatService!");
                 Console.WriteLine("Failed to start DiscordBot!");
 
                 ExitCleanly();
@@ -116,22 +127,22 @@ namespace DiscordBot
         public static void ExitCleanly(int exitCode = 0)
         {
             Console.WriteLine("Discord Bot is quiting!");
-            cts.Cancel();
-            logger.Information("Killing Lavalink Proccess");
-            lavaLink.Kill(true);
+            _cts.Cancel();
+            _logger.Information("Killing Lavalink Proccess");
+            _lavaLink.Kill(true);
 
             Environment.Exit(exitCode);
         }
 
         private static void StartLavaLink()
         {
-            logger.Information("Starting LavaLink");
-            lavaLink.StartInfo.UseShellExecute = false;
-            lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-            lavaLink.StartInfo.FileName = "java";
-            lavaLink.StartInfo.Arguments = @"-jar Lavalink.jar";
-            lavaLink.StartInfo.CreateNoWindow = true;
-            lavaLink.Start();
+            _logger.Information("Starting LavaLink");
+            _lavaLink.StartInfo.UseShellExecute = false;
+            _lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            _lavaLink.StartInfo.FileName = "java";
+            _lavaLink.StartInfo.Arguments = @"-jar Lavalink.jar";
+            _lavaLink.StartInfo.CreateNoWindow = true;
+            _lavaLink.Start();
         }
     }
 }
