@@ -144,7 +144,7 @@ namespace DiscordBot
             lavaLink.StartInfo.UseShellExecute = false;
             lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
             lavaLink.StartInfo.FileName = "java";
-            lavaLink.StartInfo.Arguments = @"-jar .\LavaLink\Lavalink.jar";
+            lavaLink.StartInfo.Arguments = @"-jar Lavalink.jar";
             lavaLink.StartInfo.CreateNoWindow = true;
             lavaLink.Start();
         }
