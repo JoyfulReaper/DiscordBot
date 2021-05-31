@@ -25,7 +25,7 @@ namespace DiscordBot.Attributes
             {
                 var user = await context.Guild.GetUserAsync(context.User.Id) as SocketGuildUser;
                 // If this command was executed by a user with the appropriate role, return a success
-                if (gUser.Roles.Any(r => r.Name == _name))
+                if (gUser.Roles.Any(r => r.Name.ToLowerInvariant() == _name.ToLowerInvariant()))
                     // Since no async work is done, the result has to be wrapped with `Task.FromResult` to avoid compiler errors
                     return await Task.FromResult(PreconditionResult.FromSuccess());
                 // Since it wasn't, fail
