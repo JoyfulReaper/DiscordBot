@@ -45,13 +45,7 @@ namespace DiscordBot.DataAccess.SQLite
 
         public async Task<Server> GetByServerId(ulong guildId)
         {
-            //var parameters = GetDynamicParameters()
             var queryResult = await QuerySingleOrDefaultAsync<Server>($"SELECT * FROM {TableName} WHERE GuildId = @GuildId;", new { GuildId = guildId });
-
-            //try
-            //{
-            //    queryResult.EmbedColor
-            //}
 
             return queryResult;
         }
@@ -61,8 +55,8 @@ namespace DiscordBot.DataAccess.SQLite
             var parameters = GetDynamicParameters(entity);
 
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} " +
-                $"(GuildId, Prefix, SubredditLearning, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor, AllowInvites)" +
-                "VALUES (@GuildId, @Prefix, @SubredditLearning, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor, @AllowInvites); " +
+                $"(GuildId, Prefix, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor, AllowInvites)" +
+                "VALUES (@GuildId, @Prefix, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor, @AllowInvites); " +
                 "SELECT last_insert_rowid();",
                 parameters);
 
@@ -77,7 +71,6 @@ namespace DiscordBot.DataAccess.SQLite
             parameters.Add("@Id", entity.Id);
             parameters.Add("@GuildId", entity.GuildId);
             parameters.Add("@Prefix", entity.Prefix);
-            parameters.Add("@SubredditLearning", entity.SubredditLearning);
             parameters.Add("@WelcomeChannel", entity.WelcomeChannel);
             parameters.Add("@WelcomeBackground", entity.WelcomeBackground);
             parameters.Add("@LoggingChannel", entity.LoggingChannel);
@@ -103,7 +96,7 @@ namespace DiscordBot.DataAccess.SQLite
             var parameters = GetDynamicParameters(entity);
 
             await ExecuteAsync($"UPDATE {TableName} " +
-                $"SET Prefix = @Prefix, GuildId = @GuildId, SubredditLearning = @SubredditLearning, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground, " +
+                $"SET Prefix = @Prefix, GuildId = @GuildId, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground, " +
                 $"EmbedColor = @EmbedColor, LoggingChannel = @LoggingChannel, AllowInvites = @AllowInvites " +
                 $"WHERE Id = @Id;",
                 parameters);

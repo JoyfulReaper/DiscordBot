@@ -44,6 +44,38 @@ namespace DiscordBot.DataAccess.SQLite
             _settings = settings;
         }
 
+        public async Task EnableSubredditLearning(ulong guildId)
+        {
+            var queryResult = await QueryFirstAsync<int>($"SELECT COUNT (Id) FROM ServerReddit WHERE ID = @Id;", new { Id = guildId });
+            if (queryResult == 0)
+            {
+                await ExecuteAsync("INSERT INTO ServerReddit (SubredditLearning, ServerId) VALUES (1, @ServerId);", new { ServerId = guildId });
+            }
+            else
+            {
+                await ExecuteAsync("UPDATE ServerReddit SET SubredditLearning = 1, ServerId = @ServerId;", new { ServerId = guildId });
+            }
+        }
+
+        public async Task DisableSubredditLearning(ulong guildId)
+        {
+            var queryResult = await QueryFirstAsync<int>($"SELECT COUNT (Id) FROM ServerReddit WHERE ID = @Id;", new { Id = guildId });
+            if (queryResult == 0)
+            {
+                await ExecuteAsync("INSERT INTO ServerReddit (SubredditLearning, ServerId) VALUES (0, @ServerId);", new { ServerId = guildId });
+            }
+            else
+            {
+                await ExecuteAsync("UPDATE ServerReddit SET SubredditLearning = 0, ServerId = @ServerId;", new { ServerId = guildId });
+            }
+        }
+
+        public async Task<bool> IsSubredditLearningEnabled(ulong guildId)
+        {
+            var queryResult = await QueryFirstAsync<bool>($"SELECT SubredditLearning FROM ServerReddit WHERE ServerId = @ServerId;", new { ServerId = guildId });
+            return queryResult;
+        }
+
         public async Task<List<Subreddit>> GetSubredditListByServerId(ulong guildId)
         {
             var queryResult = await QueryAsync<Subreddit>($"SELECT r.Id, Name " +
@@ -72,7 +104,7 @@ namespace DiscordBot.DataAccess.SQLite
         public async Task<Subreddit> GetSubreddit(string name)
         {
             var queryResult = await QueryFirstOrDefaultAsync<Subreddit>($"SELECT * " +
-                $"FROM {TableName} WHERE @Name = Name;",
+                $"FROM Subreddit WHERE @Name = Name;",
                 new { Name = name });
 
             return queryResult;
@@ -80,7 +112,7 @@ namespace DiscordBot.DataAccess.SQLite
 
         public async override Task AddAsync(Subreddit entity)
         {
-            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Name) " +
+            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO Subreddit (Name) " +
                 $"VALUES (@Name); select last_insert_rowid();", entity);
 
             entity.Id = queryResult;
@@ -105,7 +137,7 @@ namespace DiscordBot.DataAccess.SQLite
 
         public async override Task DeleteAsync(Subreddit entity)
         {
-            await ExecuteAsync($"DELETE FROM {TableName} WHERE Id = @Id;",
+            await ExecuteAsync($"DELETE FROM Subreddit WHERE Id = @Id;",
                 new { Id = entity.Id });
         }
 
@@ -133,7 +165,7 @@ namespace DiscordBot.DataAccess.SQLite
 
         public async override Task EditAsync(Subreddit entity)
         {
-            await ExecuteAsync($"UPDATE {TableName} SET Name = @Name " +
+            await ExecuteAsync($"UPDATE Subreddit SET Name = @Name " +
                 $"WHERE Id = @Id;", entity);
         }
     }

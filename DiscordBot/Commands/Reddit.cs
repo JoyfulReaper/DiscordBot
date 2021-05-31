@@ -179,21 +179,21 @@ namespace DiscordBot.Commands
 
             if(value == null)
             {
-                await ReplyAsync($"Subreddit learning is {(server.SubredditLearning ? "enabled" : "disabled")}");
+                await ReplyAsync($"Subreddit learning is {(await _subredditRepository.IsSubredditLearningEnabled(server.GuildId) ? "enabled" : "disabled")}");
                 return;
             }
 
             if (value.ToLowerInvariant() == "on")
             {
-                server.SubredditLearning = true;
-                //await ReplyAsync("Subreddit learning enabled");
+                await _subredditRepository.EnableSubredditLearning(server.GuildId);
+
                 await Context.Channel.SendEmbedAsync("Subreddit Learning", "Subreddit learning enabled", await _servers.GetEmbedColor(Context.Guild.Id));
                 await _servers.SendLogsAsync(Context.Guild, "Subreddit Learning", $"{Context.User.Mention} enabled subreddit learning");
             }
             else if (value.ToLowerInvariant() == "off")
             {
-                server.SubredditLearning = false;
-                //await ReplyAsync("Subreddit learning disabled");
+                await _subredditRepository.DisableSubredditLearning(server.Id);
+
                 await Context.Channel.SendEmbedAsync("Subreddit Learning", "Subreddit learning disabled", await _servers.GetEmbedColor(Context.Guild.Id));
                 await _servers.SendLogsAsync(Context.Guild, "Subreddit Learning", $"{Context.User.Mention} disabled subreddit learning");
             }
@@ -261,7 +261,7 @@ namespace DiscordBot.Commands
             if (!subreddits.Any(x => x.Name.ToLowerInvariant() == subreddit.ToLowerInvariant()))
             {
                 var server = await _serverRepository.GetByServerId(Context.Guild.Id);
-                if (!server.SubredditLearning)
+                if (!await _subredditRepository.IsSubredditLearningEnabled(Context.Guild.Id))
                 {
                     await Context.Channel.SendMessageAsync("Subreddit is not known and learning is disabled for this server.");
                     return false;

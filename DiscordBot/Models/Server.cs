@@ -39,10 +39,6 @@ namespace DiscordBot.Models
         /// </summary>
         public string Prefix { get; set; }
         /// <summary>
-        /// Enable or disable learning subreddits
-        /// </summary>
-        public bool SubredditLearning { get; set; } = false;
-        /// <summary>
         /// Channel to send welcome messages to
         /// </summary>
         public ulong WelcomeChannel { get; set; }
