@@ -36,9 +36,12 @@ namespace DiscordBot.DataAccess
         Task DeleteAsync(string subreddit);
         Task DeleteAsync(Subreddit entity);
         Task DeleteAsync(ulong serverId, ulong subreddit);
+        Task DisableSubredditLearning(ulong guildId);
         Task EditAsync(Subreddit entity);
+        Task EnableSubredditLearning(ulong guildId);
         Task<Subreddit> GetSubreddit(string name);
         Task<Subreddit> GetSubredditByServerId(ulong guildId, string subreddit);
         Task<List<Subreddit>> GetSubredditListByServerId(ulong guildId);
+        Task<bool> IsSubredditLearningEnabled(ulong guildId);
     }
 }

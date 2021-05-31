@@ -28,6 +28,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.DataAccess;
+using DiscordBot.DataAccess.SQLite;
 using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,14 +67,14 @@ namespace DiscordBot
         /// <returns>The DI Container</returns>
         internal static ServiceProvider Initialize(string[] args)
         {
-            //IConfiguration config = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
-
             IConfigurationBuilder configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true);
                 //.AddEnvironmentVariables();
             IConfiguration config = configBuilder.Build();
+
+            var database = config.GetSection("DatabaseType").Value;
 
             CommandService commandService = new CommandService(new CommandServiceConfig
             {
@@ -85,7 +86,7 @@ namespace DiscordBot
             DiscordSocketClient socketClient = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Verbose,
-                MessageCacheSize = 1000,
+                MessageCacheSize = 500,
                 AlwaysDownloadUsers = true,
                 ExclusiveBulkDelete = true,
             });
@@ -102,7 +103,6 @@ namespace DiscordBot
                     x.UserAgent = "DiscordBot by JoyfulReaper";
                 })
                 .AddSingleton<InteractiveService>()
-                .AddSingleton<IServerRepository, ServerRepository>()
                 .AddSingleton(config)
                 .AddSingleton<LoggingService>()
                 .AddSingleton(socketClient)
@@ -110,21 +110,33 @@ namespace DiscordBot
                 .AddSingleton(commandService)
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<ISettings, Settings>()
-                .AddSingleton<IServerService, ServerService>()
-                .AddSingleton<ImageService>()
-                .AddSingleton<IRankService, RankService>()
-                .AddSingleton<IAutoRoleService, AutoRoleService>()
-                .AddSingleton<IRankRepository, RankRepository>()
-                .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
-                .AddSingleton<ISubredditRepository, SubredditRepository>()
-                .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>();
+                .AddSingleton<ImageService>();
+
+
+            switch(database)
+            {
+                case "SQLite":
+                    serviceCollection
+                        .AddSingleton<IServerRepository, ServerRepository>()
+                        .AddSingleton<IRankService, RankService>()
+                        .AddSingleton<IAutoRoleService, AutoRoleService>()
+                        .AddSingleton<IRankRepository, RankRepository>()
+                        .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
+                        .AddSingleton<ISubredditRepository, SubredditRepository>()
+                        .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>()
+                        .AddSingleton<IServerService, ServerService>();
+                    break;
+                default:
+                    Log.Logger.Fatal("{database} is not supported", database);
+                    Console.WriteLine($"{database} is not supported", database);
+                    Environment.Exit(-1);
+                    break;
+
+            }
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            //TODO I'm not a big fan of this
-            // We need this so the ctor gets called and the commandHandler actually gets instantiated
-            // This way the events get hooked up
-            // I don't think this is the place to do this, or there must be a better way
+            // Create an instance of these so the event handlers get registered
             serviceProvider.GetRequiredService<CommandHandler>();
             serviceProvider.GetRequiredService<LoggingService>();
 

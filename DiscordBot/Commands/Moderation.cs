@@ -34,6 +34,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DiscordBot.Models;
 using System;
+using DiscordBot.DataAccess;
 
 namespace DiscordBot.Commands
 {
@@ -44,18 +45,20 @@ namespace DiscordBot.Commands
         private readonly ILogger<Moderation> _logger;
         private readonly IServerService _servers;
         private readonly IConfiguration _configuration;
+        private readonly IServerRepository _serverRepository;
         private readonly int _prefixMaxLength;
 
         public Moderation(DiscordSocketClient client,
             ILogger<Moderation> logger,
             IServerService servers,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IServerRepository serverRepository)
         {
             _client = client;
             _logger = logger;
             _servers = servers;
             _configuration = configuration;
-
+            _serverRepository = serverRepository;
             var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
             if (int.TryParse(prefixConfigValue, out int maxLength))
             {
@@ -66,6 +69,47 @@ namespace DiscordBot.Commands
                 _prefixMaxLength = 8;
                 _logger.LogError("Unable to set max prefix length, using default: {defaultValue}", _prefixMaxLength);
             }
+        }
+
+        [Command("serverinvites")]
+        [Alias("allowinvites")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("Enable or disable server invites")]
+        public async Task ServerInvites([Summary("On to allow, off to disallow")]string enabled = null)
+        { 
+            var server = await _servers.GetServer(Context.Guild);
+
+            if(enabled == null)
+            {
+                var message = "off";
+                if(server.AllowInvites)
+                {
+                    message = "on";
+                }
+                await ReplyAsync($"Server invites are turned {message}.");
+                return;
+            }
+
+            if (enabled.ToLowerInvariant() == "on")
+            {
+                server.AllowInvites = true;
+            }
+            else if(enabled.ToLowerInvariant() == "off")
+            {
+                server.AllowInvites = false;
+            }
+            else
+            {
+                await ReplyAsync("Would you like to turn server invites `on` or `off`?");
+                return;
+            }
+
+            await Context.Channel.SendEmbedAsync("Server Invites", $"Server invites have been turned {enabled}",
+                ColorHelper.GetColor(server));
+
+            await _servers.SendLogsAsync(Context.Guild, "Server Invites", $"Server invites have been turned {enabled} by {Context.User.Mention}");
+
+            await _serverRepository.EditAsync(server);
         }
 
         [Command("kick")]

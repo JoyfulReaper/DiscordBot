@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBot.DataAccess;
+using DiscordBot.DataAccess.SQLite;
 
 namespace DiscordBot.Services
 {
@@ -35,5 +35,6 @@ namespace DiscordBot.Services
         string OwnerDiscriminator { get; }
         string OwnerName { get; }
         string WelcomeMessage { get; }
+        bool EnableLavaLink { get; }
     }
 }

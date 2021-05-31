@@ -23,40 +23,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
-using System.Collections.Generic;
+using System;
+using System.Diagnostics;
+using System.IO;
+using Serilog;
 
-namespace DiscordBot.Models
+namespace DiscordBot.Helpers
 {
-    public class Server : DatabaseEntity
+    class LavaLinkHelper
     {
-        /// <summary>
-        /// Id of the Discord server/Guild
-        /// </summary>
-        public ulong GuildId { get; set; }
-        /// <summary>
-        /// Prefix the bot will respond to in the server/guild
-        /// </summary>
-        public string Prefix { get; set; }
-        /// <summary>
-        /// Channel to send welcome messages to
-        /// </summary>
-        public ulong WelcomeChannel { get; set; }
-        /// <summary>
-        /// The background image to use for the welcome banner image
-        /// </summary>
-        public string WelcomeBackground { get; set; }
-        /// <summary>
-        /// Channel to send logs to
-        /// </summary>
-        public ulong LoggingChannel { get; set; }
-        /// <summary>
-        /// Embed color
-        /// </summary>
-        public Color EmbedColor { get; set; }
-        /// <summary>
-        /// Allow invites to other discord servers
-        /// </summary>
-        public bool AllowInvites { get; set; } = true;
+        private static Process _lavaLink = new Process();
+
+        public static void StartLavaLink()
+        {
+            Log.Information("Starting LavaLink");
+            _lavaLink.StartInfo.UseShellExecute = false;
+            _lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            _lavaLink.StartInfo.FileName = "java";
+            _lavaLink.StartInfo.Arguments = @"-jar Lavalink.jar";
+            _lavaLink.StartInfo.CreateNoWindow = true;
+            _lavaLink.Start();
+        }
+
+        public static void StopLavaLink()
+        {
+            Log.Information("Killing LavaLink");
+            _lavaLink.Kill(true);
+        }
+
+        public static bool isLavaLinkRunning()
+        {
+            try
+            {
+                var id = _lavaLink.Id;
+            }
+            catch(InvalidOperationException)
+            {
+                return false;
+            }
+
+            return !_lavaLink.HasExited;
+        }
     }
 }

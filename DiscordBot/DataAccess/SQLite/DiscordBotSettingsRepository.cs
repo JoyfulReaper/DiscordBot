@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 
-namespace DiscordBot.DataAccess
+namespace DiscordBot.DataAccess.SQLite
 {
     public class DiscordBotSettingsRepository : Repository<DiscordBotSettings>, IDiscordBotSettingsRepository
     {

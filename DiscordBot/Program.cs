@@ -32,28 +32,23 @@ https://github.com/Directoire/dnbds
 */
 
 
+using DiscordBot.Helpers;
 using DiscordBot.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-
-// See https://docs.stillu.cc/guides/concepts/logging.html for some information about logging
-// It's advised to wrap logging in a Task.Run so Discord.NET's gateway thread is not blocked
-// while waiting for logging data to be written
-// TODO: Write a logging helper than can be used with Task.Run and replace all logger calls with
-// this, or look into other solutions.
 
 namespace DiscordBot
 {
     class Program
     {
-        private static readonly CancellationTokenSource cts = new CancellationTokenSource();
-        private static readonly Process lavaLink = new Process();
-        private static readonly ILogger logger = Log.ForContext<Program>();
+        private static readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private static readonly ILogger _logger = Log.ForContext<Program>();
+        private static bool _startLavaLink = false;
 
         static async Task Main(string[] args)
         {
@@ -63,30 +58,30 @@ namespace DiscordBot
             // Set up Dependency Injection
             var serviceProvider = Bootstrap.Initialize(args);
             var chatService = serviceProvider.GetRequiredService<IChatService>();
+            var config = serviceProvider.GetRequiredService<IConfiguration>();
+
+            if (!bool.TryParse(config.GetSection("StartLavaLink").Value, out _startLavaLink))
+            {
+                _logger.Warning("Unable to parse StartLavaLink, using {value}", _startLavaLink);
+            }
 
             if (chatService != null)
             {
                 try
                 {
-                    StartLavaLink();
+                    if (_startLavaLink)
+                    {
+                        LavaLinkHelper.StartLavaLink();
+                    }
 
                     // Start the DiscordBot
-                    logger.Information("Starting chatService");
-                    await Task.Run(chatService.Start, cts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    // I don't think this will ever hit, I think I'm doing this wrong.
-                    // TODO: Look into cancellation tokens more
-                    logger.Warning("Cancelation was Requested");
-                    Console.WriteLine("Cancelation was requested");
-
-                    ExitCleanly();
+                    _logger.Information("DiscordBot Starting");
+                    await Task.Run(chatService.Start, _cts.Token);
                 }
                 catch(Exception e)
                 {
                     // Catch all exceptions if they aren't handeled anywhere else, log and exit.
-                    logger.Error(e, "Unhandeled Exception Caught!");
+                    _logger.Error(e, "Unhandeled Exception Caught!");
 
                     Console.WriteLine("Unhandeled Exception Caught!");
                     Console.WriteLine(e.Message);
@@ -104,8 +99,8 @@ namespace DiscordBot
             }
             else
             {
-                logger.Fatal("Failed to retrieve ChatService!");
-                Console.WriteLine("Failed to retrieve ChatService!");
+                _logger.Fatal("Failed to retrieve ChatService!");
+                Console.WriteLine("Failed to start DiscordBot!");
 
                 ExitCleanly();
             }
@@ -130,23 +125,15 @@ namespace DiscordBot
         /// <param name="exitCode">Exit code to pass to the OS</param>
         public static void ExitCleanly(int exitCode = 0)
         {
-            Console.WriteLine("Quiting!");
-            cts.Cancel();
-            logger.Information("Killing Lavalink Proccess");
-            lavaLink.Kill(true);
+            Console.WriteLine("Discord Bot is quiting!");
+            _cts.Cancel();
+
+            if (LavaLinkHelper.isLavaLinkRunning())
+            {
+                LavaLinkHelper.StopLavaLink();
+            }
 
             Environment.Exit(exitCode);
-        }
-
-        private static void StartLavaLink()
-        {
-            logger.Information("Starting LavaLink");
-            lavaLink.StartInfo.UseShellExecute = false;
-            lavaLink.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-            lavaLink.StartInfo.FileName = "java";
-            lavaLink.StartInfo.Arguments = @"-jar Lavalink.jar";
-            lavaLink.StartInfo.CreateNoWindow = true;
-            lavaLink.Start();
         }
     }
 }

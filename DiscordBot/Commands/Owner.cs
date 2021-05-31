@@ -71,6 +71,43 @@ namespace DiscordBot.Commands
             _servers = servers;
         }
 
+        [Command("lavalink")]
+        [RequireOwner]
+        [Summary("Start or stop lavalink")]
+        public async Task LavaLink(string enable = null)
+        {
+            if(enable == null)
+            {
+                await ReplyAsync("LavaLink is " + (LavaLinkHelper.isLavaLinkRunning() ? "" : "not" ) + " running.");
+                return;
+            }
+
+            if (enable.ToLowerInvariant() == "start")
+            {
+                LavaLinkHelper.StartLavaLink();
+                if(!_lavaNode.IsConnected)
+                {
+                    await _lavaNode.ConnectAsync();
+                }
+            }
+            else if (enable.ToLowerInvariant() == "stop")
+            {
+                if (_lavaNode.IsConnected)
+                {
+                    await _lavaNode.DisconnectAsync();
+                }
+
+                LavaLinkHelper.StopLavaLink();
+            }
+            else
+            {
+                await ReplyAsync("Would you like to `start` or `stop` lavalink?");
+                return;
+            }
+
+            await ReplyAsync("Done!");
+        }
+
         [Command("quit")]
         [RequireOwner]
         [Alias("stop")]
@@ -89,8 +126,12 @@ namespace DiscordBot.Commands
             }
             else
             {
+                if (_settings.EnableLavaLink)
+                {
+                    await _lavaNode.DisconnectAsync();
+                }
+
                 IUserMessage message;
-                await _lavaNode.DisconnectAsync();
                 await ReplyAsync("Please, no! I want to live! Noooo.....");
 
                 if(imageUrl != null)
@@ -113,7 +154,7 @@ namespace DiscordBot.Commands
                 await message.DeleteAsync();
 
                 ShowQuitMessageIfEnabled();
-                await _servers.SendLogsAsync(Context.Guild, "Bot quitting", $"{Context.User.Mention} has requested the bot terminates.");
+                await _servers.SendLogsAsync(Context.Guild, "Bot quitting", $"{Context.User.Mention} has requested the bot to terminate.");
 
                 await _client.StopAsync(); // Allow the client to cleanup
                 Program.ExitCleanly();
@@ -140,6 +181,9 @@ namespace DiscordBot.Commands
                 await _client.SetGameAsync(game);
                 settings.Game = game;
                 await _discordBotSettingsRepository.EditAsync(settings);
+
+                await ReplyAsync("Game changed!");
+                await _servers.SendLogsAsync(Context.Guild, "Game Updated", $"{Context.User.Mention} has changed the game to {game}.");
             }
         }
 

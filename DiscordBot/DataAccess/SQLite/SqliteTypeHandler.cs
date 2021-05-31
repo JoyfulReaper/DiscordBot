@@ -5,7 +5,7 @@ using Discord;
 using System;
 using System.Data;
 
-namespace DiscordBot.DataAccess
+namespace DiscordBot.DataAccess.SQLite
 {
     abstract class SqliteTypeHandler<T> : SqlMapper.TypeHandler<T>
     {
