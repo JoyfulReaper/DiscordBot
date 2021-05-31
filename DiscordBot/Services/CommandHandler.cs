@@ -150,11 +150,13 @@ namespace DiscordBot.Services
             }
 
             var channel = message.Channel as SocketGuildChannel;
+            var guild = channel?.Guild;
+
             string prefix = string.Empty;
             if (channel != null)
             {
                 prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
-                await CheckForServerInvites(message);
+                await CheckForServerInvites(message,guild);
             }
 
             var context = new SocketCommandContext(_client, message);
@@ -175,9 +177,14 @@ namespace DiscordBot.Services
             }
         }
 
-        private async Task CheckForServerInvites(SocketUserMessage message)
+        private async Task CheckForServerInvites(SocketUserMessage message, IGuild guild)
         {
-            // TODO make this a setting per server
+            var server = await _servers.GetServer(guild);
+            if (server == null || server.AllowInvites)
+            {
+                return;
+            }
+
             if(message.Content.Contains("https://discord.gg/"))
             {
                 if((message.Channel as SocketGuildChannel).Guild.GetUser(message.Author.Id).GuildPermissions.Administrator)
@@ -187,6 +194,8 @@ namespace DiscordBot.Services
 
                 await message.DeleteAsync();
                 await message.Channel.SendMessageAsync($"{message.Author.Mention} You cannot send Discord Invite links!");
+
+                _logger.LogInformation("{user} was denied posting an invite in {server}/{channel}", message.Author.Username, guild.Name, message.Channel);
             }
         }
 
@@ -198,7 +207,9 @@ namespace DiscordBot.Services
                 //TODO make this optional/a setting
                 Task.Run(async () =>
                 {
-                    _logger.LogDebug("{user} attempted to use an unknown command {command}", context.User.Username, context.Message.Content);
+                    _logger.LogDebug("{user} attempted to use an unknown command ({command}) on {server}/{channel}",
+                        context.User.Username, context.Message.Content, context.Guild?.Name ?? "DM", context.Channel);
+
                     var badCommandMessage = await context.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");
                     await Task.Delay(3500);
                     await badCommandMessage.DeleteAsync();
@@ -220,7 +231,8 @@ namespace DiscordBot.Services
                     await context.Channel.SendMessageAsync(result.ErrorReason);
                 }
 
-                _logger.LogError("Error Occured for command {command}: {error}", context.Message.Content, result.Error);
+                _logger.LogError("Error Occured for command {command}: {error} in {server}/{channel}",
+                    context.Message.Content, result.Error, context.Guild?.Name ?? "DM", context.Channel);
                 Console.WriteLine($"The following error occured: {result.Error}");
             }
         }

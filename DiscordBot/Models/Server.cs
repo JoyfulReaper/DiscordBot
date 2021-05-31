@@ -50,9 +50,17 @@ namespace DiscordBot.Models
         /// The background image to use for the welcome banner image
         /// </summary>
         public string WelcomeBackground { get; set; }
-
+        /// <summary>
+        /// Channel to send logs to
+        /// </summary>
         public ulong LoggingChannel { get; set; }
-
+        /// <summary>
+        /// Embed color
+        /// </summary>
         public Color EmbedColor { get; set; }
+        /// <summary>
+        /// Allow invites to other discord servers
+        /// </summary>
+        public bool AllowInvites { get; set; } = true;
     }
 }
