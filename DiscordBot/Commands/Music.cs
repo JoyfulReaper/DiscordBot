@@ -333,7 +333,7 @@ namespace DiscordBot.Commands
 
         private bool CheckIfLavaLinkIsEnabled()
         {
-            if(!_settings.EnableLavaLink)
+            if(!LavaLinkHelper.isLavaLinkRunning())
             {
                 ReplyAsync("Lavalink is not running :(");
                 return false;

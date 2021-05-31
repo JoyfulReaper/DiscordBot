@@ -71,6 +71,43 @@ namespace DiscordBot.Commands
             _servers = servers;
         }
 
+        [Command("lavalink")]
+        [RequireOwner]
+        [Summary("Start or stop lavalink")]
+        public async Task LavaLink(string enable = null)
+        {
+            if(enable == null)
+            {
+                await ReplyAsync("LavaLink is " + (LavaLinkHelper.isLavaLinkRunning() ? "" : "not" ) + " running.");
+                return;
+            }
+
+            if (enable.ToLowerInvariant() == "start")
+            {
+                LavaLinkHelper.StartLavaLink();
+                if(!_lavaNode.IsConnected)
+                {
+                    await _lavaNode.ConnectAsync();
+                }
+            }
+            else if (enable.ToLowerInvariant() == "stop")
+            {
+                if (_lavaNode.IsConnected)
+                {
+                    await _lavaNode.DisconnectAsync();
+                }
+
+                LavaLinkHelper.StopLavaLink();
+            }
+            else
+            {
+                await ReplyAsync("Would you like to `start` or `stop` lavalink?");
+                return;
+            }
+
+            await ReplyAsync("Done!");
+        }
+
         [Command("quit")]
         [RequireOwner]
         [Alias("stop")]
