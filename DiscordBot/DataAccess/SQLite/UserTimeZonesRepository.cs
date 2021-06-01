@@ -8,9 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.DataAccess
+namespace DiscordBot.DataAccess.SQLite
 {
-    class UserTimeZonesRepository : Repository<UserTimeZone>
+    public class UserTimeZonesRepository : Repository<UserTimeZone>, IUserTimeZonesRepository
     {
         private readonly ISettings _settings;
         private readonly ILogger<UserTimeZonesRepository> _logger;
