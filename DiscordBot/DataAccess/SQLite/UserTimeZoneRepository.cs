@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess.SQLite
 {
-    public class UserTimeZonesRepository : Repository<UserTimeZone>, IUserTimeZonesRepository
+    public class UserTimeZoneRepository : Repository<UserTimeZone>, IUserTimeZonesRepository
     {
         private readonly ISettings _settings;
-        private readonly ILogger<UserTimeZonesRepository> _logger;
+        private readonly ILogger<UserTimeZoneRepository> _logger;
 
-        public UserTimeZonesRepository(ISettings settings,
-            ILogger<UserTimeZonesRepository> logger) : base(settings, logger)
+        public UserTimeZoneRepository(ISettings settings,
+            ILogger<UserTimeZoneRepository> logger) : base(settings, logger)
         {
             _settings = settings;
             _logger = logger;
@@ -25,7 +25,7 @@ namespace DiscordBot.DataAccess.SQLite
         public async Task<UserTimeZone> GetByUserID(ulong userId)
         {
             var queryResult = await QueryFirstOrDefaultAsync<UserTimeZone>($"SELECT * FROM {TableName} " +
-                $"WHERE Id = @Id;", new { UserId = userId });
+                $"WHERE UserId = @UserId;", new { UserId = userId });
 
             return queryResult;
         }
@@ -43,8 +43,8 @@ namespace DiscordBot.DataAccess.SQLite
 
         public override async Task EditAsync(UserTimeZone entity)
         {
-            await ExecuteAsync($"UPDATE {TableName} SET UserId = @UserId, TimeZone = @Timezone " +
-                $"WHERE Id = @Id;");
+            await ExecuteAsync($"UPDATE {TableName} SET TimeZone = @TimeZone " +
+                $"WHERE UserId = @UserId;", entity);
         }
     }
 }

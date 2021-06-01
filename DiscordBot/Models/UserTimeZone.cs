@@ -9,6 +9,6 @@ namespace DiscordBot.Models
     public class UserTimeZone : DatabaseEntity
     {
         public string TimeZone { get; set; }
-        public int UserId { get; set; }
+        public ulong UserId { get; set; }
     }
 }
