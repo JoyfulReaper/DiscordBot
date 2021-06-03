@@ -155,8 +155,21 @@ namespace DiscordBot.Services
             string prefix = string.Empty;
             if (channel != null)
             {
+                // Not a DM
+
                 prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
-                await CheckForServerInvites(message,guild);
+                await CheckForServerInvites(message, guild);
+                if (ProfanityHelper.ContainsProfanity(message.Content))
+                {
+                    if(message.Author.Username == "DiscordBot")
+                    {
+                        return;
+                    }
+                    ProfanityHelper.HandleProfanity(message, await _servers.GetServer(guild));
+                    var devGuild = _client.GetGuild(820787797682159616);
+                    var devChannel = devGuild.GetChannel(846898179063808020);
+                    await (devChannel as SocketTextChannel).SendMessageAsync($"DEBUG: {message.Author.Username} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.");
+                }
             }
 
             var context = new SocketCommandContext(_client, message);
