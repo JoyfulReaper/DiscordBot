@@ -69,10 +69,31 @@ namespace DiscordBot.Services
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
             _client.ReactionAdded += OnReactionAdded;
+            _client.MessageUpdated += OnMessageUpated;
 
             _commands.CommandExecuted += OnCommandExecuted;
 
             Task.Run(async () => await MuteHandler.MuteWorker(client));
+        }
+
+        private async Task OnMessageUpated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channelArg)
+        {
+            if (ProfanityHelper.ContainsProfanity(after.Content))
+            {
+                if (after.Author.Username == "DiscordBot")
+                {
+                    return;
+                }
+
+                var channel = channelArg as SocketGuildChannel;
+
+                await CheckForServerInvites(after as SocketUserMessage, channel.Guild);
+
+                ProfanityHelper.HandleProfanity(after, await _servers.GetServer(channel.Guild));
+                var devGuild = _client.GetGuild(820787797682159616);
+                var devChannel = devGuild.GetChannel(846898179063808020);
+                await(devChannel as SocketTextChannel).SendMessageAsync($"DEBUG (edited): {after.Author.Username} said a bad word: {after.Content}\nin {channel.Guild.Name}/{channel.Name}.");
+            }
         }
 
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
@@ -159,6 +180,7 @@ namespace DiscordBot.Services
 
                 prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
                 await CheckForServerInvites(message, guild);
+
                 if (ProfanityHelper.ContainsProfanity(message.Content))
                 {
                     if(message.Author.Username == "DiscordBot")
@@ -193,7 +215,7 @@ namespace DiscordBot.Services
         private async Task CheckForServerInvites(SocketUserMessage message, IGuild guild)
         {
             var server = await _servers.GetServer(guild);
-            if (server == null || server.AllowInvites)
+            if (server == null || server.AllowInvites || message == null)
             {
                 return;
             }
