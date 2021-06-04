@@ -71,6 +71,50 @@ namespace DiscordBot.Commands
             }
         }
 
+        [Command("profanityfilter")]
+        [Alias("profanity")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("Enable or Disable profanity filtering")]
+        public async Task ProfanityFilter([Summary("On to allow, off to disallow")] string enabled = null)
+        {
+            var server = await _servers.GetServer(Context.Guild);
+
+            if (enabled == null)
+            {
+                var message = "off";
+                if (server.FilterProfanity)
+                {
+                    message = "on";
+                }
+                await ReplyAsync($"Profanity Filter is turned {message}.");
+                return;
+            }
+
+            if (enabled.ToLowerInvariant() == "on")
+            {
+                server.FilterProfanity = true;
+            }
+            else if (enabled.ToLowerInvariant() == "off")
+            {
+                server.FilterProfanity = false;
+            }
+            else
+            {
+                await ReplyAsync("Would you like to turn the profanity filter `on` or `off`?");
+                return;
+            }
+
+            await Context.Channel.SendEmbedAsync("Profanity Filter", $"Profanity Filter has been turned {enabled}",
+                ColorHelper.GetColor(server));
+
+            await _servers.SendLogsAsync(Context.Guild, "Profanity Filter", $"Profanity Filter has been turned {enabled} by {Context.User.Mention}");
+
+            _logger.LogInformation("{user}#{discriminator} set profanityfilter to {enabled} in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, enabled, Context.Channel.Name, Context.Guild.Name);
+
+            await _serverRepository.EditAsync(server);
+        }
+
         [Command("serverinvites")]
         [Alias("allowinvites")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -108,6 +152,9 @@ namespace DiscordBot.Commands
                 ColorHelper.GetColor(server));
 
             await _servers.SendLogsAsync(Context.Guild, "Server Invites", $"Server invites have been turned {enabled} by {Context.User.Mention}");
+
+            _logger.LogInformation("{user}#{discriminator} set serverinvites to {enabled} in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, enabled, Context.Channel.Name, Context.Guild.Name);
 
             await _serverRepository.EditAsync(server);
         }

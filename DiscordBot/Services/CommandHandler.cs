@@ -92,11 +92,15 @@ namespace DiscordBot.Services
             {
                 await CheckForServerInvites(after as SocketUserMessage, channel.Guild);
 
-                var badWords = ProfanityHelper.GetProfanity(after.Content);
-
-                if (badWords.Count != 0)
+                var server = await _servers.GetServer(channel.Guild);
+                if (server != null && server.FilterProfanity)
                 {
-                    ProfanityHelper.HandleProfanity(message, await _servers.GetServer(channel.Guild), badWords);
+                    var badWords = ProfanityHelper.GetProfanity(after.Content);
+
+                    if (badWords.Count != 0)
+                    {
+                        await ProfanityHelper.HandleProfanity(message, server, badWords);
+                    }
                 }
             }
         }
@@ -123,10 +127,15 @@ namespace DiscordBot.Services
             {
                 await CheckForServerInvites(message, guild);
 
-                var badWords = ProfanityHelper.GetProfanity(message.Content);
-                if (badWords.Count != 0)
+                var server = await _servers.GetServer(channel.Guild);
+                if (server != null && server.FilterProfanity)
                 {
-                    ProfanityHelper.HandleProfanity(message, await _servers.GetServer(guild), badWords);
+                    var badWords = ProfanityHelper.GetProfanity(message.Content);
+
+                    if (badWords.Count != 0)
+                    {
+                        await ProfanityHelper.HandleProfanity(message, server, badWords);
+                    }
                 }
             }
 
