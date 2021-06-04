@@ -56,7 +56,7 @@ namespace DiscordBot
                 .ReadFrom.Configuration(configBuilder.Build())
                 .Enrich.FromLogContext()
                 .CreateLogger();
-            Log.Logger.Information("DiscordBot starting");
+            Log.Logger.Information("Initial Logging Setup");
 
         }
 

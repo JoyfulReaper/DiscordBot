@@ -188,6 +188,8 @@ namespace DiscordBot.Services
 
         private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
         {
+            // TODO Make this a per server option
+
             bool showMessage = false;
 
             try
