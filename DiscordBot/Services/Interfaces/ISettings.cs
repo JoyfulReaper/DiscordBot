@@ -29,6 +29,8 @@ namespace DiscordBot.Services
 {
     public interface ISettings
     {
+        ulong DevGuild { get; }
+        ulong DevChannel { get; }
         string ConnectionString { get; }
         DatabaseType DatabaseType { get; }
         string DefaultPrefix { get; }

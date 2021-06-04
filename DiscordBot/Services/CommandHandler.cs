@@ -78,21 +78,86 @@ namespace DiscordBot.Services
 
         private async Task OnMessageUpated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channelArg)
         {
-            if (ProfanityHelper.ContainsProfanity(after.Content))
+            if (after.Author.Username == _client.CurrentUser.Username 
+                && after.Author.Discriminator == _client.CurrentUser.Discriminator)
             {
-                if (after.Author.Username == "DiscordBot")
+                return;
+            }
+
+            var channel = channelArg as SocketGuildChannel;
+
+            if(channel != null) // Not a DM
+            {
+                await CheckForServerInvites(after as SocketUserMessage, channel.Guild);
+
+                var badWords = ProfanityHelper.GetProfanity(after.Content);
+
+                if (badWords.Count != 0)
                 {
+                    var badWordsJoined = String.Join(", ", ProfanityHelper.GetProfanity(after.Content));
+                    ProfanityHelper.HandleProfanity(after, await _servers.GetServer(channel.Guild));
+
+                    //Debug, checking for false positives TODO: Remove this code
+                    var devGuild = _client.GetGuild(_settings.DevGuild);
+                    var devChannel = devGuild.GetChannel(_settings.DevChannel);
+                    await (devChannel as SocketTextChannel).SendMessageAsync($"DEBUG (edited): {after.Author.Username} said a bad word: {after.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords:{badWordsJoined}");
+                }
+            }
+        }
+
+        private async Task OnMessageReceived(SocketMessage messageParam)
+        {
+            if (messageParam.Author.Username == _client.CurrentUser.Username
+                && messageParam.Author.Discriminator == _client.CurrentUser.Discriminator)
+            {
+                return;
+            }
+
+            var message = messageParam as SocketUserMessage;
+            if (message == null)
+            {
+                _logger.LogDebug("message was null");
+                return;
+            }
+
+            var channel = message.Channel as SocketGuildChannel;
+            var guild = channel?.Guild;
+
+            if (channel != null) // Not a DM
+            {
+                await CheckForServerInvites(message, guild);
+
+                var badWords = ProfanityHelper.GetProfanity(message.Content);
+                if (badWords.Count != 0)
+                {
+                    var badWordsJoined = String.Join(", ", ProfanityHelper.GetProfanity(message.Content));
+
+                    ProfanityHelper.HandleProfanity(message, await _servers.GetServer(guild));
+
+                    //Debug, checking for false positives TODO: Remove this code
+                    var devGuild = _client.GetGuild(_settings.DevGuild);
+                    var devChannel = devGuild.GetChannel(_settings.DevChannel);
+                    await (devChannel as SocketTextChannel).SendMessageAsync($"DEBUG: {message.Author.Username} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords:{badWordsJoined}");
+                }
+            }
+
+            string prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
+
+            var context = new SocketCommandContext(_client, message);
+            int position = 0;
+
+            if (message.HasStringPrefix(prefix, ref position)
+                || message.HasMentionPrefix(_client.CurrentUser, ref position))
+            {
+                _logger.LogInformation("Command received: {command}", message.Content);
+
+                if (message.Author.IsBot)
+                {
+                    _logger.LogDebug("Command ({command}) was sent by another bot, ignoring", message.Content);
                     return;
                 }
 
-                var channel = channelArg as SocketGuildChannel;
-
-                await CheckForServerInvites(after as SocketUserMessage, channel.Guild);
-
-                ProfanityHelper.HandleProfanity(after, await _servers.GetServer(channel.Guild));
-                var devGuild = _client.GetGuild(820787797682159616);
-                var devChannel = devGuild.GetChannel(846898179063808020);
-                await(devChannel as SocketTextChannel).SendMessageAsync($"DEBUG (edited): {after.Author.Username} said a bad word: {after.Content}\nin {channel.Guild.Name}/{channel.Name}.");
+                await _commands.ExecuteAsync(context, position, _serviceProvider);
             }
         }
 
@@ -157,58 +222,6 @@ namespace DiscordBot.Services
                 var memoryStream = await _images.CreateImage(userJoining, background);
                 memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
                 await channel.SendFileAsync(memoryStream, $"{userJoining.Username}.png");
-            }
-        }
-
-        private async Task OnMessageReceived(SocketMessage messageParam)
-        {
-            var message = messageParam as SocketUserMessage;
-
-            if(message == null)
-            {
-                _logger.LogDebug("message was null");
-                return;
-            }
-
-            var channel = message.Channel as SocketGuildChannel;
-            var guild = channel?.Guild;
-
-            string prefix = string.Empty;
-            if (channel != null)
-            {
-                // Not a DM
-
-                prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
-                await CheckForServerInvites(message, guild);
-
-                if (ProfanityHelper.ContainsProfanity(message.Content))
-                {
-                    if(message.Author.Username == "DiscordBot")
-                    {
-                        return;
-                    }
-                    ProfanityHelper.HandleProfanity(message, await _servers.GetServer(guild));
-                    var devGuild = _client.GetGuild(820787797682159616);
-                    var devChannel = devGuild.GetChannel(846898179063808020);
-                    await (devChannel as SocketTextChannel).SendMessageAsync($"DEBUG: {message.Author.Username} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.");
-                }
-            }
-
-            var context = new SocketCommandContext(_client, message);
-            int position = 0;
-
-            if(message.HasStringPrefix(prefix, ref position) 
-                || message.HasMentionPrefix(_client.CurrentUser, ref position))
-            {
-                _logger.LogInformation("Command received: {command}", message.Content);
-
-                if (message.Author.IsBot)
-                {
-                    _logger.LogDebug("Command ({command}) was sent by another bot, ignoring", message.Content);
-                    return;
-                }
-
-               await _commands.ExecuteAsync(context, position, _serviceProvider);
             }
         }
 
