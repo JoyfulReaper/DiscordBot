@@ -28,7 +28,7 @@ namespace DiscordBot.Helpers
             "condom", "crack", "crap", "crappy", "dirty", "erect", "erotic", "fart", "fubar", "ganja", "genitals", "god", "hemp", "jerk", "labia", "lmao", "lmfao",
             "maxi", "meth", "moron", "nipple", "nipples", "omg", "opiate", "opium", "organ", "orally", "orgasm", "pcp", "panty", "pee", "penetrate", "penetration",
             "penis", "queers", "rectal", "rectum", "taste my", "teste", "testes", "tied up", "undies", "unwed", "urinal", "vagina", "virgin", "vomit", "vodka",
-            "vulva", "wazoo", "weed", "weiner", "wedgie", "whiz", "womb", "rum", "kill", "murder", "stupid"};
+            "vulva", "wazoo", "weed", "weiner", "wedgie", "whiz", "womb", "rum", "kill", "murder", "stupid", "flaps"};
 
             foreach (var word in allowed)
             {
@@ -41,9 +41,20 @@ namespace DiscordBot.Helpers
             return filter.ContainsProfanity(sentence);
         }
 
-        public static void HandleProfanity(SocketMessage message, Server server)
+        public async static Task HandleProfanity(SocketUserMessage message, Server server, IReadOnlyList<string> badWords)
         {
-            message.Channel.SendMessageAsync($"Lol, {message.Author.Username} said a swear!");
+            await message.Channel.SendMessageAsync($"Lol, {message.Author.Username} said a swear!");
+
+            var channel = message.Channel as SocketGuildChannel;
+            var guild = channel.Guild;
+            var loggingChannel = guild.GetChannel(server.LoggingChannel);
+            var badWordsJoined = String.Join(", ", badWords);
+
+            if (loggingChannel != null)
+            {
+                await (loggingChannel as SocketTextChannel).SendLogAsync("Profanity Filter", $"{message.Author.Mention} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords: `{badWordsJoined}`",
+                    ColorHelper.GetColor(server));
+            }
         }
 
         public static ReadOnlyCollection<string> GetProfanity(string sentence)

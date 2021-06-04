@@ -78,7 +78,9 @@ namespace DiscordBot.Services
 
         private async Task OnMessageUpated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channelArg)
         {
-            if (after.Author.Username == _client.CurrentUser.Username 
+            var message = after as SocketUserMessage;
+            if (message == null || 
+                after.Author.Username == _client.CurrentUser.Username 
                 && after.Author.Discriminator == _client.CurrentUser.Discriminator)
             {
                 return;
@@ -94,13 +96,7 @@ namespace DiscordBot.Services
 
                 if (badWords.Count != 0)
                 {
-                    var badWordsJoined = String.Join(", ", ProfanityHelper.GetProfanity(after.Content));
-                    ProfanityHelper.HandleProfanity(after, await _servers.GetServer(channel.Guild));
-
-                    //Debug, checking for false positives TODO: Remove this code
-                    var devGuild = _client.GetGuild(_settings.DevGuild);
-                    var devChannel = devGuild.GetChannel(_settings.DevChannel);
-                    await (devChannel as SocketTextChannel).SendMessageAsync($"DEBUG (edited): {after.Author.Username} said a bad word: {after.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords:{badWordsJoined}");
+                    ProfanityHelper.HandleProfanity(message, await _servers.GetServer(channel.Guild), badWords);
                 }
             }
         }
@@ -130,14 +126,7 @@ namespace DiscordBot.Services
                 var badWords = ProfanityHelper.GetProfanity(message.Content);
                 if (badWords.Count != 0)
                 {
-                    var badWordsJoined = String.Join(", ", ProfanityHelper.GetProfanity(message.Content));
-
-                    ProfanityHelper.HandleProfanity(message, await _servers.GetServer(guild));
-
-                    //Debug, checking for false positives TODO: Remove this code
-                    var devGuild = _client.GetGuild(_settings.DevGuild);
-                    var devChannel = devGuild.GetChannel(_settings.DevChannel);
-                    await (devChannel as SocketTextChannel).SendMessageAsync($"DEBUG: {message.Author.Username} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords:{badWordsJoined}");
+                    ProfanityHelper.HandleProfanity(message, await _servers.GetServer(guild), badWords);
                 }
             }
 
