@@ -54,7 +54,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("registertimezone")]
-        [Alias("registertz", "regtz")]
+        [Alias("registertz", "regtz", "settz", "settimezone")]
         [Summary("Register your timezone with the bot")]
         public async Task RegisterTimeZone([Remainder] string timeZone = null)
         {
@@ -125,6 +125,7 @@ namespace DiscordBot.Commands
             {
                 await Context.Channel.SendEmbedAsync("Not Registered", $"{user.Username} has not registered their time zone.",
                     ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+
                 return;
             }
 
@@ -133,6 +134,8 @@ namespace DiscordBot.Commands
             {
                 await Context.Channel.SendEmbedAsync("Invalid Time Zone", "User some how registered an invalid timezone...",
                     ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+
+                return;
             }
 
             DateTime time = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tzi);
@@ -154,6 +157,7 @@ namespace DiscordBot.Commands
             {
                 await Context.Channel.SendEmbedAsync("Unable to parse time zone", "Please provide a windows or IANA timezone",
                     ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+
                 return;
             }
 
@@ -185,6 +189,7 @@ namespace DiscordBot.Commands
             {
                 await Context.Channel.SendEmbedAsync("Unable to parse time zone", "Please provide a windows or IANA timezone",
                     ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+
                 return;
             }
 

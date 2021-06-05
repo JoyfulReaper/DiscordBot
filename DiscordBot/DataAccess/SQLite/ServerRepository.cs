@@ -55,8 +55,8 @@ namespace DiscordBot.DataAccess.SQLite
             var parameters = GetDynamicParameters(entity);
 
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} " +
-                $"(GuildId, Prefix, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor, AllowInvites)" +
-                "VALUES (@GuildId, @Prefix, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor, @AllowInvites); " +
+                $"(GuildId, Prefix, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor, AllowInvites, FilterProfanity)" +
+                "VALUES (@GuildId, @Prefix, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor, @AllowInvites, @FilterProfanity); " +
                 "SELECT last_insert_rowid();",
                 parameters);
 
@@ -76,6 +76,7 @@ namespace DiscordBot.DataAccess.SQLite
             parameters.Add("@LoggingChannel", entity.LoggingChannel);
             parameters.Add("@AllowInvites", entity.AllowInvites);
             parameters.Add("@EmbedColor", color);
+            parameters.Add("@FilterProfanity", entity.FilterProfanity);
 
             return parameters;
         }
@@ -97,7 +98,7 @@ namespace DiscordBot.DataAccess.SQLite
 
             await ExecuteAsync($"UPDATE {TableName} " +
                 $"SET Prefix = @Prefix, GuildId = @GuildId, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground, " +
-                $"EmbedColor = @EmbedColor, LoggingChannel = @LoggingChannel, AllowInvites = @AllowInvites " +
+                $"EmbedColor = @EmbedColor, LoggingChannel = @LoggingChannel, AllowInvites = @AllowInvites, FilterProfanity = @FilterProfanity " +
                 $"WHERE Id = @Id;",
                 parameters);
         }

@@ -58,5 +58,6 @@ namespace DiscordBot.Models
         /// Allow invites to other discord servers
         /// </summary>
         public bool AllowInvites { get; set; } = true;
+        public bool FilterProfanity { get; set; }
     }
 }

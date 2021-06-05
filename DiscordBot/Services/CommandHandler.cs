@@ -69,10 +69,94 @@ namespace DiscordBot.Services
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
             _client.ReactionAdded += OnReactionAdded;
+            _client.MessageUpdated += OnMessageUpated;
 
             _commands.CommandExecuted += OnCommandExecuted;
 
             Task.Run(async () => await MuteHandler.MuteWorker(client));
+        }
+
+        private async Task OnMessageUpated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channelArg)
+        {
+            var message = after as SocketUserMessage;
+            if (message == null || 
+                after.Author.Username == _client.CurrentUser.Username 
+                && after.Author.Discriminator == _client.CurrentUser.Discriminator)
+            {
+                return;
+            }
+
+            var channel = channelArg as SocketGuildChannel;
+
+            if(channel != null) // Not a DM
+            {
+                await CheckForServerInvites(after as SocketUserMessage, channel.Guild);
+
+                var server = await _servers.GetServer(channel.Guild);
+                if (server != null && server.FilterProfanity)
+                {
+                    var badWords = ProfanityHelper.GetProfanity(after.Content);
+
+                    if (badWords.Count != 0)
+                    {
+                        await ProfanityHelper.HandleProfanity(message, server, badWords);
+                    }
+                }
+            }
+        }
+
+        private async Task OnMessageReceived(SocketMessage messageParam)
+        {
+            if (messageParam.Author.Username == _client.CurrentUser.Username
+                && messageParam.Author.Discriminator == _client.CurrentUser.Discriminator)
+            {
+                return;
+            }
+
+            var message = messageParam as SocketUserMessage;
+            if (message == null)
+            {
+                _logger.LogDebug("message was null");
+                return;
+            }
+
+            var channel = message.Channel as SocketGuildChannel;
+            var guild = channel?.Guild;
+
+            if (channel != null) // Not a DM
+            {
+                await CheckForServerInvites(message, guild);
+
+                var server = await _servers.GetServer(channel.Guild);
+                if (server != null && server.FilterProfanity)
+                {
+                    var badWords = ProfanityHelper.GetProfanity(message.Content);
+
+                    if (badWords.Count != 0)
+                    {
+                        await ProfanityHelper.HandleProfanity(message, server, badWords);
+                    }
+                }
+            }
+
+            string prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
+
+            var context = new SocketCommandContext(_client, message);
+            int position = 0;
+
+            if (message.HasStringPrefix(prefix, ref position)
+                || message.HasMentionPrefix(_client.CurrentUser, ref position))
+            {
+                _logger.LogInformation("Command received: {command}", message.Content);
+
+                if (message.Author.IsBot)
+                {
+                    _logger.LogDebug("Command ({command}) was sent by another bot, ignoring", message.Content);
+                    return;
+                }
+
+                await _commands.ExecuteAsync(context, position, _serviceProvider);
+            }
         }
 
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
@@ -102,6 +186,8 @@ namespace DiscordBot.Services
 
         private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
         {
+            // TODO Make this a per server option
+
             bool showMessage = false;
 
             try
@@ -139,48 +225,10 @@ namespace DiscordBot.Services
             }
         }
 
-        private async Task OnMessageReceived(SocketMessage messageParam)
-        {
-            var message = messageParam as SocketUserMessage;
-
-            if(message == null)
-            {
-                _logger.LogDebug("message was null");
-                return;
-            }
-
-            var channel = message.Channel as SocketGuildChannel;
-            var guild = channel?.Guild;
-
-            string prefix = string.Empty;
-            if (channel != null)
-            {
-                prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
-                await CheckForServerInvites(message,guild);
-            }
-
-            var context = new SocketCommandContext(_client, message);
-            int position = 0;
-
-            if(message.HasStringPrefix(prefix, ref position) 
-                || message.HasMentionPrefix(_client.CurrentUser, ref position))
-            {
-                _logger.LogInformation("Command received: {command}", message.Content);
-
-                if (message.Author.IsBot)
-                {
-                    _logger.LogDebug("Command ({command}) was sent by another bot, ignoring", message.Content);
-                    return;
-                }
-
-               await _commands.ExecuteAsync(context, position, _serviceProvider);
-            }
-        }
-
         private async Task CheckForServerInvites(SocketUserMessage message, IGuild guild)
         {
             var server = await _servers.GetServer(guild);
-            if (server == null || server.AllowInvites)
+            if (server == null || server.AllowInvites || message == null)
             {
                 return;
             }

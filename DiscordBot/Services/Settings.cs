@@ -32,6 +32,8 @@ namespace DiscordBot.Services
 {
     public class Settings : ISettings
     {
+        public ulong DevGuild { get; set; }
+        public ulong DevChannel { get; set; }
         public DatabaseType DatabaseType { get; private set; }
         public string ConnectionString { get; private set; }
         public string OwnerName { get; private set; }
@@ -80,6 +82,18 @@ namespace DiscordBot.Services
             OwnerDiscriminator = _configuration.GetSection("OwnerDiscriminator").Value ?? "7485";
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
             DefaultPrefix = _configuration.GetSection("DefaultPrefix").Value ?? "!";
+
+            try
+            {
+                DevGuild = UInt64.Parse(_configuration.GetSection("DevGuild").Value);
+                DevChannel = UInt64.Parse(_configuration.GetSection("DevChannel").Value);
+            }
+            catch
+            {
+                DevGuild = 0;
+                DevChannel = 0;
+                _logger.LogWarning("Unable to parse DevGuild or DevChannel, using '0'");
+            }
         }
     }
 }
