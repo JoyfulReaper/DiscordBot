@@ -43,7 +43,7 @@ namespace DiscordBot.Helpers
 
         public async static Task HandleProfanity(SocketUserMessage message, Server server, IReadOnlyList<string> badWords)
         {
-            await message.Channel.SendMessageAsync($"Lol, {message.Author.Username} said a swear!");
+            //await message.Channel.SendMessageAsync($"Lol, {message.Author.Username} said a swear!");
 
             var channel = message.Channel as SocketGuildChannel;
             var guild = channel.Guild;
@@ -55,6 +55,11 @@ namespace DiscordBot.Helpers
                 await (loggingChannel as SocketTextChannel).SendLogAsync("Profanity Filter", $"{message.Author.Mention} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords: `{badWordsJoined}`",
                     ColorHelper.GetColor(server));
             }
+
+            var censored = filter.CensorString(message.Content);
+            await message.DeleteAsync();
+
+            await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear. Orignial message: {censored.Replace("*", "#")}");
         }
 
         public static ReadOnlyCollection<string> GetProfanity(string sentence)

@@ -27,7 +27,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.DataAccess;
-using DiscordBot.Helpers;
 using DiscordBot.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

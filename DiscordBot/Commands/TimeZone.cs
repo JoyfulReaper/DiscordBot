@@ -54,7 +54,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("registertimezone")]
-        [Alias("registertz", "regtz")]
+        [Alias("registertz", "regtz", "settz", "settimezone")]
         [Summary("Register your timezone with the bot")]
         public async Task RegisterTimeZone([Remainder] string timeZone = null)
         {
