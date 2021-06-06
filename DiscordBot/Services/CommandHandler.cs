@@ -81,6 +81,7 @@ namespace DiscordBot.Services
             Task.Run(async () => await MuteHandler.MuteWorker(client));
         }
 
+        // Message was edited
         private async Task OnMessageUpated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channelArg)
         {
             var message = after as SocketUserMessage;
@@ -95,9 +96,9 @@ namespace DiscordBot.Services
 
             if(channel != null) // Not a DM
             {
-                await CheckForServerInvites(after as SocketUserMessage, channel.Guild);
-
                 var server = await _servers.GetServer(channel.Guild);
+                await ServerHelper.CheckForServerInvites(after as SocketUserMessage, server);
+
                 if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
                     var badWords = await ProfanityHelper.GetProfanity(server, after.Content);
@@ -110,6 +111,7 @@ namespace DiscordBot.Services
             }
         }
 
+        // Message was received
         private async Task OnMessageReceived(SocketMessage messageParam)
         {
             if (messageParam.Author.Username == _client.CurrentUser.Username
@@ -126,16 +128,14 @@ namespace DiscordBot.Services
             }
 
             var channel = message.Channel as SocketGuildChannel;
-            var guild = channel?.Guild;
             var prefix = String.Empty;
 
             if (channel != null) // Not a DM
             {
-                 prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
-
-                await CheckForServerInvites(message, guild);
-
+                prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
                 var server = await _servers.GetServer(channel.Guild);
+                await ServerHelper.CheckForServerInvites(message, server);
+                
                 if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
                     var badWords = await ProfanityHelper.GetProfanity(server, message.Content);
@@ -165,17 +165,20 @@ namespace DiscordBot.Services
             }
         }
 
+        // Reaction was added
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
         {
             await RPSHelper.RPSProcessor(cachedEntity, channel, reaction);
         }
 
+        // User joined a guild
         private async Task OnUserJoined(SocketGuildUser userJoining)
         {
             await AutoRoleHelper.AssignAutoRoles(_autoRoleService, userJoining);
             Task.Run(async () => await ShowWelcomeMessage(userJoining));
         }
 
+        // Show the welcome message
         private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
         {
             // TODO Make this a per server option
@@ -214,28 +217,6 @@ namespace DiscordBot.Services
                 var memoryStream = await _images.CreateImage(userJoining, background);
                 memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
                 await channel.SendFileAsync(memoryStream, $"{userJoining.Username}.png");
-            }
-        }
-
-        private async Task CheckForServerInvites(SocketUserMessage message, IGuild guild)
-        {
-            var server = await _servers.GetServer(guild);
-            if (server == null || server.AllowInvites || message == null)
-            {
-                return;
-            }
-
-            if(message.Content.Contains("https://discord.gg/"))
-            {
-                if((message.Channel as SocketGuildChannel).Guild.GetUser(message.Author.Id).GuildPermissions.Administrator)
-                {
-                    return;
-                }
-
-                await message.DeleteAsync();
-                await message.Channel.SendMessageAsync($"{message.Author.Mention} You cannot send Discord Invite links!");
-
-                _logger.LogInformation("{user} was denied posting an invite in {server}/{channel}", message.Author.Username, guild.Name, message.Channel);
             }
         }
 

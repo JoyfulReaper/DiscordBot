@@ -46,7 +46,7 @@ namespace DiscordBot.Services
             _logger = logger;
         }
 
-        public async Task<MemoryStream> CreateImage(SocketGuildUser user, string url = "https://images.unsplash.com/photo-1500829243541-74b677fecc30?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2555&q=80")
+        public async Task<MemoryStream> CreateImage(SocketGuildUser user, string url = null)
         {
             if(url == null)
             {
@@ -54,8 +54,6 @@ namespace DiscordBot.Services
             }
 
             var avatar = await FetchImage(user.GetAvatarUrl(size: 2048, format: Discord.ImageFormat.Png) ?? user.GetDefaultAvatarUrl());
-            //var background = await FetchImage("https://images.unsplash.com/photo-1500829243541-74b677fecc30?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2555&q=80");
-            //var background = await FetchImage("https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1050&q=80");
             var background = await FetchImage(url);
 
             background = CropToBanner(background);
@@ -67,8 +65,6 @@ namespace DiscordBot.Services
             var banner = CopyRegionIntoImage(bitmap, background);
             banner = DrawTextToImage(banner, $"{user.Username}#{user.Discriminator} joined the server", $"Member #{ user.Guild.MemberCount}");
 
-            string path = $"{Guid.NewGuid()}.png";
-            //banner.Save(path);
             var memoryStream = new MemoryStream();
             banner.Save(memoryStream, ImageFormat.Png);
             return await Task.FromResult(memoryStream);
