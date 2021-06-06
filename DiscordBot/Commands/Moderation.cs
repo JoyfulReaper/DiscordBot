@@ -75,6 +75,50 @@ namespace DiscordBot.Commands
             }
         }
 
+        [Command("ban")]
+        [RequireBotPermission(GuildPermission.BanMembers)]
+        [RequireUserPermission(GuildPermission.BanMembers)]
+        [Summary("Ban a user")]
+        public async Task Ban([Summary("The user to ban")]SocketGuildUser user, [Summary("The number of days of the banned user's messages to purge")]int days, 
+            [Remainder] string reason = null)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            if(user == null)
+            {
+                await ReplyAsync("Please provide a user to ban!");
+            }
+
+            _logger.LogInformation("{user}#{discriminator} banned {user} messages in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, user.Username, Context.Channel.Name, Context.Guild.Name);
+
+            await Context.Channel.SendEmbedAsync("Ban Hammer", $"{user.Mention} has been banned for *{(reason ?? "no reason")}*",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), EmbedImageHelper.GetImageUrl("BAN_IMAGES"));
+
+            await _servers.SendLogsAsync(Context.Guild, "Banned", $"{Context.User.Mention} has banned {user.Mention} and deleted the past {days} day of their messages!");
+
+            await user.BanAsync(days, reason);
+        }
+
+        [Command("unban")]
+        [RequireBotPermission(GuildPermission.BanMembers)]
+        [RequireUserPermission(GuildPermission.BanMembers)]
+        [Summary("unban a user")]
+        public async Task Unban([Summary("Id of the user to unban")]ulong userId)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} unbanned {userId} messages in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, userId, Context.Channel.Name, Context.Guild.Name);
+
+            await Context.Channel.SendEmbedAsync("Un-Banned", $"{userId} has been un-banned",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), EmbedImageHelper.GetImageUrl("UNBAN_IMAGES"));
+
+            await _servers.SendLogsAsync(Context.Guild, "Un-Banned", $"{Context.User.Mention} has un-banned userId: {userId}");
+
+            await Context.Guild.RemoveBanAsync(userId);
+        }
+
         [Command("profanityallow")]
         [Alias("pallow")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -220,6 +264,8 @@ namespace DiscordBot.Commands
         [Summary("Kick a user")]
         public async Task Kick([Summary("user to kick")] SocketGuildUser user = null)
         {
+            Context.Channel.TriggerTypingAsync();
+
             if (user == null)
             {
                 await ReplyAsync("Please specify the user the kick");

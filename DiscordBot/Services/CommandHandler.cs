@@ -286,7 +286,10 @@ namespace DiscordBot.Services
 
                 _logger.LogError("Error Occured for command {command}: {error} in {server}/{channel}",
                     context.Message.Content, result.Error, context.Guild?.Name ?? "DM", context.Channel);
+
                 Console.WriteLine($"The following error occured: {result.Error}");
+
+                await context.Channel.SendMessageAsync($"The following error occured: {result.Error}");
             }
         }
     }

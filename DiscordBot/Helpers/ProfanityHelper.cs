@@ -1,4 +1,8 @@
 ﻿/*
+
+PLEASE NOTE THIS FILE MAY CONTAIN PROFANITY
+Procede at your own risk if you care
+
 MIT License
 
 Copyright(c) 2021 Kyle Givler
@@ -48,6 +52,7 @@ namespace DiscordBot.Helpers
             "penis", "queers", "rectal", "rectum", "taste my", "teste", "testes", "tied up", "undies", "unwed", "urinal", "vagina", "virgin", "vomit", "vodka",
             "vulva", "wazoo", "weed", "weiner", "wedgie", "whiz", "womb", "rum", "kill", "murder", "stupid", "flaps"};
 
+        private static string[] GlobalBannedWords = new[] { "f*ck", "shat", "sh!t" };
 
         public static async Task<bool> ContainsProfanity(Server server, string sentence)
         {
@@ -106,6 +111,7 @@ namespace DiscordBot.Helpers
 
             ProfanityFilter.ProfanityFilter filter = new ProfanityFilter.ProfanityFilter();
             filter.RemoveProfanity(GlobalAllowedWords);
+            filter.AddProfanity(GlobalBannedWords);
 
             var allowedWords = await ProfanityRepository.GetAllowedProfanity(server.GuildId);
             var blockedWord = await ProfanityRepository.GetBlockedProfanity(server.GuildId);
