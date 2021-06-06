@@ -40,8 +40,13 @@ namespace DiscordBot.Helpers
         public static readonly string[] UNBAN_IMAGES = new string[] { "https://tengaged.com/img_p/3993530.jpg?c=0",
             "https://latestnews.fresherslive.com/images/articles/origin/2021/01/20/how-to-get-unbanned-from-tinder-60081e1c387aa-1611144732.jpg" };
 
-        private static Random _random = new Random();
+        public static readonly string[] QUIT_IMAGES = new string[] { "https://i.makeagif.com/media/11-18-2014/2oMnrI.gif", "https://news.efinancialcareers.com/binaries/content/gallery/efinancial-careers/articles/2017/11/I-quit_twinsterphoto_GettyImages.jpg",
+            "https://myzol.co.zw/Data/Articles/2387/bye-quit__zoom.png", "https://c1.staticflickr.com/3/2199/3527660157_2827558f95_z.jpg", "https://cdn.tinybuddha.com/wp-content/uploads/2015/08/Bad-Day.png",
+            "https://geekologie.com/2015/08/03/dead-hitchhiking-robot.jpg"};
 
+
+
+        private static Random _random = new Random();
 
         public static string GetImageUrl(string key)
         {
