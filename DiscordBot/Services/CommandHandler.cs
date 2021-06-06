@@ -95,7 +95,7 @@ namespace DiscordBot.Services
                 var server = await _servers.GetServer(channel.Guild);
                 if (server != null && server.FilterProfanity)
                 {
-                    var badWords = ProfanityHelper.GetProfanity(after.Content);
+                    var badWords = ProfanityHelper.GetProfanity(server, after.Content);
 
                     if (badWords.Count != 0)
                     {
@@ -130,7 +130,7 @@ namespace DiscordBot.Services
                 var server = await _servers.GetServer(channel.Guild);
                 if (server != null && server.FilterProfanity)
                 {
-                    var badWords = ProfanityHelper.GetProfanity(message.Content);
+                    var badWords = ProfanityHelper.GetProfanity(server, message.Content);
 
                     if (badWords.Count != 0)
                     {
