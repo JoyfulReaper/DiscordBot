@@ -127,9 +127,12 @@ namespace DiscordBot.Services
 
             var channel = message.Channel as SocketGuildChannel;
             var guild = channel?.Guild;
+            var prefix = String.Empty;
 
             if (channel != null) // Not a DM
             {
+                 prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
+
                 await CheckForServerInvites(message, guild);
 
                 var server = await _servers.GetServer(channel.Guild);
@@ -143,8 +146,6 @@ namespace DiscordBot.Services
                     }
                 }
             }
-
-            string prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
 
             var context = new SocketCommandContext(_client, message);
             int position = 0;
