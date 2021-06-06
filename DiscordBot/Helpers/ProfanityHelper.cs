@@ -29,6 +29,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using DiscordBot.DataAccess;
+using DiscordBot.Enums;
 using DiscordBot.Models;
 using Serilog;
 
@@ -73,7 +74,15 @@ namespace DiscordBot.Helpers
             var censored = filter.CensorString(message.Content);
             await message.DeleteAsync();
 
-            await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear. {message.Author.Username}'s Orignial message:\n{censored.Replace("*", "#")}");
+            if (server.ProfanityFilterMode == ProfanityFilterMode.FilterCensor)
+            {
+                await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear. {message.Author.Username}'s Censored message:\n{censored.Replace("*", "#")}");
+            }
+            else
+            {
+                await(channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear.");
+            }
+
         }
 
         public static async Task<ReadOnlyCollection<string>> GetProfanity(Server server, string sentence)
@@ -86,6 +95,9 @@ namespace DiscordBot.Helpers
         private static async Task<ProfanityFilter.ProfanityFilter> GetProfanityFilterForServer(Server server)
         {
             // TODO Look into caching this some how...
+            // TODO Look into caching in general (Cache servers/guilds also for example)
+            // Looks like MonkeyCache just uses a SQLite db to caches and that is what we are doing anyway
+            // Maybe do some kind of in memeory caching?
             if (ProfanityRepository == null)
             {
                 Log.Warning("ProfanityRepository is null!");

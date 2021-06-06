@@ -35,6 +35,7 @@ using System.Threading.Tasks;
 using DiscordBot.Models;
 using System;
 using DiscordBot.DataAccess;
+using DiscordBot.Enums;
 
 namespace DiscordBot.Commands
 {
@@ -119,7 +120,7 @@ namespace DiscordBot.Commands
         [Alias("profanity")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Enable or Disable profanity filtering")]
-        public async Task ProfanityFilter([Summary("On to allow, off to disallow")] string enabled = null)
+        public async Task ProfanityFilter([Summary("On to allow, censor to censor, delete to delete")] string enabled = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -128,37 +129,45 @@ namespace DiscordBot.Commands
             if (enabled == null)
             {
                 var message = "off";
-                if (server.FilterProfanity)
+                if (server.ProfanityFilterMode == ProfanityFilterMode.FilterCensor)
                 {
-                    message = "on";
+                    message = "set to censor";
                 }
-                await ReplyAsync($"Profanity Filter is turned {message}.");
+                else if(server.ProfanityFilterMode == ProfanityFilterMode.FilterDelete)
+                {
+                    message = "set to delete";
+                }
+                await ReplyAsync($"Profanity Filter is `{message}`.");
                 return;
             }
 
-            if (enabled.ToLowerInvariant() == "on")
+            if (enabled.ToLowerInvariant() == "censor")
             {
-                server.FilterProfanity = true;
+                server.ProfanityFilterMode = ProfanityFilterMode.FilterCensor;
+            }
+            else if(enabled.ToLowerInvariant() == "delete")
+            {
+                server.ProfanityFilterMode = ProfanityFilterMode.FilterDelete;
             }
             else if (enabled.ToLowerInvariant() == "off")
             {
-                server.FilterProfanity = false;
+                server.ProfanityFilterMode = ProfanityFilterMode.FilterOff;
             }
             else
             {
-                await ReplyAsync("Would you like to turn the profanity filter `on` or `off`?");
+                await ReplyAsync("Would you like to set the profanity filter to `censor`, `delete` or `off`?");
                 return;
             }
 
-            await Context.Channel.SendEmbedAsync("Profanity Filter", $"Profanity Filter has been turned {enabled}",
+            await _serverRepository.EditAsync(server);
+
+            await Context.Channel.SendEmbedAsync("Profanity Filter", $"Profanity Filter has been set to `{enabled}`",
                 ColorHelper.GetColor(server));
 
-            await _servers.SendLogsAsync(Context.Guild, "Profanity Filter", $"Profanity Filter has been turned {enabled} by {Context.User.Mention}");
+            await _servers.SendLogsAsync(Context.Guild, "Profanity Filter", $"Profanity Filter has been set to `{enabled}` by {Context.User.Mention}");
 
             _logger.LogInformation("{user}#{discriminator} set profanityfilter to {enabled} in {channel} on {server}",
                 Context.User.Username, Context.User.Discriminator, enabled, Context.Channel.Name, Context.Guild.Name);
-
-            await _serverRepository.EditAsync(server);
         }
 
         [Command("serverinvites")]
