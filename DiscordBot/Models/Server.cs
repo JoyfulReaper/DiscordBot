@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 using Discord;
-using System.Collections.Generic;
+using DiscordBot.Enums;
 
 namespace DiscordBot.Models
 {
@@ -58,6 +58,9 @@ namespace DiscordBot.Models
         /// Allow invites to other discord servers
         /// </summary>
         public bool AllowInvites { get; set; } = true;
-        public bool FilterProfanity { get; set; }
+        /// <summary>
+        /// Determine if profanity should be filtered
+        /// </summary>
+        public ProfanityFilterMode ProfanityFilterMode { get; set; } = ProfanityFilterMode.FilterOff;
     }
 }

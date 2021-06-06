@@ -32,6 +32,7 @@ using System;
 using System.Threading.Tasks;
 using DiscordBot.Helpers;
 using DiscordBot.DataAccess;
+using DiscordBot.Enums;
 
 namespace DiscordBot.Services
 {
@@ -97,7 +98,7 @@ namespace DiscordBot.Services
                 await CheckForServerInvites(after as SocketUserMessage, channel.Guild);
 
                 var server = await _servers.GetServer(channel.Guild);
-                if (server != null && server.FilterProfanity)
+                if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
                     var badWords = await ProfanityHelper.GetProfanity(server, after.Content);
 
@@ -132,7 +133,7 @@ namespace DiscordBot.Services
                 await CheckForServerInvites(message, guild);
 
                 var server = await _servers.GetServer(channel.Guild);
-                if (server != null && server.FilterProfanity)
+                if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
                     var badWords = await ProfanityHelper.GetProfanity(server, message.Content);
 
