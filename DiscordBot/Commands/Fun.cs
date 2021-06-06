@@ -63,7 +63,7 @@ namespace DiscordBot.Commands
 
         [Command("rockpaperscissors")]
         [Alias("rps")]
-        [Summary("Play a game of rock paper scissors")]
+        [Summary("Play a game of rock paper scissors!")]
         public async Task RockPaperScissors()
         {
             await Context.Channel.TriggerTypingAsync();

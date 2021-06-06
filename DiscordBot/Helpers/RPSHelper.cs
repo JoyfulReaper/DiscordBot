@@ -26,9 +26,6 @@ SOFTWARE.
 using Discord;
 using Discord.WebSocket;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Helpers
@@ -96,22 +93,40 @@ namespace DiscordBot.Helpers
                 var winner = DetermineWinner(computerThrow, playerThrow);
 
                 string outputMessage;
-                // TODO get the emoji from the Enum...
                 if (winner == Winner.Bot)
                 {
-                    outputMessage = $"{ message.Author.Mention } *won* by throwing { Enum.GetName(typeof(ThrowResult), computerThrow)} against { usersReaction.Name}!";
+                    outputMessage = $"{ message.Author.Mention } *won* by throwing { GetEmoji(computerThrow) } against { usersReaction.Name}!";
                     
                 }
                 else if (winner == Winner.Player)
                 {
-                    outputMessage = $"{ reactingUser.Mention } *won* by throwing { usersReaction.Name} against { Enum.GetName(typeof(ThrowResult), computerThrow)}!";
+                    outputMessage = $"{ reactingUser.Mention } *won* by throwing { usersReaction.Name} against { GetEmoji(computerThrow) }!";
                 }
                 else
                 {
-                    outputMessage = $"It's a tie! { Enum.GetName(typeof(ThrowResult), computerThrow)} vs { Enum.GetName(typeof(ThrowResult), playerThrow)}!";
+                    outputMessage = $"It's a tie! { GetEmoji(computerThrow)} vs { GetEmoji(playerThrow) }!";
                 }
 
                 await message.ModifyAsync(msg => msg.Content = outputMessage);
+            }
+        }
+
+        private static IEmote GetEmoji(ThrowResult throwResult)
+        {
+            switch (throwResult)
+            {
+                case ThrowResult.Rock:
+                    return new Emoji("🪨");
+                    break;
+                case ThrowResult.Paper:
+                    return new Emoji("🧻");
+                    break;
+                case ThrowResult.Scissors:
+                    return new Emoji("✂️");
+                    break;
+                default:
+                    return new Emoji("❓");
+                    break;
             }
         }
 
