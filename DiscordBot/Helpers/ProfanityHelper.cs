@@ -73,7 +73,7 @@ namespace DiscordBot.Helpers
             var censored = filter.CensorString(message.Content);
             await message.DeleteAsync();
 
-            await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear. Orignial message: {censored.Replace("*", "#")}");
+            await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear. {message.Author.Username}'s Orignial message:\n{censored.Replace("*", "#")}");
         }
 
         public static async Task<ReadOnlyCollection<string>> GetProfanity(Server server, string sentence)

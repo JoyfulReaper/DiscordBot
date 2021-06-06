@@ -85,7 +85,8 @@ namespace DiscordBot.Commands
             var server = await _servers.GetServer(Context.Guild);
             await _profanityRepository.AllowProfanity(server.GuildId, profanity);
 
-            await ReplyAsync("DONE! TODO MAKE THIS AN EMBED!");
+            await Context.Channel.SendEmbedAsync("Profanity Filter", $"Profanity allowed: `{profanity}`",
+                ColorHelper.GetColor(server));
 
             _logger.LogInformation("{user}#{discriminator} invoked profanityallow for {profanity} in {channel} on {server}",
                 Context.User.Username, Context.User.Discriminator, profanity, Context.Channel.Name, Context.Guild.Name);
@@ -104,7 +105,8 @@ namespace DiscordBot.Commands
             var server = await _servers.GetServer(Context.Guild);
             await _profanityRepository.BlockProfanity(server.GuildId, profanity);
 
-            await ReplyAsync("DONE! TODO MAKE THIS AN EMBED!");
+            await Context.Channel.SendEmbedAsync("Profanity Filter", $"Profanity blocked: `CENSORED!`",
+                ColorHelper.GetColor(server));
 
             _logger.LogInformation("{user}#{discriminator} invoked profanityblock for {profanity} in {channel} on {server}",
                 Context.User.Username, Context.User.Discriminator, profanity, Context.Channel.Name, Context.Guild.Name);
