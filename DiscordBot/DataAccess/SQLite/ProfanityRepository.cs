@@ -33,13 +33,13 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess.SQLite
 {
-    public class ProfanityRepository : Repository<Profanity>
+    public class ProfanityRepository : Repository<Profanity>, IProfanityRepository
     {
         private readonly ILogger<ProfanityRepository> _logger;
         private readonly ISettings _settings;
 
         public ProfanityRepository(ILogger<ProfanityRepository> logger,
-            ISettings settings) : base (settings, logger)
+            ISettings settings) : base(settings, logger)
         {
             _logger = logger;
             _settings = settings;
@@ -63,15 +63,15 @@ namespace DiscordBot.DataAccess.SQLite
             {
                 await ExecuteAsync($"UPDATE ProfanityServer " +
                      $"SET ServerId = @ServerId, ProfanityId = @ProfanityId, ProfanityMode = @ProfanityMode " +
-                     $"WHERE ServerId = @serverId AND ProfanityId = @ProfanityId;",
-                     new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = ProfanityMode.Allow });
+                     $"WHERE ServerId = @ServerId AND ProfanityId = @ProfanityId;",
+                     new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow });
             }
             else
             {
                 await ExecuteAsync($"INSERT INTO ProfanityServer " +
                     $"(ServerId, ProfanityId, ProfanityMode) " +
                     $"VALUES (@ServerId, @ProfanityId, @ProfanityMode);",
-                    new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = ProfanityMode.Allow });
+                    new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow });
             }
         }
 
@@ -86,22 +86,22 @@ namespace DiscordBot.DataAccess.SQLite
 
             int count = await QueryFirstOrDefaultAsync<int>($"SELECT count(Id) " +
                 $"FROM ProfanityServer WHERE ServerId = @ServerId " +
-                $"AND ProfanityId = @ProfanityId AND ProfanityMode = @ProfanityMode;", 
-                new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow});
+                $"AND ProfanityId = @ProfanityId AND ProfanityMode = @ProfanityMode;",
+                new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow });
 
             if (count != 0)
             {
                 await ExecuteAsync($"UPDATE ProfanityServer " +
                  $"SET ServerId = @ServerId, ProfanityId = @ProfanityId, ProfanityMode = @ProfanityMode " +
-                 $"WHERE ServerId = @serverId AND ProfanityId = @ProfanityId;",
-                 new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = ProfanityMode.Block });
+                 $"WHERE ServerId = @ServerId AND ProfanityId = @ProfanityId;",
+                 new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Block });
             }
             else
             {
                 await ExecuteAsync($"INSERT INTO ProfanityServer " +
                     $"(ServerId, ProfanityId, ProfanityMode) " +
                     $"VALUES (@ServerId, @ProfanityId, @ProfanityMode);",
-                    new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = ProfanityMode.Block });
+                    new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Block });
             }
         }
 
@@ -111,7 +111,7 @@ namespace DiscordBot.DataAccess.SQLite
                 $"FROM Profanity p " +
                 $"INNER JOIN ProfanityServer ps on ps.ProfanityId = p.Id " +
                 $"INNER JOIN Server s on s.GuildId = ps.ServerId " +
-                $"WHERE ServerId = @ServerId and ps.ProfantiyMode = {(int)ProfanityMode.Allow}",
+                $"WHERE ServerId = @ServerId and ps.ProfanityMode = {(int)ProfanityMode.Allow};",
                 new { ServerId = serverId });
 
             return QueryResult.ToList();
@@ -123,7 +123,7 @@ namespace DiscordBot.DataAccess.SQLite
                 $"FROM Profanity p " +
                 $"INNER JOIN ProfanityServer ps on ps.ProfanityId = p.Id " +
                 $"INNER JOIN Server s on s.GuildId = ps.ServerId " +
-                $"WHERE ServerId = @ServerId and ps.ProfantiyMode = {(int)ProfanityMode.Block}",
+                $"WHERE ServerId = @ServerId and ps.ProfanityMode = {(int)ProfanityMode.Block};",
                 new { ServerId = serverId });
 
             return QueryResult.ToList();

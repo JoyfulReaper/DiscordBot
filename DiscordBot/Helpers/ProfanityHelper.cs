@@ -28,14 +28,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using DiscordBot.DataAccess;
 using DiscordBot.Models;
-
+using Serilog;
 
 namespace DiscordBot.Helpers
 {
     public class ProfanityHelper
     {
-        private static string[] allowedWords = new[] { "butt", "poop", "bender", "bugger", "bum", "drunk", "dummy", "foobar", "gays", "hardcore", "hookah", "hun", "lesbian", "lesbians",
+        public static IProfanityRepository ProfanityRepository = null;
+
+        private static string[] GlobalAllowedWords = new[] { "butt", "poop", "bender", "bugger", "bum", "drunk", "dummy", "foobar", "gays", "hardcore", "hookah", "hun", "lesbian", "lesbians",
             "piss", "pissed", "porn", "pornography", "potty", "prod", "psycho", "pube", "pubes", "pubic", "queer", "reefer", "sex", "sexual", "stoned", "suck", "sucks",
             "sucking", "sucked", "tampon", "tart", "testical", "testicle", "thrust", "thug", "tit", "toke", "toots", "topless", "trashy", "turd", "ugly", "urine",
             "balls", "barf", "big breasts", "big black", "big tits", "bloody", "boob", "boobs", "bong", "booger", "boong", "booze", "bummer", "cervix", "climax", 
@@ -45,16 +48,16 @@ namespace DiscordBot.Helpers
             "vulva", "wazoo", "weed", "weiner", "wedgie", "whiz", "womb", "rum", "kill", "murder", "stupid", "flaps"};
 
 
-        public static bool ContainsProfanity(Server server, string sentence)
+        public static async Task<bool> ContainsProfanity(Server server, string sentence)
         {
-            var filter = GetProfanityFilterForServer(server);
+            var filter = await GetProfanityFilterForServer (server);
 
             return filter.ContainsProfanity(sentence);
         }
 
         public async static Task HandleProfanity(SocketUserMessage message, Server server, IReadOnlyList<string> badWords)
         {
-            var filter = GetProfanityFilterForServer(server);
+            var filter = await GetProfanityFilterForServer(server);
 
             var channel = message.Channel as SocketGuildChannel;
             var guild = channel.Guild;
@@ -73,17 +76,37 @@ namespace DiscordBot.Helpers
             await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear. Orignial message: {censored.Replace("*", "#")}");
         }
 
-        public static ReadOnlyCollection<string> GetProfanity(Server server, string sentence)
+        public static async Task<ReadOnlyCollection<string>> GetProfanity(Server server, string sentence)
         {
-            var filter = GetProfanityFilterForServer(server);
+            var filter = await GetProfanityFilterForServer(server);
 
             return filter.DetectAllProfanities(sentence);
         }
 
-        private static ProfanityFilter.ProfanityFilter GetProfanityFilterForServer(Server server)
+        private static async Task<ProfanityFilter.ProfanityFilter> GetProfanityFilterForServer(Server server)
         {
+            // TODO Look into caching this some how...
+            if (ProfanityRepository == null)
+            {
+                Log.Warning("ProfanityRepository is null!");
+                throw new InvalidOperationException("ProfanityRepostiry cannot be null, please set it before using the ProfanityHelper!");
+            }
+
             ProfanityFilter.ProfanityFilter filter = new ProfanityFilter.ProfanityFilter();
-            filter.RemoveProfanity(allowedWords);
+            filter.RemoveProfanity(GlobalAllowedWords);
+
+            var allowedWords = await ProfanityRepository.GetAllowedProfanity(server.GuildId);
+            var blockedWord = await ProfanityRepository.GetBlockedProfanity(server.GuildId);
+
+            foreach (var word in allowedWords)
+            {
+                filter.RemoveProfanity(word.Word);
+            }
+
+            foreach (var word in blockedWord)
+            {
+                filter.AddProfanity(word.Word);
+            }
 
             return filter;
         }

@@ -125,7 +125,8 @@ namespace DiscordBot
                         .AddSingleton<ISubredditRepository, SubredditRepository>()
                         .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>()
                         .AddSingleton<IServerService, ServerService>()
-                        .AddSingleton<IUserTimeZonesRepository, UserTimeZoneRepository>();
+                        .AddSingleton<IUserTimeZonesRepository, UserTimeZoneRepository>()
+                        .AddSingleton<IProfanityRepository, ProfanityRepository>();
                     break;
                 default:
                     Log.Logger.Fatal("{database} is not supported", database);
