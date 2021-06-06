@@ -166,21 +166,7 @@ namespace DiscordBot.Services
 
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            //TODO Maybe find a way to make this useful...
-            //TODO Maybe keep a DB of reactable messages
-            // and find a way to have them trigger something
-            if (reaction.MessageId != 843516844794314782)
-            {
-                return;
-            }
-
-            if(reaction.Emote.Name != "✅")
-            {
-                return;
-            }
-
-            var textChannel = await (channel as ITextChannel).Guild.GetTextChannelAsync(821113360711155729);
-            await textChannel.SendMessageAsync($"{reaction.User.Value.Mention} reacted with the ✅");
+            await RPSHelper.RPSProcessor(cachedEntity, channel, reaction);
         }
 
         private async Task OnUserJoined(SocketGuildUser userJoining)

@@ -9,7 +9,7 @@ DiscordBot has the following features:
 * Auto Roles: Allow Discord roles to be registered with the bot, these registered roles will be given to all members when joing the server.
   * autoroles, addautotole, delautorole, runautorules
 * Fun: 
-  * 8ball, coinflip, rolldie, RussianRoulette, lmgtfy (Let Me Google That for You)
+  * 8ball, coinflip, rolldie, RussianRoulette, lmgtfy (Let Me Google That for You), RockPaperScissors
 * General commands including:
   * Math, ping, about, owner, echo, info, server, image, help
 * Moderation commands including:

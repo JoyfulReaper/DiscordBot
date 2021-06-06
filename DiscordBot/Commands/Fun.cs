@@ -61,6 +61,27 @@ namespace DiscordBot.Commands
             _servers = servers;
         }
 
+        [Command("rockpaperscissors")]
+        [Alias("rps")]
+        [Summary("Play a game of rock paper scissors!")]
+        public async Task RockPaperScissors()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed rockpaperscissors on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            IEmote[] rpsReactions = new IEmote[]
+            {
+                new Emoji("🪨"),
+                new Emoji("🧻"),
+                new Emoji("✂️"),
+            };
+
+            var message = await ReplyAsync("Choose Rock, Paper, or Scissors!");
+            await message.AddReactionsAsync(rpsReactions);
+        }
+
         [Command("8ball")]
         [Alias("eightBall")]
         [Summary("Ask the 8ball a question, get the answer!")]
