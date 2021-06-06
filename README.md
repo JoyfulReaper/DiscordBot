@@ -7,21 +7,24 @@ If you would like to contribute, offer suggestion/criticism or hang out on the D
 DiscordBot has the following features:
 
 * Auto Roles: Allow Discord roles to be registered with the bot, these registered roles will be given to all members when joing the server.
+  * autoroles, addautotole, delautorole, runautorules
 * Fun: 
   * 8ball, coinflip, rolldie, RussianRoulette, lmgtfy (Let Me Google That for You)
 * General commands including:
-  * Math, ping, about, echo, info, server, image, help
+  * Math, ping, about, owner, echo, info, server, image, help
 * Moderation commands including:
-  * Ability to enable or disable sending invites to other server 
-  * kick, purge, prefix, welcome, mute, unmute, slowmode, logs, embedcolor
+  * Ability to enable or disable sending invites to other server (serverinvites)
+  * Ability to censor or delete messages with profanity, and allow or disallow words. This is pretty basic and doesn't take too much creativity to bypass :(
+  * ban, unban, kick, purge, prefix, welcome, mute, unmute, slowmode, logs, embedcolor
 * Music Commands
   * search, play, join, skip, pause, resume
 * Ranks: Allows discord roles to be registered with the bot as ranks, users can assign these ranks to themselves
+  * ranks, addrank, delrank, rank
 * Reddit command
-  * Show a post from a chosen or random subreddit
+  * Show a post from a chosen or random subreddit (reddit) delete known subreddit (subredditremove)
   * subredditlearning can be turned 'on' or 'off' and requires the redditor role to teach the bot new subreddits
 * Timzone features:
-  * registertimezone, userstime, time (get the time in any timezone)
+  * registertimezone, userstime, time (get the time in any timezone), validtimezone (validate a timezone)
 * Web
   * Google (search google)  
 
