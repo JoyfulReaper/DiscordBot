@@ -23,13 +23,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace DiscordBot.Models
+using DiscordBot.Enums;
+using DiscordBot.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace DiscordBot.DataAccess
 {
-    public class Subreddit : DatabaseEntity
+    public interface IProfanityRepository
     {
-        /// <summary>
-        /// Name of the subreddit /r/Name
-        /// </summary>
-        public string Name { get; set; }
+        Task AddAsync(Profanity entity);
+        Task<Profanity> AddAsync(ulong serverId, string profanity, ProfanityMode mode);
+        Task AllowProfanity(ulong serverId, string profanity);
+        Task BlockProfanity(ulong serverId, string profanity);
+        Task DeleteAsync(Profanity entity);
+        Task DeleteAsync(string profanity);
+        Task DeleteAsync(ulong serverId, ulong profanity);
+        Task EditAsync(Profanity entity);
+        Task<List<Profanity>> GetAllowedProfanity(ulong serverId);
+        Task<List<Profanity>> GetBlockedProfanity(ulong serverId);
+        Task<Profanity> GetProfanity(string word);
     }
 }

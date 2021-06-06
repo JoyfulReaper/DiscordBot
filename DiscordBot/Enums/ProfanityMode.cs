@@ -23,13 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace DiscordBot.Models
+namespace DiscordBot.Enums
 {
-    public class Subreddit : DatabaseEntity
+    public enum ProfanityMode
     {
-        /// <summary>
-        /// Name of the subreddit /r/Name
-        /// </summary>
-        public string Name { get; set; }
+        Allow = 0,
+        Block = 1,
     }
 }

@@ -31,6 +31,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using DiscordBot.Helpers;
+using DiscordBot.DataAccess;
 
 namespace DiscordBot.Services
 {
@@ -54,7 +55,8 @@ namespace DiscordBot.Services
             IServerService servers,
             ImageService images,
             IConfiguration configuration,
-            IAutoRoleService autoRoleService)
+            IAutoRoleService autoRoleService,
+            IProfanityRepository profanityRepository)
         {
             _client = client;
             _commands = commands;
@@ -72,6 +74,8 @@ namespace DiscordBot.Services
             _client.MessageUpdated += OnMessageUpated;
 
             _commands.CommandExecuted += OnCommandExecuted;
+
+            ProfanityHelper.ProfanityRepository = profanityRepository;
 
             Task.Run(async () => await MuteHandler.MuteWorker(client));
         }
@@ -95,7 +99,7 @@ namespace DiscordBot.Services
                 var server = await _servers.GetServer(channel.Guild);
                 if (server != null && server.FilterProfanity)
                 {
-                    var badWords = ProfanityHelper.GetProfanity(after.Content);
+                    var badWords = await ProfanityHelper.GetProfanity(server, after.Content);
 
                     if (badWords.Count != 0)
                     {
@@ -130,7 +134,7 @@ namespace DiscordBot.Services
                 var server = await _servers.GetServer(channel.Guild);
                 if (server != null && server.FilterProfanity)
                 {
-                    var badWords = ProfanityHelper.GetProfanity(message.Content);
+                    var badWords = await ProfanityHelper.GetProfanity(server, message.Content);
 
                     if (badWords.Count != 0)
                     {

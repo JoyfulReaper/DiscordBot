@@ -46,19 +46,22 @@ namespace DiscordBot.Commands
         private readonly IServerService _servers;
         private readonly IConfiguration _configuration;
         private readonly IServerRepository _serverRepository;
+        private readonly IProfanityRepository _profanityRepository;
         private readonly int _prefixMaxLength;
 
         public Moderation(DiscordSocketClient client,
             ILogger<Moderation> logger,
             IServerService servers,
             IConfiguration configuration,
-            IServerRepository serverRepository)
+            IServerRepository serverRepository,
+            IProfanityRepository profanityRepository)
         {
             _client = client;
             _logger = logger;
             _servers = servers;
             _configuration = configuration;
             _serverRepository = serverRepository;
+            _profanityRepository = profanityRepository;
             var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
             if (int.TryParse(prefixConfigValue, out int maxLength))
             {
@@ -71,12 +74,55 @@ namespace DiscordBot.Commands
             }
         }
 
+        [Command("profanityallow")]
+        [Alias("pallow")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("Add exception to profanity filter")]
+        public async Task ProfanityAllow([Remainder] string profanity)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            var server = await _servers.GetServer(Context.Guild);
+            await _profanityRepository.AllowProfanity(server.GuildId, profanity);
+
+            await Context.Channel.SendEmbedAsync("Profanity Filter", $"Profanity allowed: `{profanity}`",
+                ColorHelper.GetColor(server));
+
+            _logger.LogInformation("{user}#{discriminator} invoked profanityallow for {profanity} in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, profanity, Context.Channel.Name, Context.Guild.Name);
+
+            await _servers.SendLogsAsync(Context.Guild, "Profanity Filter", $"Profanity `{profanity}` has been allowed by {Context.User.Mention}");
+        }
+
+        [Command("profanityblock")]
+        [Alias("pblock")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("Add new entry to profanity filter")]
+        public async Task ProfanityBlock([Remainder] string profanity)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            var server = await _servers.GetServer(Context.Guild);
+            await _profanityRepository.BlockProfanity(server.GuildId, profanity);
+
+            await Context.Channel.SendEmbedAsync("Profanity Filter", $"Profanity blocked: `CENSORED!`",
+                ColorHelper.GetColor(server));
+
+            _logger.LogInformation("{user}#{discriminator} invoked profanityblock for {profanity} in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, profanity, Context.Channel.Name, Context.Guild.Name);
+
+            await _servers.SendLogsAsync(Context.Guild, "Profanity Filter", $"Profanity `{profanity}` has been blocked by {Context.User.Mention}");
+        }
+
+
         [Command("profanityfilter")]
         [Alias("profanity")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Enable or Disable profanity filtering")]
         public async Task ProfanityFilter([Summary("On to allow, off to disallow")] string enabled = null)
         {
+            await Context.Channel.TriggerTypingAsync();
+
             var server = await _servers.GetServer(Context.Guild);
 
             if (enabled == null)
