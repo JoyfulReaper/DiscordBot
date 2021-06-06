@@ -44,6 +44,7 @@ namespace DiscordBot.Helpers
             "https://myzol.co.zw/Data/Articles/2387/bye-quit__zoom.png", "https://c1.staticflickr.com/3/2199/3527660157_2827558f95_z.jpg", "https://cdn.tinybuddha.com/wp-content/uploads/2015/08/Bad-Day.png",
             "https://geekologie.com/2015/08/03/dead-hitchhiking-robot.jpg"};
 
+        public static readonly string[] BADCOMMAND_IMAGES = new string[] { "https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png" };
 
 
         private static Random _random = new Random();

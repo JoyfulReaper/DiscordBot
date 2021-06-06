@@ -224,14 +224,13 @@ namespace DiscordBot.Services
         {
             if (result.Error == CommandError.UnknownCommand)
             {
-                //TODO add multiple images
                 //TODO make this optional/a setting
                 Task.Run(async () =>
                 {
                     _logger.LogDebug("{user} attempted to use an unknown command ({command}) on {server}/{channel}",
                         context.User.Username, context.Message.Content, context.Guild?.Name ?? "DM", context.Channel);
 
-                    var badCommandMessage = await context.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");
+                    var badCommandMessage = await context.Channel.SendMessageAsync(EmbedImageHelper.GetImageUrl("BADCOMMAND_IMAGES"));
                     await Task.Delay(3500);
                     await badCommandMessage.DeleteAsync();
                 });
