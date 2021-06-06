@@ -1,12 +1,12 @@
 DiscordBot
 ==========
-A Discord Bot written in C# using the Discord.NET library. I plan to continue to expland this bot with common Discord bot features. If you would like to see a command/feature/different database or ORM/etc please open an issues, I love a challenge :)
+A Discord Bot written in C# using the Discord.NET library. I plan to continue to expand this bot with common Discord bot features. If you would like to see a command/feature/different database or ORM/etc please open an issues, I love a challenge :)
 
 If you would like to contribute, offer suggestion/criticism or hang out on the Discord server I test the bot in join here: https://discord.gg/2bxgHyfN6A If you want to invite the bot to your server then ask in the server linked above. For now it's just running on my PC as I develop it though.
 
 DiscordBot has the following features:
 
-* Auto Roles: Allow Discord roles to be registered with the bot, these registered roles will be given to all members when joing the server.
+* Auto Roles: Allow Discord roles to be registered with the bot, these registered roles will be given to all members when joining the server.
   * autoroles, addautotole, delautorole, runautorules
 * Fun: 
   * 8ball, coinflip, rolldie, RussianRoulette, lmgtfy (Let Me Google That for You), RockPaperScissors
@@ -29,4 +29,4 @@ DiscordBot has the following features:
   * Google (search google)  
 
 This bot uses Dapper as the ORM and currently uses SQLite as the database engine. 
-If you find this bot useful, but would perfer a different database engine please let me know as I would like to look into adding support for other databases later.
+If you find this bot useful, but would prefer a different database engine please let me know as I would like to look into adding support for other databases later.
