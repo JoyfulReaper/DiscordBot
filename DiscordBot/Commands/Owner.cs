@@ -48,14 +48,6 @@ namespace DiscordBot.Commands
         private readonly IServerService _servers;
         private readonly Random _random = new Random();
 
-        //TODO store these in the database
-        private readonly List<string> _quitImages = new List<string>
-        {
-            "https://i.makeagif.com/media/11-18-2014/2oMnrI.gif", "https://news.efinancialcareers.com/binaries/content/gallery/efinancial-careers/articles/2017/11/I-quit_twinsterphoto_GettyImages.jpg",
-            "https://myzol.co.zw/Data/Articles/2387/bye-quit__zoom.png", "https://c1.staticflickr.com/3/2199/3527660157_2827558f95_z.jpg", "https://cdn.tinybuddha.com/wp-content/uploads/2015/08/Bad-Day.png",
-            "https://geekologie.com/2015/08/03/dead-hitchhiking-robot.jpg"
-        };
-
         public Owner(DiscordSocketClient client,
             ISettings settings,
             ILogger<Owner> logger,
@@ -76,7 +68,12 @@ namespace DiscordBot.Commands
         [Summary("Start or stop lavalink")]
         public async Task LavaLink(string enable = null)
         {
-            if(enable == null)
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed lavalink ({option}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, enable, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if (enable == null)
             {
                 await ReplyAsync("LavaLink is " + (LavaLinkHelper.isLavaLinkRunning() ? "" : "not" ) + " running.");
                 return;
@@ -85,6 +82,8 @@ namespace DiscordBot.Commands
             if (enable.ToLowerInvariant() == "start")
             {
                 LavaLinkHelper.StartLavaLink();
+                await Task.Delay(5000);
+
                 if(!_lavaNode.IsConnected)
                 {
                     await _lavaNode.ConnectAsync();
@@ -105,7 +104,10 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            await ReplyAsync("Done!");
+            await Context.Channel.SendEmbedAsync("Lava Link", $"Lavalink was {(enable.ToLowerInvariant() == "start" ? "started" : "stopped")}!",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)));
+
+            await _servers.SendLogsAsync(Context.Guild, "Lavalink", $"Lavalink was {(enable.ToLowerInvariant() == "start" ? "started": "stopped")}!");
         }
 
         [Command("quit")]
@@ -140,7 +142,7 @@ namespace DiscordBot.Commands
                     await Context.Message.DeleteAsync();
                 }
 
-                var memoryStream = await ImageHelper.FetchImage(imageUrl ?? _quitImages[_random.Next(_quitImages.Count)]);
+                var memoryStream = await ImageHelper.FetchImage(imageUrl ?? EmbedImageHelper.GetImageUrl("QUIT_IMAGES"));
                 if(memoryStream == null)
                 {
                     await ReplyAsync("Quit Image could not be fetched! Bye anyway!");
