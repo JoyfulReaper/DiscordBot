@@ -23,8 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
-
 namespace DiscordBot.Models
 {
     public class Rank : DatabaseEntity
@@ -33,6 +31,7 @@ namespace DiscordBot.Models
         /// Id of the role
         /// </summary>
         public ulong RoleId { get; set; }
+
         /// <summary>
         ///  Id of the server/guild
         /// </summary>

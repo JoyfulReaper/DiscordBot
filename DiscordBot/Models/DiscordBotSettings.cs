@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
 
 namespace DiscordBot.Models
 {
@@ -33,6 +32,7 @@ namespace DiscordBot.Models
         /// The bot's token
         /// </summary>
         public string Token { get; set; }
+
         /// <summary>
         /// The game the bot is playing
         /// </summary>

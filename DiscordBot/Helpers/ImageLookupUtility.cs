@@ -43,7 +43,7 @@ namespace DiscordBot.Helpers
 
         public static readonly string[] LOGGING_IMAGES = new string[] { "https://cdn.quotesgram.com/img/87/86/1090166097-captains_log_meme.jpg" };
 
-        private static Random _random = new Random();
+        private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)
         {
