@@ -110,7 +110,7 @@ namespace DiscordBot
                 .AddSingleton(commandService)
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<ISettings, Settings>()
-                .AddSingleton<ImageService>();
+                .AddSingleton<BannerImageService>();
 
 
             switch(database)

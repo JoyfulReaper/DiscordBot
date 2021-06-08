@@ -28,7 +28,6 @@ SOFTWARE.
 */
 
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -52,16 +51,18 @@ namespace DiscordBot.Helpers
             "penis", "queers", "rectal", "rectum", "taste my", "teste", "testes", "tied up", "undies", "unwed", "urinal", "vagina", "virgin", "vomit", "vodka",
             "vulva", "wazoo", "weed", "weiner", "wedgie", "whiz", "womb", "rum", "kill", "murder", "stupid", "flaps"};
 
-        private static string[] GlobalBannedWords = new[] { "f*ck", "shat", "sh!t" };
+        // I'm not sure why, but words with symbols (*, !) don't seem to work
+        // TODO: Look into another filtering library, writing my own filter, or improving the existing solution some how
+        private static string[] GlobalBannedWords = new[] { "f*ck", "shat", "sh!t" }; 
 
-        public static async Task<bool> ContainsProfanity(Server server, string sentence)
+        internal static async Task<bool> ContainsProfanity(Server server, string sentence)
         {
             var filter = await GetProfanityFilterForServer (server);
 
             return filter.ContainsProfanity(sentence);
         }
 
-        public async static Task HandleProfanity(SocketUserMessage message, Server server)
+        internal async static Task HandleProfanity(SocketUserMessage message, Server server)
         {
             var checkString = message.Content.Replace(".", String.Empty).Replace('!', 'i');
             var badWords = await GetProfanity(server, checkString);
@@ -95,7 +96,7 @@ namespace DiscordBot.Helpers
             }
         }
 
-        public static async Task<ReadOnlyCollection<string>> GetProfanity(Server server, string sentence)
+        internal static async Task<ReadOnlyCollection<string>> GetProfanity(Server server, string sentence)
         {
             var filter = await GetProfanityFilterForServer(server);
             return filter.DetectAllProfanities(sentence);

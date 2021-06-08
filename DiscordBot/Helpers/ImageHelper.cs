@@ -25,8 +25,7 @@ SOFTWARE.
 
 using Discord;
 using Discord.WebSocket;
-using System.Drawing;
-using System.Drawing.Imaging;
+using Serilog;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -42,11 +41,7 @@ namespace DiscordBot.Helpers
 
             if (!response.IsSuccessStatusCode)
             {
-                //_logger.Warning("Unable to fetch: {url}", url);
-
-                //var backupResponse = await client.GetAsync("https://images.unsplash.com/photo-1500829243541-74b677fecc30?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2555&q=80");
-                //var backupStream = await backupResponse.Content.ReadAsStreamAsync();
-                //return Image.FromStream(backupStream);
+                Log.Warning("Unable to fetch: {url}", url);
                 return null;
             }
 

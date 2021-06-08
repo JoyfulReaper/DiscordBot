@@ -24,15 +24,10 @@ SOFTWARE.
 */
 
 using System;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Helpers
 {
-    public static class EmbedImageHelper
+    public static class ImageLookupUtility
     {
         public static readonly string[] BAN_IMAGES = new string[] { "https://image.freepik.com/free-vector/iron-ban-hammer-isolated-white_175250-450.jpg",
             "https://i.ytimg.com/vi/nnb2gXr4nCw/maxresdefault.jpg", "https://www.clipartkey.com/mpngs/m/7-78285_banned-hammer-png-clipart-free-library-ban-hammer.png"};
@@ -46,12 +41,13 @@ namespace DiscordBot.Helpers
 
         public static readonly string[] BADCOMMAND_IMAGES = new string[] { "https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png" };
 
+        public static readonly string[] LOGGING_IMAGES = new string[] { "https://cdn.quotesgram.com/img/87/86/1090166097-captains_log_meme.jpg" };
 
-        private static Random _random = new Random();
+        private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)
         {
-            Type type = typeof(EmbedImageHelper);
+            Type type = typeof(ImageLookupUtility);
             var fieldInfo = type.GetField(key);
 
             if(fieldInfo == null)

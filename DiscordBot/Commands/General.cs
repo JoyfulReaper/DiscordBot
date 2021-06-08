@@ -43,17 +43,17 @@ namespace DiscordBot.Commands
     {
         private readonly ILogger<General> _logger;
         private readonly DiscordSocketClient _client;
-        private readonly ImageService _images;
+        private readonly BannerImageService _bannerImageService;
         private readonly IServerService _servers;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
-            ImageService images,
+            BannerImageService bannerImageService,
             IServerService servers)
         {
             _logger = logger;
             _client = client;
-            _images = images;
+            _bannerImageService = bannerImageService;
             _servers = servers;
         }
 
@@ -242,7 +242,7 @@ namespace DiscordBot.Commands
 
             var background = await _servers.GetBackground(user.Guild.Id);
 
-            var memoryStream = await _images.CreateImage(user, background);
+            var memoryStream = await _bannerImageService.CreateImage(user, background);
             memoryStream.Seek(0, SeekOrigin.Begin);
             await Context.Channel.SendFileAsync(memoryStream, $"{user.Username}.png");
         }

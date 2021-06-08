@@ -32,8 +32,6 @@ namespace DiscordBot.Helpers
 {
     public static class RPSHelper
     {
-        private static Random _random = new();
-
         private enum ThrowResult
         {
             Rock,
@@ -71,7 +69,7 @@ namespace DiscordBot.Helpers
                     }
                 }
 
-                ThrowResult playerThrow = ThrowResult.Rock;
+                ThrowResult playerThrow = (ThrowResult)(-1);
                 if (usersReaction.Name == "🪨")
                 {
                     playerThrow = ThrowResult.Rock;
@@ -113,20 +111,21 @@ namespace DiscordBot.Helpers
 
         private static IEmote GetEmoji(ThrowResult throwResult)
         {
+            if (!EnumHelper.EnumValueIsValid(throwResult))
+            {
+                throw new ArgumentException("Argument is invalid.", nameof(throwResult));
+            }
+
             switch (throwResult)
             {
                 case ThrowResult.Rock:
                     return new Emoji("🪨");
-                    break;
                 case ThrowResult.Paper:
                     return new Emoji("🧻");
-                    break;
                 case ThrowResult.Scissors:
                     return new Emoji("✂️");
-                    break;
                 default:
                     return new Emoji("❓");
-                    break;
             }
         }
 

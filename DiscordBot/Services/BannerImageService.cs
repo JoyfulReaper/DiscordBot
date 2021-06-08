@@ -37,11 +37,11 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class ImageService
+    public class BannerImageService
     {
-        private readonly ILogger<ImageService> _logger;
+        private readonly ILogger<BannerImageService> _logger;
 
-        public ImageService(ILogger<ImageService> logger)
+        public BannerImageService(ILogger<BannerImageService> logger)
         {
             _logger = logger;
         }

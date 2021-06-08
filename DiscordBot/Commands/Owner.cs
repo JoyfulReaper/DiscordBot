@@ -142,7 +142,7 @@ namespace DiscordBot.Commands
                     await Context.Message.DeleteAsync();
                 }
 
-                var memoryStream = await ImageHelper.FetchImage(imageUrl ?? EmbedImageHelper.GetImageUrl("QUIT_IMAGES"));
+                var memoryStream = await ImageHelper.FetchImage(imageUrl ?? ImageLookupUtility.GetImageUrl("QUIT_IMAGES"));
                 if(memoryStream == null)
                 {
                     await ReplyAsync("Quit Image could not be fetched! Bye anyway!");

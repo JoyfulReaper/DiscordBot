@@ -26,7 +26,6 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -44,7 +43,7 @@ namespace DiscordBot.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
         private readonly IServerService _servers;
-        private readonly ImageService _images;
+        private readonly BannerImageService _bannerImageService;
         private readonly IAutoRoleService _autoRoleService;
 
         public CommandHandler(DiscordSocketClient client,
@@ -53,7 +52,7 @@ namespace DiscordBot.Services
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger,
             IServerService servers,
-            ImageService images,
+            BannerImageService bannerImageService,
             IAutoRoleService autoRoleService,
             IProfanityRepository profanityRepository)
         {
@@ -63,7 +62,7 @@ namespace DiscordBot.Services
             _serviceProvider = serviceProvider;
             _logger = logger;
             _servers = servers;
-            _images = images;
+            _bannerImageService = bannerImageService;
             _autoRoleService = autoRoleService;
 
             _client.MessageReceived += OnMessageReceived;
@@ -189,7 +188,7 @@ namespace DiscordBot.Services
                 await channel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
 
                 var background = await _servers.GetBackground(userJoining.Guild.Id);
-                var memoryStream = await _images.CreateImage(userJoining, background);
+                var memoryStream = await _bannerImageService.CreateImage(userJoining, background);
                 memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
                 await channel.SendFileAsync(memoryStream, $"{userJoining.Username}.png");
             }
@@ -205,7 +204,7 @@ namespace DiscordBot.Services
                     _logger.LogDebug("{user} attempted to use an unknown command ({command}) on {server}/{channel}",
                         context.User.Username, context.Message.Content, context.Guild?.Name ?? "DM", context.Channel);
 
-                    var badCommandMessage = await context.Channel.SendMessageAsync(EmbedImageHelper.GetImageUrl("BADCOMMAND_IMAGES"));
+                    var badCommandMessage = await context.Channel.SendMessageAsync(ImageLookupUtility.GetImageUrl("BADCOMMAND_IMAGES"));
                     await Task.Delay(3500);
                     await badCommandMessage.DeleteAsync();
                 });

@@ -23,8 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Dead code I think
-
 using Discord;
 using DiscordBot.Models;
 using System;
@@ -33,7 +31,7 @@ namespace DiscordBot.Helpers
 {
     public static class ColorHelper
     {
-        private static Random _random = new();
+        private static readonly Random _random = new();
 
         public static bool isValidColor (string color)
         {

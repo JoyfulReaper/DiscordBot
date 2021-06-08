@@ -78,7 +78,6 @@ namespace DiscordBot.Services
 
         private Task OnMessageReceived(SocketMessage arg)
         {
-            //TODO replace this with logging / Possibly keep a database of all messages received
             Console.WriteLine($"Message received: {arg.Author.Username} : {arg.Channel.Name} : {arg.Content}");
             _logger.LogInformation("Message Received: {author} : {channel} : {message}", arg.Author.Username, arg.Channel.Name, arg.Content);
 

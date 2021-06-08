@@ -25,6 +25,7 @@ SOFTWARE.
 
 using Discord;
 using Discord.WebSocket;
+using DiscordBot.Models;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Helpers
@@ -48,6 +49,11 @@ namespace DiscordBot.Helpers
 
             var message = await channel.SendMessageAsync(embed: embed.Build());
             return message;
+        }
+
+        public static async Task<IMessage> SendEmbedAsync(this ISocketMessageChannel channel, string title, string description, Server server, string thumbImage = null)
+        {
+            return await SendEmbedAsync(channel, title, description, server.EmbedColor.RawValue == 0 ? ColorHelper.RandomColor() : server.EmbedColor, thumbImage);
         }
     }
 }
