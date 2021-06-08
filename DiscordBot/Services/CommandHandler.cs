@@ -45,7 +45,6 @@ namespace DiscordBot.Services
         private readonly ILogger<CommandHandler> _logger;
         private readonly IServerService _servers;
         private readonly ImageService _images;
-        private readonly IConfiguration _configuration;
         private readonly IAutoRoleService _autoRoleService;
 
         public CommandHandler(DiscordSocketClient client,
@@ -55,7 +54,6 @@ namespace DiscordBot.Services
             ILogger<CommandHandler> logger,
             IServerService servers,
             ImageService images,
-            IConfiguration configuration,
             IAutoRoleService autoRoleService,
             IProfanityRepository profanityRepository)
         {
@@ -66,7 +64,6 @@ namespace DiscordBot.Services
             _logger = logger;
             _servers = servers;
             _images = images;
-            _configuration = configuration;
             _autoRoleService = autoRoleService;
 
             _client.MessageReceived += OnMessageReceived;
@@ -81,6 +78,7 @@ namespace DiscordBot.Services
             Task.Run(async () => await MuteHandler.MuteWorker(client));
         }
 
+        // Message was edited
         private async Task OnMessageUpated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channelArg)
         {
             var message = after as SocketUserMessage;
@@ -95,21 +93,17 @@ namespace DiscordBot.Services
 
             if(channel != null) // Not a DM
             {
-                await CheckForServerInvites(after as SocketUserMessage, channel.Guild);
-
                 var server = await _servers.GetServer(channel.Guild);
+                await ServerHelper.CheckForServerInvites(after as SocketUserMessage, server);
+
                 if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
-                    var badWords = await ProfanityHelper.GetProfanity(server, after.Content);
-
-                    if (badWords.Count != 0)
-                    {
-                        await ProfanityHelper.HandleProfanity(message, server, badWords);
-                    }
+                    await ProfanityHelper.HandleProfanity(message, server);
                 }
             }
         }
 
+        // Message was received
         private async Task OnMessageReceived(SocketMessage messageParam)
         {
             if (messageParam.Author.Username == _client.CurrentUser.Username
@@ -126,24 +120,17 @@ namespace DiscordBot.Services
             }
 
             var channel = message.Channel as SocketGuildChannel;
-            var guild = channel?.Guild;
             var prefix = String.Empty;
 
             if (channel != null) // Not a DM
             {
-                 prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
-
-                await CheckForServerInvites(message, guild);
-
+                prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
                 var server = await _servers.GetServer(channel.Guild);
+                await ServerHelper.CheckForServerInvites(message, server);
+                
                 if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
-                    var badWords = await ProfanityHelper.GetProfanity(server, message.Content);
-
-                    if (badWords.Count != 0)
-                    {
-                        await ProfanityHelper.HandleProfanity(message, server, badWords);
-                    }
+                    await ProfanityHelper.HandleProfanity(message, server);
                 }
             }
 
@@ -165,37 +152,28 @@ namespace DiscordBot.Services
             }
         }
 
+        // Reaction was added
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cachedEntity, ISocketMessageChannel channel, SocketReaction reaction)
         {
             await RPSHelper.RPSProcessor(cachedEntity, channel, reaction);
         }
 
+        // User joined a guild
         private async Task OnUserJoined(SocketGuildUser userJoining)
         {
             await AutoRoleHelper.AssignAutoRoles(_autoRoleService, userJoining);
             Task.Run(async () => await ShowWelcomeMessage(userJoining));
         }
 
+        // Show the welcome message
         private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
         {
-            // TODO Make this a per server option
-
-            bool showMessage = false;
-
-            try
-            {
-                showMessage = bool.Parse(_configuration.GetSection("ShowWelcomeMessage").Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to parse ShowWelecomMessage, using {value}", showMessage);
-            }
-
-            if (showMessage)
+            var server = await _servers.GetServer(userJoining.Guild);
+            if (server.WelcomeUsers)
             {
                 _logger.LogInformation("Showing welcome message for {user} in {server}", userJoining.Username, userJoining.Guild.Name);
 
-                var channelId = await _servers.GetWelcomeChannel(userJoining.Guild.Id);
+                var channelId = server.WelcomeChannel;
                 if(channelId == 0)
                 {
                     return;
@@ -217,40 +195,17 @@ namespace DiscordBot.Services
             }
         }
 
-        private async Task CheckForServerInvites(SocketUserMessage message, IGuild guild)
-        {
-            var server = await _servers.GetServer(guild);
-            if (server == null || server.AllowInvites || message == null)
-            {
-                return;
-            }
-
-            if(message.Content.Contains("https://discord.gg/"))
-            {
-                if((message.Channel as SocketGuildChannel).Guild.GetUser(message.Author.Id).GuildPermissions.Administrator)
-                {
-                    return;
-                }
-
-                await message.DeleteAsync();
-                await message.Channel.SendMessageAsync($"{message.Author.Mention} You cannot send Discord Invite links!");
-
-                _logger.LogInformation("{user} was denied posting an invite in {server}/{channel}", message.Author.Username, guild.Name, message.Channel);
-            }
-        }
-
         private async Task OnCommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
             if (result.Error == CommandError.UnknownCommand)
             {
-                //TODO add multiple images
                 //TODO make this optional/a setting
                 Task.Run(async () =>
                 {
                     _logger.LogDebug("{user} attempted to use an unknown command ({command}) on {server}/{channel}",
                         context.User.Username, context.Message.Content, context.Guild?.Name ?? "DM", context.Channel);
 
-                    var badCommandMessage = await context.Channel.SendMessageAsync("https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png");
+                    var badCommandMessage = await context.Channel.SendMessageAsync(EmbedImageHelper.GetImageUrl("BADCOMMAND_IMAGES"));
                     await Task.Delay(3500);
                     await badCommandMessage.DeleteAsync();
                 });

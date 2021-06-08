@@ -25,13 +25,22 @@ SOFTWARE.
 
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
+using DiscordBot.Models;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace DiscordBot.Helpers
 {
     public static class ServerHelper
     {
-        public async static Task<bool> CheckIfContextIsDM(SocketCommandContext context, bool requireGuild = true)
+        /// <summary>
+        /// Check if Context is a DM
+        /// </summary>
+        /// <param name="context">The context</param>
+        /// <param name="requireGuild">if true, reply with an error message</param>
+        /// <returns>true if context is a DM, false otherwise</returns>
+        internal async static Task<bool> CheckIfContextIsDM(SocketCommandContext context, bool requireGuild = true)
         {
             if (context.Guild == null && requireGuild)
             {
@@ -47,6 +56,34 @@ namespace DiscordBot.Helpers
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Check if a message contains a server invite, and remove it if invites are disabled
+        /// </summary>
+        /// <param name="message">The message to check</param>
+        /// <param name="server">The server the message was sent from</param>
+        /// <returns></returns>
+        internal static async Task CheckForServerInvites(SocketUserMessage message, Server server)
+        {
+            if (server == null || server.AllowInvites || message == null)
+            {
+                return;
+            }
+
+            var channel = message.Channel as SocketGuildChannel;
+            if (message.Content.Contains("https://discord.gg/"))
+            {
+                if (channel.Guild.GetUser(message.Author.Id).GuildPermissions.Administrator)
+                {
+                    return;
+                }
+
+                await message.DeleteAsync();
+                await message.Channel.SendMessageAsync($"{message.Author.Mention} You cannot send Discord Invite links!");
+
+                Log.Information("{user} was denied posting an invite in {server}/{channel}", message.Author.Username, channel.Guild, message.Channel);
+            }
         }
     }
 }

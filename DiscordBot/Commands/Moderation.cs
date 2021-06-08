@@ -347,9 +347,10 @@ namespace DiscordBot.Commands
         {
             await Context.Channel.TriggerTypingAsync();
 
+            var server = await _servers.GetServer(Context.Guild);
             if (option == null && value == null)
             {
-                SendWelcomeChannelInformation();
+                SendWelcomeChannelInformation(server);
                 return;
             }
 
@@ -375,7 +376,38 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            await ReplyAsync("You did not use this command properly!");
+            if (option.ToLowerInvariant() == "on" && value == null)
+            {
+                server.WelcomeUsers = true;
+                await _serverRepository.EditAsync(server);
+
+                await _servers.SendLogsAsync(Context.Guild, "Welcome Users", $"{Context.User.Mention} set User Welcoming `on`");
+                _logger.LogInformation("User Welcoming enabled by {user} in server {server}", Context.User.Username, Context.Guild.Name);
+
+                await ReplyAsync("User welcoming has been enabled!");
+
+                return;
+            }
+
+            if (option.ToLowerInvariant() == "off" && value == null)
+            {
+                server.WelcomeUsers = false;
+                await _serverRepository.EditAsync(server);
+
+                await _servers.SendLogsAsync(Context.Guild, "Welcome Users", $"{Context.User.Mention} set User Welcoming `off`");
+                _logger.LogInformation("User Welcoming disabled by {user} in server {server}", Context.User.Username, Context.Guild.Name);
+
+                await ReplyAsync("User welcoming has been disabled!");
+
+                return;
+            }
+
+            await ReplyAsync("You did not use this command properly!\n" +
+                "*options:*\n" +
+                "channel (channel): Change welcome channel\n" +
+                "background (image url): Change welcome banner background\n" +
+                "clear: Clear the welcome channel\n" +
+                "on/off: Turn user welcoming `on` or `off`");
         }
 
         [Command("mute")]
@@ -523,9 +555,14 @@ namespace DiscordBot.Commands
                 value, Context.Channel.Name, Context.User);
         }
 
-        private async void SendWelcomeChannelInformation()
+        private async void SendWelcomeChannelInformation(Server server)
         {
-            var welcomeChannelId = await _servers.GetWelcomeChannel(Context.Guild.Id);
+            if(!server.WelcomeUsers)
+            {
+                await ReplyAsync("User welcoming is *`not`* enabled!");
+            }
+
+            var welcomeChannelId = server.WelcomeChannel;
             if (welcomeChannelId == 0)
             {
                 await ReplyAsync("The welcome channel has not yet been set!");
