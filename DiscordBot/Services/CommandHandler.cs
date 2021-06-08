@@ -43,7 +43,7 @@ namespace DiscordBot.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<CommandHandler> _logger;
         private readonly IServerService _servers;
-        private readonly ImageService _images;
+        private readonly BannerImageService _bannerImageService;
         private readonly IAutoRoleService _autoRoleService;
 
         public CommandHandler(DiscordSocketClient client,
@@ -52,7 +52,7 @@ namespace DiscordBot.Services
             IServiceProvider serviceProvider,
             ILogger<CommandHandler> logger,
             IServerService servers,
-            ImageService images,
+            BannerImageService bannerImageService,
             IAutoRoleService autoRoleService,
             IProfanityRepository profanityRepository)
         {
@@ -62,7 +62,7 @@ namespace DiscordBot.Services
             _serviceProvider = serviceProvider;
             _logger = logger;
             _servers = servers;
-            _images = images;
+            _bannerImageService = bannerImageService;
             _autoRoleService = autoRoleService;
 
             _client.MessageReceived += OnMessageReceived;
