@@ -59,6 +59,16 @@ namespace DiscordBot.Services
             return await _serverRepository.GetByServerId(guild.Id);
         }
 
+        public async Task UpdateServer(Server server)
+        {
+            if(server == null)
+            {
+                return;
+            }
+
+            await _serverRepository.EditAsync(server);
+        }
+
         public async Task<bool> UsingRandomEmbedColor(ulong serverId)
         {
             var server = await _serverRepository.GetByServerId(serverId);
