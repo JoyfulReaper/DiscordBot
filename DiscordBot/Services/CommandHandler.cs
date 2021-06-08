@@ -45,7 +45,6 @@ namespace DiscordBot.Services
         private readonly ILogger<CommandHandler> _logger;
         private readonly IServerService _servers;
         private readonly ImageService _images;
-        private readonly IConfiguration _configuration;
         private readonly IAutoRoleService _autoRoleService;
 
         public CommandHandler(DiscordSocketClient client,
@@ -55,7 +54,6 @@ namespace DiscordBot.Services
             ILogger<CommandHandler> logger,
             IServerService servers,
             ImageService images,
-            IConfiguration configuration,
             IAutoRoleService autoRoleService,
             IProfanityRepository profanityRepository)
         {
@@ -66,7 +64,6 @@ namespace DiscordBot.Services
             _logger = logger;
             _servers = servers;
             _images = images;
-            _configuration = configuration;
             _autoRoleService = autoRoleService;
 
             _client.MessageReceived += OnMessageReceived;
@@ -101,12 +98,7 @@ namespace DiscordBot.Services
 
                 if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
-                    var badWords = await ProfanityHelper.GetProfanity(server, after.Content);
-
-                    if (badWords.Count != 0)
-                    {
-                        await ProfanityHelper.HandleProfanity(message, server, badWords);
-                    }
+                    await ProfanityHelper.HandleProfanity(message, server);
                 }
             }
         }
@@ -138,12 +130,7 @@ namespace DiscordBot.Services
                 
                 if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
-                    var badWords = await ProfanityHelper.GetProfanity(server, message.Content);
-
-                    if (badWords.Count != 0)
-                    {
-                        await ProfanityHelper.HandleProfanity(message, server, badWords);
-                    }
+                    await ProfanityHelper.HandleProfanity(message, server);
                 }
             }
 

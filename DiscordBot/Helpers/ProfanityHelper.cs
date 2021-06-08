@@ -61,39 +61,43 @@ namespace DiscordBot.Helpers
             return filter.ContainsProfanity(sentence);
         }
 
-        public async static Task HandleProfanity(SocketUserMessage message, Server server, IReadOnlyList<string> badWords)
+        public async static Task HandleProfanity(SocketUserMessage message, Server server)
         {
-            var filter = await GetProfanityFilterForServer(server);
+            var checkString = message.Content.Replace(".", String.Empty).Replace('!', 'i');
+            var badWords = await GetProfanity(server, checkString);
 
-            var channel = message.Channel as SocketGuildChannel;
-            var guild = channel.Guild;
-            var loggingChannel = guild.GetChannel(server.LoggingChannel);
-            var badWordsJoined = String.Join(", ", badWords);
-
-            if (loggingChannel != null)
+            if (badWords.Count > 0)
             {
-                await (loggingChannel as SocketTextChannel).SendLogAsync("Profanity Filter", $"{message.Author.Mention} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords: `{badWordsJoined}`",
-                    ColorHelper.GetColor(server));
-            }
+                var filter = await GetProfanityFilterForServer(server);
 
-            var censored = filter.CensorString(message.Content);
-            await message.DeleteAsync();
+                var channel = message.Channel as SocketGuildChannel;
+                var guild = channel.Guild;
+                var loggingChannel = guild.GetChannel(server.LoggingChannel);
+                var badWordsJoined = String.Join(", ", badWords);
 
-            if (server.ProfanityFilterMode == ProfanityFilterMode.FilterCensor)
-            {
-                await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear. {message.Author.Username}'s Censored message:\n{censored.Replace("*", "#")}");
-            }
-            else
-            {
-                await(channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear.");
-            }
+                if (loggingChannel != null)
+                {
+                    await (loggingChannel as SocketTextChannel).SendLogAsync("Profanity Filter", $"{message.Author.Mention} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords: `{badWordsJoined}`",
+                        ColorHelper.GetColor(server));
+                }
 
+                await message.DeleteAsync();
+
+                if (server.ProfanityFilterMode == ProfanityFilterMode.FilterCensor)
+                {
+                    var censored = filter.CensorString(checkString);
+                    await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear. {message.Author.Username}'s Censored message:\n{censored.Replace("*", "#")}");
+                }
+                else
+                {
+                    await (channel as SocketTextChannel).SendMessageAsync($"{message.Author.Mention}, please don't swear.");
+                }
+            }
         }
 
         public static async Task<ReadOnlyCollection<string>> GetProfanity(Server server, string sentence)
         {
             var filter = await GetProfanityFilterForServer(server);
-
             return filter.DetectAllProfanities(sentence);
         }
 
