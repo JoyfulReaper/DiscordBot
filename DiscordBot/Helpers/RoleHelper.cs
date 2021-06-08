@@ -30,6 +30,12 @@ namespace DiscordBot.Helpers
 {
     public static class RoleHelper
     {
+        /// <summary>
+        /// Check if a user has a role
+        /// </summary>
+        /// <param name="user">User to check</param>
+        /// <param name="role">Role to check for</param>
+        /// <returns>True if the user has the role, false if not</returns>
         public static bool CheckForRole(SocketGuildUser user, string role)
         {
             if (user.Roles.Any(r => r.Name.ToLowerInvariant() == role.ToLowerInvariant()))

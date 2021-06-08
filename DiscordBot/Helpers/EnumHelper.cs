@@ -32,12 +32,23 @@ namespace DiscordBot.Helpers
     {
         private static readonly Random _random = new Random();
 
+        /// <summary>
+        /// Reterive a random value from an enum
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>Random value from the given enum</returns>
         public static T RandomEnumValue<T>()
         {
             var values = Enum.GetValues(typeof(T));
             return (T)values.GetValue(_random.Next(values.Length));
         }
 
+        /// <summary>
+        /// Check if the given enum value is valid
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static bool EnumValueIsValid<T>(T value)
         {
             return Enum.IsDefined(typeof(T), value);
