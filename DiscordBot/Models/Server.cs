@@ -34,30 +34,39 @@ namespace DiscordBot.Models
         /// Id of the Discord server/Guild
         /// </summary>
         public ulong GuildId { get; set; }
+
         /// <summary>
         /// Prefix the bot will respond to in the server/guild
         /// </summary>
         public string Prefix { get; set; }
+
+        public bool WelcomeUsers { get; set; } = true;
+
         /// <summary>
         /// Channel to send welcome messages to
         /// </summary>
         public ulong WelcomeChannel { get; set; }
+
         /// <summary>
         /// The background image to use for the welcome banner image
         /// </summary>
         public string WelcomeBackground { get; set; }
+
         /// <summary>
         /// Channel to send logs to
         /// </summary>
         public ulong LoggingChannel { get; set; }
+
         /// <summary>
         /// Embed color
         /// </summary>
         public Color EmbedColor { get; set; }
+
         /// <summary>
         /// Allow invites to other discord servers
         /// </summary>
         public bool AllowInvites { get; set; } = true;
+
         /// <summary>
         /// Determine if profanity should be filtered
         /// </summary>

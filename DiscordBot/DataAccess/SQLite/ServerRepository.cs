@@ -55,8 +55,10 @@ namespace DiscordBot.DataAccess.SQLite
             var parameters = GetDynamicParameters(entity);
 
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} " +
-                $"(GuildId, Prefix, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor, AllowInvites, ProfanityFilterMode)" +
-                "VALUES (@GuildId, @Prefix, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor, @AllowInvites, @ProfanityFilterMode); " +
+                $"(GuildId, Prefix, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor, AllowInvites, ProfanityFilterMode, " +
+                $"WelcomeUsers) " +
+                "VALUES (@GuildId, @Prefix, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor, @AllowInvites, @ProfanityFilterMode, " +
+                "@WelcomeUsers); " +
                 "SELECT last_insert_rowid();",
                 parameters);
 
@@ -73,6 +75,7 @@ namespace DiscordBot.DataAccess.SQLite
             parameters.Add("@Prefix", entity.Prefix);
             parameters.Add("@WelcomeChannel", entity.WelcomeChannel);
             parameters.Add("@WelcomeBackground", entity.WelcomeBackground);
+            parameters.Add("@WelcomeUsers", entity.WelcomeUsers);
             parameters.Add("@LoggingChannel", entity.LoggingChannel);
             parameters.Add("@AllowInvites", entity.AllowInvites);
             parameters.Add("@EmbedColor", color);
@@ -98,7 +101,8 @@ namespace DiscordBot.DataAccess.SQLite
 
             await ExecuteAsync($"UPDATE {TableName} " +
                 $"SET Prefix = @Prefix, GuildId = @GuildId, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground, " +
-                $"EmbedColor = @EmbedColor, LoggingChannel = @LoggingChannel, AllowInvites = @AllowInvites, ProfanityFilterMode = @ProfanityFilterMode " +
+                $"EmbedColor = @EmbedColor, LoggingChannel = @LoggingChannel, AllowInvites = @AllowInvites, ProfanityFilterMode = @ProfanityFilterMode," +
+                $"WelcomeUsers = @WelcomeUsers " +
                 $"WHERE Id = @Id;",
                 parameters);
         }

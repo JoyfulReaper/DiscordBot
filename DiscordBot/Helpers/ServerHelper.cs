@@ -40,7 +40,7 @@ namespace DiscordBot.Helpers
         /// <param name="context">The context</param>
         /// <param name="requireGuild">if true, reply with an error message</param>
         /// <returns>true if context is a DM, false otherwise</returns>
-        public async static Task<bool> CheckIfContextIsDM(SocketCommandContext context, bool requireGuild = true)
+        internal async static Task<bool> CheckIfContextIsDM(SocketCommandContext context, bool requireGuild = true)
         {
             if (context.Guild == null && requireGuild)
             {
@@ -64,7 +64,7 @@ namespace DiscordBot.Helpers
         /// <param name="message">The message to check</param>
         /// <param name="server">The server the message was sent from</param>
         /// <returns></returns>
-        public static async Task CheckForServerInvites(SocketUserMessage message, Server server)
+        internal static async Task CheckForServerInvites(SocketUserMessage message, Server server)
         {
             if (server == null || server.AllowInvites || message == null)
             {

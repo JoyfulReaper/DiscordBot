@@ -181,24 +181,12 @@ namespace DiscordBot.Services
         // Show the welcome message
         private async Task ShowWelcomeMessage(SocketGuildUser userJoining)
         {
-            // TODO Make this a per server option
-
-            bool showMessage = false;
-
-            try
-            {
-                showMessage = bool.Parse(_configuration.GetSection("ShowWelcomeMessage").Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to parse ShowWelecomMessage, using {value}", showMessage);
-            }
-
-            if (showMessage)
+            var server = await _servers.GetServer(userJoining.Guild);
+            if (server.WelcomeUsers)
             {
                 _logger.LogInformation("Showing welcome message for {user} in {server}", userJoining.Username, userJoining.Guild.Name);
 
-                var channelId = await _servers.GetWelcomeChannel(userJoining.Guild.Id);
+                var channelId = server.WelcomeChannel;
                 if(channelId == 0)
                 {
                     return;
