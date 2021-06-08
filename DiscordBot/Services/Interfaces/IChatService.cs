@@ -29,7 +29,6 @@ namespace DiscordBot.Services
 {
     public interface IChatService
     {
-        public static bool ShowJoinAndPartMessages { get; } = false;
         Task Start();
     }
 }
