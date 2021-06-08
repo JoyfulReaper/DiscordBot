@@ -29,14 +29,52 @@ namespace DiscordBot.Services
 {
     public interface ISettings
     {
+        /// <summary>
+        /// Development Guild
+        /// </summary>
         ulong DevGuild { get; }
+
+        /// <summary>
+        /// Development Channel
+        /// Send any global debug messages/logs here
+        /// Must be a channel on the DevGuild
+        /// </summary>
         ulong DevChannel { get; }
+
+        /// <summary>
+        /// Database Connection String
+        /// </summary>
         string ConnectionString { get; }
+
+        /// <summary>
+        /// Database Type
+        /// </summary>
         DatabaseType DatabaseType { get; }
+
+        /// <summary>
+        /// Default prefix that the bot will respond to
+        /// Can be overriden per server
+        /// </summary>
         string DefaultPrefix { get; }
+
+        /// <summary>
+        /// Bot Owner's Discord Discriminator
+        /// </summary>
         string OwnerDiscriminator { get; }
+
+        /// <summary>
+        /// Bot Owner's Discord Username
+        /// </summary>
         string OwnerName { get; }
+
+        /// <summary>
+        /// Welcome Message
+        /// </summary>
         string WelcomeMessage { get; }
+
+        /// <summary>
+        /// Start Lavalink by default or not
+        /// </summary>
         bool EnableLavaLink { get; }
     }
 }

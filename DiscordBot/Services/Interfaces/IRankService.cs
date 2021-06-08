@@ -32,10 +32,41 @@ namespace DiscordBot.Services
 {
     public interface IRankService
     {
+        /// <summary>
+        /// Add a user assignable rank
+        /// </summary>
+        /// <param name="serverId">Guild Id</param>
+        /// <param name="roleId">Discord role of the rank</param>
+        /// <returns></returns>
         Task AddRank(ulong serverId, ulong roleId);
+
+        /// <summary>
+        /// Clear given ranks
+        /// </summary>
+        /// <param name="ranks">The ranks to clear</param>
+        /// <returns></returns>
         Task ClearRanks(List<Rank> ranks);
+
+        /// <summary>
+        /// Get avaiable ranks
+        /// </summary>
+        /// <param name="guild">Guild</param>
+        /// <returns>Roles avaiable to use as ranks in the guild</returns>
         Task<List<IRole>> GetRanks(IGuild guild);
+
+        /// <summary>
+        /// Get avaiable ranks
+        /// </summary>
+        /// <param name="serverId">server id</param>
+        /// <returns>Ranks avaiable for the given server id</returns>
         Task<List<Rank>> GetRanks(ulong serverId);
+
+        /// <summary>
+        /// Remove a rank
+        /// </summary>
+        /// <param name="serverId">Server id</param>
+        /// <param name="roleId">id of the role for the rank to remove</param>
+        /// <returns></returns>
         Task RemoveRank(ulong serverId, ulong roleId);
     }
 }

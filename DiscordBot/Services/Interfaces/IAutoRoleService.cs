@@ -32,10 +32,41 @@ namespace DiscordBot.Services
 {
     public interface IAutoRoleService
     {
+        /// <summary>
+        /// Add a role to automaticly assign users when they join the server
+        /// </summary>
+        /// <param name="serverId">Server id</param>
+        /// <param name="roleId">Role to auto assign</param>
+        /// <returns></returns>
         Task AddAutoRole(ulong serverId, ulong roleId);
+
+        /// <summary>
+        /// Clear the given autoroles, no long assigning them automaticly
+        /// </summary>
+        /// <param name="autoRoles">The roles to clear</param>
+        /// <returns></returns>
         Task ClearAutoRoles(List<AutoRole> autoRoles);
+
+        /// <summary>
+        /// Get the autoroles for a given guild
+        /// </summary>
+        /// <param name="guild">Guild</param>
+        /// <returns>Auto roles for the given guild</returns>
         Task<List<IRole>> GetAutoRoles(IGuild guild);
+
+        /// <summary>
+        /// Get the auto roles for a given server id
+        /// </summary>
+        /// <param name="serverId">Serve id</param>
+        /// <returns>AutoRoles for the given server id</returns>
         Task<List<AutoRole>> GetAutoRoles(ulong serverId);
+
+        /// <summary>
+        /// Remove an autorole for the given server id
+        /// </summary>
+        /// <param name="serverId">server id</param>
+        /// <param name="roleId">id of the auto role to remove</param>
+        /// <returns></returns>
         Task RemoveAutoRole(ulong serverId, ulong roleId);
     }
 }
