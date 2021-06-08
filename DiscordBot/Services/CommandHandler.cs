@@ -188,7 +188,7 @@ namespace DiscordBot.Services
                 await channel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
 
                 var background = await _servers.GetBackground(userJoining.Guild.Id);
-                var memoryStream = await _images.CreateImage(userJoining, background);
+                var memoryStream = await _bannerImageService.CreateImage(userJoining, background);
                 memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
                 await channel.SendFileAsync(memoryStream, $"{userJoining.Username}.png");
             }
