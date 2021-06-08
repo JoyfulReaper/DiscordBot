@@ -24,11 +24,6 @@ SOFTWARE.
 */
 
 using System;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Helpers
 {
@@ -46,6 +41,7 @@ namespace DiscordBot.Helpers
 
         public static readonly string[] BADCOMMAND_IMAGES = new string[] { "https://www.wheninmanila.com/wp-content/uploads/2017/12/meme-kid-confused.png" };
 
+        public static readonly string[] LOGGING_IMAGES = new string[] { "https://cdn.quotesgram.com/img/87/86/1090166097-captains_log_meme.jpg" };
 
         private static Random _random = new Random();
 
