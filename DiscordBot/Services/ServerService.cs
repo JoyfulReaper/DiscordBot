@@ -362,7 +362,7 @@ namespace DiscordBot.Services
 
             if(thumbnailUrl == null)
             {
-                thumbnailUrl = EmbedImageHelper.GetImageUrl("LOGGING_IMAGES");
+                thumbnailUrl = ImageLookupUtility.GetImageUrl("LOGGING_IMAGES");
             }
 
             var channelId = await GetLoggingChannel(guild.Id);

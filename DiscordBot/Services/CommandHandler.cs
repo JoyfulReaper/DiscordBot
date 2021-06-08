@@ -204,7 +204,7 @@ namespace DiscordBot.Services
                     _logger.LogDebug("{user} attempted to use an unknown command ({command}) on {server}/{channel}",
                         context.User.Username, context.Message.Content, context.Guild?.Name ?? "DM", context.Channel);
 
-                    var badCommandMessage = await context.Channel.SendMessageAsync(EmbedImageHelper.GetImageUrl("BADCOMMAND_IMAGES"));
+                    var badCommandMessage = await context.Channel.SendMessageAsync(ImageLookupUtility.GetImageUrl("BADCOMMAND_IMAGES"));
                     await Task.Delay(3500);
                     await badCommandMessage.DeleteAsync();
                 });

@@ -93,7 +93,7 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, user.Username, Context.Channel.Name, Context.Guild.Name);
 
             await Context.Channel.SendEmbedAsync("Ban Hammer", $"{user.Mention} has been banned for *{(reason ?? "no reason")}*",
-                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), EmbedImageHelper.GetImageUrl("BAN_IMAGES"));
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("BAN_IMAGES"));
 
             await _servers.SendLogsAsync(Context.Guild, "Banned", $"{Context.User.Mention} has banned {user.Mention} and deleted the past {days} day of their messages!");
 
@@ -112,7 +112,7 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, userId, Context.Channel.Name, Context.Guild.Name);
 
             await Context.Channel.SendEmbedAsync("Un-Banned", $"{userId} has been un-banned",
-                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), EmbedImageHelper.GetImageUrl("UNBAN_IMAGES"));
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("UNBAN_IMAGES"));
 
             await _servers.SendLogsAsync(Context.Guild, "Un-Banned", $"{Context.User.Mention} has un-banned userId: {userId}");
 

@@ -27,7 +27,7 @@ using System;
 
 namespace DiscordBot.Helpers
 {
-    public static class EmbedImageHelper
+    public static class ImageLookupUtility
     {
         public static readonly string[] BAN_IMAGES = new string[] { "https://image.freepik.com/free-vector/iron-ban-hammer-isolated-white_175250-450.jpg",
             "https://i.ytimg.com/vi/nnb2gXr4nCw/maxresdefault.jpg", "https://www.clipartkey.com/mpngs/m/7-78285_banned-hammer-png-clipart-free-library-ban-hammer.png"};
@@ -47,7 +47,7 @@ namespace DiscordBot.Helpers
 
         public static string GetImageUrl(string key)
         {
-            Type type = typeof(EmbedImageHelper);
+            Type type = typeof(ImageLookupUtility);
             var fieldInfo = type.GetField(key);
 
             if(fieldInfo == null)
