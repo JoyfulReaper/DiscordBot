@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Serilog;
 using System;
 
 namespace DiscordBot.Helpers
@@ -56,6 +57,18 @@ namespace DiscordBot.Helpers
 
         public static readonly string[] MATH_IMAGES = new string[] { "https://i.pinimg.com/originals/97/a3/b9/97a3b92384b62eb04566a457f6d76f6c.gif" };
 
+        public static readonly string[] KICK_IMAGES = new string[] { "https://www.nydailynews.com/resizer/vwH9gF1tqmXVFcROKQqcar7mL3U=/800x608/top/arc-anglerfish-arc2-prod-tronc.s3.amazonaws.com/public/CZ5U3VRUGH74ETHW7KVB7OZZTY.jpg" };
+
+        public static readonly string[] PURGE_IMAGES = new string[] { "https://clipground.com/images/bye-clipart-17.jpg" };
+
+        public static readonly string[] PREFIX_IMAGES = new string[] { "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg" };
+
+        public static readonly string[] ERROR_IMAGES = new string[] { "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png" };
+
+        public static readonly string[] MUTE_IMAGES = new string[] { "https://image.freepik.com/free-vector/no-loud-sound-mute-icon_101884-1079.jpg" };
+
+        public static readonly string[] UNMUTE_IMAGES = new string[] { "https://imgaz2.staticbg.com/thumb/large/oaupload/ser1/banggood/images/21/07/9474ae00-56ad-43ba-9bf1-97c7e80d34ee.jpg.webp" };
+
         private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)
@@ -65,6 +78,9 @@ namespace DiscordBot.Helpers
 
             if(fieldInfo == null)
             {
+                var logger = Log.ForContext(typeof(ImageLookupUtility));
+                logger.Warning("Key: {key} not found!", key);
+
                 return null;
             }
 
