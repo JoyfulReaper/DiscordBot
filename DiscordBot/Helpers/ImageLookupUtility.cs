@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using DiscordBot.Extensions;
 using Serilog;
 using System;
 
@@ -73,19 +74,23 @@ namespace DiscordBot.Helpers
 
         public static string GetImageUrl(string key)
         {
+            var logger = Log.ForContext(typeof(ImageLookupUtility));
+
             Type type = typeof(ImageLookupUtility);
             var fieldInfo = type.GetField(key);
 
             if(fieldInfo == null)
             {
-                var logger = Log.ForContext(typeof(ImageLookupUtility));
                 logger.Warning("Key: {key} not found!", key);
-
                 return null;
             }
 
-            string[] output = (string[])fieldInfo.GetValue(null);
-            return output[_random.Next(output.Length)];
+            string[] urlArray = (string[])fieldInfo.GetValue(null);
+            string imageUrl = urlArray.RandomItem();
+
+            logger.Information("Sending image: {imageurl}", imageUrl);
+
+            return imageUrl;
         }
     }
 }
