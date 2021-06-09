@@ -63,6 +63,7 @@ namespace DiscordBot.Commands
             _configuration = configuration;
             _serverRepository = serverRepository;
             _profanityRepository = profanityRepository;
+
             var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
             if (int.TryParse(prefixConfigValue, out int maxLength))
             {
@@ -79,7 +80,9 @@ namespace DiscordBot.Commands
         [RequireBotPermission(GuildPermission.BanMembers)]
         [RequireUserPermission(GuildPermission.BanMembers)]
         [Summary("Ban a user")]
-        public async Task Ban([Summary("The user to ban")]SocketGuildUser user, [Summary("The number of days of the banned user's messages to purge")]int days, 
+        public async Task Ban(
+            [Summary("The user to ban")]SocketGuildUser user, 
+            [Summary("The number of days of the banned user's messages to purge")]int days, 
             [Remainder] string reason = null)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -264,7 +267,7 @@ namespace DiscordBot.Commands
         [Summary("Kick a user")]
         public async Task Kick([Summary("user to kick")] SocketGuildUser user = null)
         {
-            Context.Channel.TriggerTypingAsync();
+            await Context.Channel.TriggerTypingAsync();
 
             if (user == null)
             {
@@ -275,7 +278,8 @@ namespace DiscordBot.Commands
             await user.KickAsync();
 
             await Context.Channel.SendEmbedAsync("Kicked", $"{user.Mention} was kicked to the curb!", 
-                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://www.nydailynews.com/resizer/vwH9gF1tqmXVFcROKQqcar7mL3U=/800x608/top/arc-anglerfish-arc2-prod-tronc.s3.amazonaws.com/public/CZ5U3VRUGH74ETHW7KVB7OZZTY.jpg");
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("KICK_IMAGES"));
+            
             await _servers.SendLogsAsync(Context.Guild, "User kicked", $"{Context.User.Mention} kicked {user.Mention}.");
 
             _logger.LogInformation("{user}#{discriminator} kicked {user} messages in {channel} on {server}",
@@ -294,7 +298,7 @@ namespace DiscordBot.Commands
             await (Context.Channel as SocketTextChannel).DeleteMessagesAsync(messages);
 
             var message = await Context.Channel.SendEmbedAsync("Purge Successful", $"{messages.Count()} messages deleted successfuly!",
-                await _servers.GetEmbedColor(Context.Guild.Id), "https://clipground.com/images/bye-clipart-17.jpg");
+                await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("PURGE_IMAGES"));
 
             await Task.Delay(3000);
             await message.DeleteAsync();
@@ -316,7 +320,7 @@ namespace DiscordBot.Commands
             if (prefix == null)
             {
                 await Context.Channel.SendEmbedAsync("Prefix", $"My Prefix is {myPrefix}",
-                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
+                    await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("PREFIX_IMAGES"));
 
                 return;
             }
@@ -324,14 +328,14 @@ namespace DiscordBot.Commands
             if(prefix.Length > _prefixMaxLength)
             {
                 await Context.Channel.SendEmbedAsync("Invalid Prefix",$"Prefix must be less than {_prefixMaxLength} characters.",
-                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
+                    await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("PREFIX_IMAGES"));
 
                 return;
             }
 
             await _servers.ModifyGuildPrefix(Context.Guild.Id, prefix);
             await Context.Channel.SendEmbedAsync("Prefix Modified", $"The prefix has been modified to `{prefix}`.",
-                     await _servers.GetEmbedColor(Context.Guild.Id), "https://www.thecurriculumcorner.com/wp-content/uploads/2012/10/prefixposter.jpg");
+                     await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("PREFIX_IMAGES"));
 
             await _servers.SendLogsAsync(Context.Guild, "Prefix adjusted", $"{Context.User.Mention} modifed the prefix to {prefix}");
 
@@ -342,7 +346,8 @@ namespace DiscordBot.Commands
         [Command("welcome")]
         [Summary("Change user welcoming settings")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task Welcome([Summary("Option to change: channel, background or clear")]string option = null,
+        public async Task Welcome(
+            [Summary("Option to change: channel, background or clear")]string option = null,
             [Summary("Value to assign to the option")]string value = null)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -410,128 +415,6 @@ namespace DiscordBot.Commands
                 "on/off: Turn user welcoming `on` or `off`");
         }
 
-        [Command("mute")]
-        [Summary("mute a user")]
-        [RequireUserPermission(GuildPermission.KickMembers)]
-        [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Mute([Summary("The user to mute")]SocketGuildUser user, 
-            [Summary("Number of minutes to mute for")]int minutes=5, 
-            [Summary("The reason for muting")][Remainder]string reason = null)
-        {
-            await Context.Channel.TriggerTypingAsync();
-
-            if (user.Hierarchy > Context.Guild.CurrentUser.Hierarchy)
-            {
-                await Context.Channel.SendEmbedAsync("Invalid User", "That user has a higher position than the bot!",
-                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
-                return;
-            }
-
-            // Check for muted role, attempt to create it if it doesn't exist
-            var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
-            if(role == null)
-            {
-                role = await Context.Guild.CreateRoleAsync("Muted", new GuildPermissions(sendMessages: false), null, false, null);
-            }
-
-            if(role.Position > Context.Guild.CurrentUser.Hierarchy)
-            {
-                await Context.Channel.SendEmbedAsync("Invalid permissions", "the muted role has a higher position than the bot!",
-                await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
-                return;
-            }
-
-            if(user.Roles.Contains(role))
-            {
-                await Context.Channel.SendEmbedAsync("Already Muted", "That user is already muted!",
-                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
-                return;
-            }
-
-            await role.ModifyAsync(x => x.Position = Context.Guild.CurrentUser.Hierarchy);
-            foreach (var channel in Context.Guild.Channels)
-            {
-                if(!channel.GetPermissionOverwrite(role).HasValue || channel.GetPermissionOverwrite(role).Value.SendMessages == PermValue.Allow)
-                {
-                    await channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny));
-                }
-            }
-
-            MuteHandler.AddMute(new Mute { Guild = Context.Guild, User = user, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
-            await user.AddRoleAsync(role);
-            await Context.Channel.SendEmbedAsync($"Muted {user.Username}", $"Duration: {minutes} minutes\nReason: {reason ?? "None"}",
-                await _servers.GetEmbedColor(Context.Guild.Id), "https://image.freepik.com/free-vector/no-loud-sound-mute-icon_101884-1079.jpg");
-
-            await _servers.SendLogsAsync(Context.Guild, "Muted", $"{Context.User.Mention} muted {user.Mention}");
-            _logger.LogInformation("{user} muted {target} in {server}", Context.User.Username, user.Username, Context.Guild.Name);
-        }
-
-        [Command("unmute")]
-        [Summary("unmute a user")]
-        [RequireUserPermission(GuildPermission.KickMembers)]
-        [RequireBotPermission(GuildPermission.ManageRoles)]
-        private async Task Unmute([Summary("The user to unmute")]SocketGuildUser user)
-        {
-            var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
-            if (role == null)
-            {
-                await Context.Channel.SendEmbedAsync("Not Muted", "This person has not been muted!", await _servers.GetEmbedColor(Context.Guild.Id));
-                return;
-            }
-
-            if (role.Position > Context.Guild.CurrentUser.Hierarchy)
-            {
-                await Context.Channel.SendEmbedAsync("Invalid permissions", "the muted role has a higher position than the bot!",
-                await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
-                return;
-            }
-
-            if (!user.Roles.Contains(role))
-            {
-                await Context.Channel.SendEmbedAsync("Not Muted", "This person has not been muted!",
-                    await _servers.GetEmbedColor(Context.Guild.Id), "https://www.elegantthemes.com/blog/wp-content/uploads/2020/08/000-http-error-codes.png");
-                return;
-            }
-
-            await user.RemoveRoleAsync(role);
-            await Context.Channel.SendEmbedAsync($"Unmuted {user.Username}", "Succesfully unmuted the user",
-                await _servers.GetEmbedColor(Context.Guild.Id), "https://imgaz2.staticbg.com/thumb/large/oaupload/ser1/banggood/images/21/07/9474ae00-56ad-43ba-9bf1-97c7e80d34ee.jpg.webp");
-
-            await _servers.SendLogsAsync(Context.Guild, "Un-muted", $"{Context.User.Mention} unmuted {user.Mention}");
-            _logger.LogInformation("{user} unmuted {target} in {server}", Context.User.Username, user.Username, Context.Guild.Name);
-        }
-
-        [Command("slowmode")]
-        [RequireUserPermission(GuildPermission.ManageChannels)]
-        [RequireBotPermission(GuildPermission.ManageChannels)]
-        [Summary("Enable slowmode")]
-        public async Task SlowMode(int interval = 0)
-        {
-            await Context.Channel.TriggerTypingAsync();
-            await (Context.Channel as SocketTextChannel).ModifyAsync(x => x.SlowModeInterval = interval);
-            await Context.Channel.SendEmbedAsync("Slowmode", $"The slowmode interval was adjusted to {interval} seconds!", await _servers.GetEmbedColor(Context.Guild.Id));
-
-            await _servers.SendLogsAsync(Context.Guild, "Slow Mode", $"{Context.User.Mention} set slowmode interval to {interval} for {Context.Channel.Name}");
-
-            _logger.LogInformation("{user} set slowmode to {value} in {server}", Context.User.Username, interval, Context.Guild.Name);
-        }
-
-        private async void SetWelcomeBannerBackgroundInformation(string value)
-        {
-            if (value == "clear")
-            {
-                await _servers.ClearBackground(Context.Guild.Id);
-                await ReplyAsync("Successfully cleared background!");
-                await _servers.SendLogsAsync(Context.Guild, "Background cleared", $"{Context.User} cleared the welcome image background.");
-                return;
-            }
-
-            await _servers.ModifyWelcomeBackground(Context.Guild.Id, value);
-            await _servers.SendLogsAsync(Context.Guild, "Background Modified", $"{Context.User} modified the welcome image background to {value}");
-            _logger.LogInformation("Background image modified to {image} by {user} in {server}", value, Context.User, Context.Guild.Name);
-            await ReplyAsync($"Successfully modified the background to {value}");
-        }
-
         private async void SetWelcomeChannelInformation(string value)
         {
             if (!MentionUtils.TryParseChannel(value, out ulong parserId))
@@ -551,13 +434,13 @@ namespace DiscordBot.Commands
             await ReplyAsync($"Successfully modified the welcome channel to {parsedChannel.Mention}");
             await _servers.SendLogsAsync(Context.Guild, "Welcome Channel Modified", $"{Context.User} modified the welcome channel to {value}");
 
-            _logger.LogInformation("Welcome channel modified to {channel} by {user} in {server}", 
+            _logger.LogInformation("Welcome channel modified to {channel} by {user} in {server}",
                 value, Context.Channel.Name, Context.User);
         }
 
         private async void SendWelcomeChannelInformation(Server server)
         {
-            if(!server.WelcomeUsers)
+            if (!server.WelcomeUsers)
             {
                 await ReplyAsync("User welcoming is *`not`* enabled!");
             }
@@ -586,6 +469,128 @@ namespace DiscordBot.Commands
             {
                 await ReplyAsync($"The welcome channel is {welcomeChannel.Mention}.\nThe background is not set.");
             }
+        }
+
+        private async void SetWelcomeBannerBackgroundInformation(string value)
+        {
+            if (value == "clear")
+            {
+                await _servers.ClearBackground(Context.Guild.Id);
+                await ReplyAsync("Successfully cleared background!");
+                await _servers.SendLogsAsync(Context.Guild, "Background cleared", $"{Context.User} cleared the welcome image background.");
+                return;
+            }
+
+            await _servers.ModifyWelcomeBackground(Context.Guild.Id, value);
+            await _servers.SendLogsAsync(Context.Guild, "Background Modified", $"{Context.User} modified the welcome image background to {value}");
+            _logger.LogInformation("Background image modified to {image} by {user} in {server}", value, Context.User, Context.Guild.Name);
+            await ReplyAsync($"Successfully modified the background to {value}");
+        }
+
+        [Command("mute")]
+        [Summary("mute a user")]
+        [RequireUserPermission(GuildPermission.KickMembers)]
+        [RequireBotPermission(GuildPermission.ManageRoles)]
+        public async Task Mute([Summary("The user to mute")]SocketGuildUser user, 
+            [Summary("Number of minutes to mute for")]int minutes=5, 
+            [Summary("The reason for muting")][Remainder]string reason = null)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            if (user.Hierarchy > Context.Guild.CurrentUser.Hierarchy)
+            {
+                await Context.Channel.SendEmbedAsync("Invalid User", "That user has a higher position than the bot!",
+                    await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("ERROR_IMAGES"));
+                return;
+            }
+
+            // Check for muted role, attempt to create it if it doesn't exist
+            var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
+            if(role == null)
+            {
+                role = await Context.Guild.CreateRoleAsync("Muted", new GuildPermissions(sendMessages: false), null, false, null);
+            }
+
+            if(role.Position > Context.Guild.CurrentUser.Hierarchy)
+            {
+                await Context.Channel.SendEmbedAsync("Invalid permissions", "the muted role has a higher position than the bot!",
+                await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("ERROR_IMAGES"));
+                return;
+            }
+
+            if(user.Roles.Contains(role))
+            {
+                await Context.Channel.SendEmbedAsync("Already Muted", "That user is already muted!",
+                    await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("ERROR_IMAGES"));
+                return;
+            }
+
+            await role.ModifyAsync(x => x.Position = Context.Guild.CurrentUser.Hierarchy);
+            foreach (var channel in Context.Guild.Channels)
+            {
+                if(!channel.GetPermissionOverwrite(role).HasValue || channel.GetPermissionOverwrite(role).Value.SendMessages == PermValue.Allow)
+                {
+                    await channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny));
+                }
+            }
+
+            MuteHandler.AddMute(new Mute { Guild = Context.Guild, User = user, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
+            await user.AddRoleAsync(role);
+            await Context.Channel.SendEmbedAsync($"Muted {user.Username}", $"Duration: {minutes} minutes\nReason: {reason ?? "None"}",
+                await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("MUTE_IMAGES"));
+
+            await _servers.SendLogsAsync(Context.Guild, "Muted", $"{Context.User.Mention} muted {user.Mention}");
+            _logger.LogInformation("{user} muted {target} in {server}", Context.User.Username, user.Username, Context.Guild.Name);
+        }
+
+        [Command("unmute")]
+        [Summary("unmute a user")]
+        [RequireUserPermission(GuildPermission.KickMembers)]
+        [RequireBotPermission(GuildPermission.ManageRoles)]
+        private async Task Unmute([Summary("The user to unmute")]SocketGuildUser user)
+        {
+            var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
+            if (role == null)
+            {
+                await Context.Channel.SendEmbedAsync("Not Muted", "This person has not been muted!", await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("ERROR_IMAGES"));
+                return;
+            }
+
+            if (role.Position > Context.Guild.CurrentUser.Hierarchy)
+            {
+                await Context.Channel.SendEmbedAsync("Invalid permissions", "the muted role has a higher position than the bot!",
+                await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("ERROR_IMAGES"));
+                return;
+            }
+
+            if (!user.Roles.Contains(role))
+            {
+                await Context.Channel.SendEmbedAsync("Not Muted", "This person has not been muted!",
+                    await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("ERROR_IMAGES"));
+                return;
+            }
+
+            await user.RemoveRoleAsync(role);
+            await Context.Channel.SendEmbedAsync($"Unmuted {user.Username}", "Succesfully unmuted the user",
+                await _servers.GetEmbedColor(Context.Guild.Id), ImageLookupUtility.GetImageUrl("UNMUTE_IMAGES"));
+
+            await _servers.SendLogsAsync(Context.Guild, "Un-muted", $"{Context.User.Mention} unmuted {user.Mention}");
+            _logger.LogInformation("{user} unmuted {target} in {server}", Context.User.Username, user.Username, Context.Guild.Name);
+        }
+
+        [Command("slowmode")]
+        [RequireUserPermission(GuildPermission.ManageChannels)]
+        [RequireBotPermission(GuildPermission.ManageChannels)]
+        [Summary("Enable slowmode")]
+        public async Task SlowMode(int interval = 0)
+        {
+            await Context.Channel.TriggerTypingAsync();
+            await (Context.Channel as SocketTextChannel).ModifyAsync(x => x.SlowModeInterval = interval);
+            await Context.Channel.SendEmbedAsync("Slowmode", $"The slowmode interval was adjusted to {interval} seconds!", await _servers.GetEmbedColor(Context.Guild.Id));
+
+            await _servers.SendLogsAsync(Context.Guild, "Slow Mode", $"{Context.User.Mention} set slowmode interval to {interval} for {Context.Channel.Name}");
+
+            _logger.LogInformation("{user} set slowmode to {value} in {server}", Context.User.Username, interval, Context.Guild.Name);
         }
 
         [Command("logs")]

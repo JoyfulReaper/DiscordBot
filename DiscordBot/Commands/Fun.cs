@@ -27,6 +27,7 @@ using Discord;
 using Discord.Commands;
 using DiscordBot.Helpers;
 using DiscordBot.Services;
+using DiscordBot.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -37,12 +38,6 @@ namespace DiscordBot.Commands
 {
     public class Fun : ModuleBase<SocketCommandContext>
     {
-        private static readonly List<string> _eightBallImages = new List<string>
-        {
-            "https://upload.wikimedia.org/wikipedia/commons/9/90/Magic8ball.jpg",
-            "https://media1.tenor.com/images/821d79609a5bc1395d8dacab2ad8e8b6/tenor.gif?itemid=17798802",
-            "https://media2.giphy.com/media/26xBJp4dcSdGxv2Zq/giphy.gif?cid=ecf05e47pnz54n4axc22ms430kzxmt8t1db6jm6qfm5vmg1p&rid=giphy.gif&ct=g"
-        };
         private static readonly List<string> _eightBallResponses = new List<string>
         {
             "It is Certian.", "It is decidedly so.", "Without a doubt.", "Yes definitely.", "You may rely on it.",
@@ -83,9 +78,9 @@ namespace DiscordBot.Commands
         }
 
         [Command("8ball")]
-        [Alias("eightBall")]
+        [Alias("eightBall", "8b")]
         [Summary("Ask the 8ball a question, get the answer!")]
-        public async Task EightBall([Summary("The question to ask")][Remainder]string question)
+        public async Task EightBall([Summary("The question to ask")][Remainder] string question)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -97,7 +92,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder();
             builder
                 .WithTitle("Magic 8ball")
-                .WithThumbnailUrl(_eightBallImages.RandomItem())
+                .WithThumbnailUrl(ImageLookupUtility.GetImageUrl("EIGHTBALL_IMAGES"))
                 .WithDescription($"{Context.User.Username} asked ***{question}***")
                 .AddField("Response", _eightBallResponses.RandomItem())
                 .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
@@ -117,7 +112,7 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             string outcome = "tails";
-            if(_random.Next(2) == 1)
+            if (_random.Next(2) == 1)
             {
                 outcome = "heads";
             }
@@ -125,22 +120,39 @@ namespace DiscordBot.Commands
             var server = await _servers.GetServer(Context.Guild);
 
             await Context.Channel.SendEmbedAsync("Coin flip", $"The coin landed {outcome} up.",
-                server == null ? ColorHelper.RandomColor() : server.EmbedColor, "https://www.bellevuerarecoins.com/wp-content/uploads/2013/11/bigstock-Coin-Flip-5807921.jpg");
+                server == null ? ColorHelper.RandomColor() : server.EmbedColor, ImageLookupUtility.GetImageUrl("COIN_IMAGES"));
         }
 
         [Command("rolldie")]
+        [Alias("dice", "die")]
         [Summary("Roll a die")]
-        public async Task CoinFlip([Summary("The number of side the die has")] int sides = 6)
+        public async Task CoinFlip([Summary("The number of die to roll")] int die = 1, [Summary("The number of side the die has")] int sides = 6)
         {
             await Context.Channel.TriggerTypingAsync();
 
             _logger.LogInformation("{username}#{discriminator} executed rolldie ({sides}) on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, sides, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            var result = _random.Next(1, sides + 1);
+            if (die > 10)
+            {
+                await ReplyAsync("You cannot roll more than 10 die at a time. 😭");
+                return;
+            }
 
-            await Context.Channel.SendEmbedAsync($"{sides} Sided Die Roll", $"You rolled a {result}",
-                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://miro.medium.com/max/1920/0*bLJxMZ_YS0RxF-82.jpg");
+            if (sides > 25)
+            {
+                await ReplyAsync("Your die can't have more than 25 sides. 😭");
+                return;
+            }
+
+            int sum = 0;
+            for (int i = 0; i < die; i++)
+            {
+                sum += _random.Next(1, sides + 1);
+            }
+
+            await Context.Channel.SendEmbedAsync($"{die} die with {sides} Sided Die Rolled", $"🎲 You rolled: {sum} 🎲",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("DIE_IMAGES"));
         }
 
         [Command("RussianRoulette")]
@@ -153,20 +165,22 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed RussianRoulette on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            var result = _random.Next(1, 7);
+            var chamberWithBullet = _random.Next(1, 7);
+            var activeChamber = _random.Next(1, 7);
+
             var message = "Click! Nothing happened...";
-            if(result == 6)
+            if (activeChamber == chamberWithBullet)
             {
-                message = "🔫 The revolver fires 🔫. Your brains leak out of your ears :(";
+                message = "🔫 The revolver fires 🔫. Your brains leak out of your ears :( 🧠👂";
             }
 
-            await Context.Channel.SendEmbedAsync("Russian Roulette", $"You pull the trigger: {message}",
-                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://www.wealthmanagement.com/sites/wealthmanagement.com/files/styles/article_featured_standard/public/gun-one-bullet-russian-roulette.jpg?itok=Q55CNN7q");
+            await Context.Channel.SendEmbedAsync("Russian Roulette", $"You spin the chamber then you pull the trigger:\n{message}",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("GUN_IMAGES"));
         }
 
         [Command("lmgtfy")]
         [Summary("Ask google, not me")]
-        public async Task LetMeGoogleThat([Summary("What to google")] [Remainder]string query = null)
+        public async Task LetMeGoogleThat([Summary("What to google")][Remainder] string query = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -183,6 +197,22 @@ namespace DiscordBot.Commands
 
             var url = "https://lmgtfy.com/?q=" + HttpUtility.UrlEncode(query);
             await Context.Channel.SendEmbedAsync("Let me Google that for you", $"Here is it: {url}", embedColor);
+        }
+
+        [Command("random")]
+        [Summary("Provide a comma seperated list of items, receive a random response!")]
+        public async Task RandomItem([Summary("Comma seperated list")][Remainder]string items)
+        {
+            var itemArr = items.Split(",", StringSplitOptions.None);
+
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed random ({items}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, items, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var chosenOne = itemArr.RandomItem();
+
+            await Context.Channel.SendEmbedAsync("Random Result", $"I have chosen: {chosenOne}", await _servers.GetServer(Context.Guild), ImageLookupUtility.GetImageUrl("DIE_IMAGES"));
         }
     }
 }

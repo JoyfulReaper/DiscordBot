@@ -62,12 +62,14 @@ namespace DiscordBot.Commands
         [Summary("Do math")]
         public async Task Math([Remainder] string math)
         {
+            await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} executed math: {math} on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, math, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             var dt = new DataTable();
 
-            var message = await ReplyAsync("https://i.pinimg.com/originals/97/a3/b9/97a3b92384b62eb04566a457f6d76f6c.gif");
+            var message = await ReplyAsync(ImageLookupUtility.GetImageUrl("MATH_IMAGES"));
             try
             {
                 var result = dt.Compute(math, null);
@@ -89,6 +91,8 @@ namespace DiscordBot.Commands
         [Summary("Information about the bot itself")]
         public async Task About()
         {
+            await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} executed about on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
@@ -97,7 +101,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                 .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
-                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
+                .WithColor(ColorHelper.GetColor(server))
                 .WithCurrentTimestamp();
 
             var embed = builder.Build();
@@ -108,6 +112,8 @@ namespace DiscordBot.Commands
         [Summary("Retreive the server owner")]
         public async Task Owner()
         {
+            await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} executed owner on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
@@ -122,7 +128,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(Context?.Guild?.Owner.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                 .WithDescription($"{Context?.Guild?.Owner.Username} is the owner of {Context.Guild.Name}")
-                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
+                .WithColor(ColorHelper.GetColor(server))
                 .WithCurrentTimestamp();
 
             var embed = builder.Build();
@@ -134,6 +140,8 @@ namespace DiscordBot.Commands
         // The remainder attribute parses until the end of a command
         public async Task Echo([Remainder] [Summary("The text to echo")] string message)
         {
+            await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} executed echo {message} on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, message, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
@@ -144,6 +152,8 @@ namespace DiscordBot.Commands
         [Summary ("Latency to server!")]
         public async Task Ping()
         {
+            await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} executed ping on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
@@ -155,7 +165,7 @@ namespace DiscordBot.Commands
                 .WithTitle("Ping Results")
                 .WithDescription("Pong!")
                 .AddField("Round-trip latency to the WebSocket server (ms):", _client.Latency, false)
-                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor )
+                .WithColor(ColorHelper.GetColor(server))
                 .WithCurrentTimestamp();
 
             await ReplyAsync(null, false, builder.Build());
@@ -166,6 +176,8 @@ namespace DiscordBot.Commands
         [Alias("user", "whois")]
         public async Task Info([Summary("Optional user to get info about")]SocketUser mentionedUser = null)
         {
+            await Context.Channel.TriggerTypingAsync();
+
             if (mentionedUser == null)
             {
                 mentionedUser = Context.User; //as SocketGuildUser;
@@ -179,7 +191,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(mentionedUser.GetAvatarUrl() ?? mentionedUser.GetDefaultAvatarUrl())
                 .WithDescription("User information:")
-                .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
+                .WithColor(ColorHelper.GetColor(server))
                 .AddField("User ID", mentionedUser.Id, true)
                 .AddField("Discriminator", mentionedUser.Discriminator, true)
                 .AddField("Created at", mentionedUser.CreatedAt.ToString("MM/dd/yyyy"), true)
@@ -201,6 +213,8 @@ namespace DiscordBot.Commands
         [Summary("Retervies some basic information about a server")]
         public async Task Server()
         {
+            await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} executed server on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
@@ -213,7 +227,7 @@ namespace DiscordBot.Commands
                 .WithThumbnailUrl(Context.Guild.IconUrl)
                 .WithDescription("Server information:")
                 .WithTitle($"{Context.Guild.Name} Information")
-                .WithColor(await _servers.GetEmbedColor(Context.Guild.Id))
+                .WithColor(ColorHelper.GetColor(await _servers.GetServer(Context.Guild)))
                 .AddField("Created at", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
                 .AddField("Member count", (Context.Guild as SocketGuild).MemberCount + " members", true)
                 .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
@@ -227,6 +241,8 @@ namespace DiscordBot.Commands
         [Summary("Show the image banner thing")]
         public async Task Image(SocketGuildUser user = null)
         {
+            await Context.Channel.TriggerTypingAsync();
+
             _logger.LogInformation("{username}#{discriminator} executed image on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 

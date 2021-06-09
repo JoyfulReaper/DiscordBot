@@ -51,12 +51,10 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed shelly on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            //await ReplyAsync("Enjoy this photo of JoyfulReaper's dog!");
-            //await ReplyAsync("https://kgivler.com/images/Shelly/Shelly.jpg");
             EmbedBuilder builder = new EmbedBuilder();
             builder
                 .WithTitle("JoyfulReaper's dog")
-                .WithDescription("A picture of the DiscordBot programmer's dog")
+                .WithDescription("A picture of the DiscordBot programmer's dog 🐕")
                 .WithImageUrl("https://kgivler.com/images/Shelly/Shelly.jpg")
                 .WithColor(ColorHelper.RandomColor())
                 .WithCurrentTimestamp();
