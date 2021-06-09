@@ -37,12 +37,6 @@ namespace DiscordBot.Commands
 {
     public class Fun : ModuleBase<SocketCommandContext>
     {
-        private static readonly List<string> _eightBallImages = new List<string>
-        {
-            "https://upload.wikimedia.org/wikipedia/commons/9/90/Magic8ball.jpg",
-            "https://media1.tenor.com/images/821d79609a5bc1395d8dacab2ad8e8b6/tenor.gif?itemid=17798802",
-            "https://media2.giphy.com/media/26xBJp4dcSdGxv2Zq/giphy.gif?cid=ecf05e47pnz54n4axc22ms430kzxmt8t1db6jm6qfm5vmg1p&rid=giphy.gif&ct=g"
-        };
         private static readonly List<string> _eightBallResponses = new List<string>
         {
             "It is Certian.", "It is decidedly so.", "Without a doubt.", "Yes definitely.", "You may rely on it.",
@@ -83,7 +77,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("8ball")]
-        [Alias("eightBall")]
+        [Alias("eightBall", "8b")]
         [Summary("Ask the 8ball a question, get the answer!")]
         public async Task EightBall([Summary("The question to ask")][Remainder]string question)
         {
@@ -97,7 +91,7 @@ namespace DiscordBot.Commands
             var builder = new EmbedBuilder();
             builder
                 .WithTitle("Magic 8ball")
-                .WithThumbnailUrl(_eightBallImages.RandomItem())
+                .WithThumbnailUrl(ImageLookupUtility.GetImageUrl("EIGHTBALL_IMAGES"))
                 .WithDescription($"{Context.User.Username} asked ***{question}***")
                 .AddField("Response", _eightBallResponses.RandomItem())
                 .WithColor(server == null ? ColorHelper.RandomColor() : server.EmbedColor)
@@ -125,7 +119,7 @@ namespace DiscordBot.Commands
             var server = await _servers.GetServer(Context.Guild);
 
             await Context.Channel.SendEmbedAsync("Coin flip", $"The coin landed {outcome} up.",
-                server == null ? ColorHelper.RandomColor() : server.EmbedColor, "https://www.bellevuerarecoins.com/wp-content/uploads/2013/11/bigstock-Coin-Flip-5807921.jpg");
+                server == null ? ColorHelper.RandomColor() : server.EmbedColor, ImageLookupUtility.GetImageUrl("COIN_IMAGES"));
         }
 
         [Command("rolldie")]
@@ -140,7 +134,7 @@ namespace DiscordBot.Commands
             var result = _random.Next(1, sides + 1);
 
             await Context.Channel.SendEmbedAsync($"{sides} Sided Die Roll", $"You rolled a {result}",
-                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://miro.medium.com/max/1920/0*bLJxMZ_YS0RxF-82.jpg");
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("DIE_IMAGES"));
         }
 
         [Command("RussianRoulette")]
@@ -153,15 +147,16 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed RussianRoulette on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            var result = _random.Next(1, 7);
+            var chamberWithBullet = _random.Next(1, 7);
+            var activeChamber = _random.Next(1, 7);
             var message = "Click! Nothing happened...";
-            if(result == 6)
+            if(activeChamber == chamberWithBullet)
             {
-                message = "🔫 The revolver fires 🔫. Your brains leak out of your ears :(";
+                message = "🔫 The revolver fires 🔫. Your brains leak out of your ears :( 🧠👂";
             }
 
-            await Context.Channel.SendEmbedAsync("Russian Roulette", $"You pull the trigger: {message}",
-                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), "https://www.wealthmanagement.com/sites/wealthmanagement.com/files/styles/article_featured_standard/public/gun-one-bullet-russian-roulette.jpg?itok=Q55CNN7q");
+            await Context.Channel.SendEmbedAsync("Russian Roulette", $"You spin the chamber then you pull the trigger:\n{message}",
+                ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("GUN_IMAGES"));
         }
 
         [Command("lmgtfy")]

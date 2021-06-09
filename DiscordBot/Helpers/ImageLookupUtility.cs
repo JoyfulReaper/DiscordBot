@@ -43,6 +43,17 @@ namespace DiscordBot.Helpers
 
         public static readonly string[] LOGGING_IMAGES = new string[] { "https://cdn.quotesgram.com/img/87/86/1090166097-captains_log_meme.jpg" };
 
+        public static readonly string[] EIGHTBALL_IMAGES = new string [] {
+            "https://upload.wikimedia.org/wikipedia/commons/9/90/Magic8ball.jpg",
+            "https://media1.tenor.com/images/821d79609a5bc1395d8dacab2ad8e8b6/tenor.gif?itemid=17798802",
+            "https://media2.giphy.com/media/26xBJp4dcSdGxv2Zq/giphy.gif?cid=ecf05e47pnz54n4axc22ms430kzxmt8t1db6jm6qfm5vmg1p&rid=giphy.gif&ct=g" };
+
+        public static readonly string[] COIN_IMAGES = new string[] { "https://www.bellevuerarecoins.com/wp-content/uploads/2013/11/bigstock-Coin-Flip-5807921.jpg" };
+
+        public static readonly string[] DIE_IMAGES = new string[] { "https://miro.medium.com/max/1920/0*bLJxMZ_YS0RxF-82.jpg" };
+
+        public static readonly string[] GUN_IMAGES = new string[] { "https://www.wealthmanagement.com/sites/wealthmanagement.com/files/styles/article_featured_standard/public/gun-one-bullet-russian-roulette.jpg?itok=Q55CNN7q" };
+
         private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)
