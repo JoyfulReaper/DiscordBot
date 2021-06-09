@@ -54,6 +54,8 @@ namespace DiscordBot.Helpers
 
         public static readonly string[] GUN_IMAGES = new string[] { "https://www.wealthmanagement.com/sites/wealthmanagement.com/files/styles/article_featured_standard/public/gun-one-bullet-russian-roulette.jpg?itok=Q55CNN7q" };
 
+        public static readonly string[] MATH_IMAGES = new string[] { "https://i.pinimg.com/originals/97/a3/b9/97a3b92384b62eb04566a457f6d76f6c.gif" };
+
         private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)

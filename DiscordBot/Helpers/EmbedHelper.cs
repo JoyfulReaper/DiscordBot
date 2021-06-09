@@ -53,6 +53,11 @@ namespace DiscordBot.Helpers
 
         public static async Task<IMessage> SendEmbedAsync(this ISocketMessageChannel channel, string title, string description, Server server, string thumbImage = null)
         {
+            if(server == null)
+            {
+                return await SendEmbedAsync(channel, title, description, ColorHelper.RandomColor(), thumbImage);
+            }
+
             return await SendEmbedAsync(channel, title, description, server.EmbedColor.RawValue == 0 ? ColorHelper.RandomColor() : server.EmbedColor, thumbImage);
         }
     }

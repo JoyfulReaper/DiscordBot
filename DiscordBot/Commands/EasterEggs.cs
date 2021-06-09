@@ -54,7 +54,7 @@ namespace DiscordBot.Commands
             EmbedBuilder builder = new EmbedBuilder();
             builder
                 .WithTitle("JoyfulReaper's dog")
-                .WithDescription("A picture of the DiscordBot programmer's dog")
+                .WithDescription("A picture of the DiscordBot programmer's dog 🐕")
                 .WithImageUrl("https://kgivler.com/images/Shelly/Shelly.jpg")
                 .WithColor(ColorHelper.RandomColor())
                 .WithCurrentTimestamp();
