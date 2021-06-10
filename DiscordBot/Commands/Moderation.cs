@@ -658,6 +658,10 @@ namespace DiscordBot.Commands
                 await _servers.ClearLoggingChannel(Context.Guild.Id);
                 return;
             }
+            else
+            {
+                await ReplyAsync($"The logging channel is {welcomeChannel.Mention}");
+            }
         }
 
         [Command("embedcolor")]
