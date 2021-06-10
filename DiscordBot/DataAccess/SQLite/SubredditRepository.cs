@@ -27,7 +27,6 @@ using DiscordBot.Models;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess.SQLite
@@ -76,7 +75,7 @@ namespace DiscordBot.DataAccess.SQLite
             return queryResult;
         }
 
-        public async Task<List<Subreddit>> GetSubredditListByServerId(ulong guildId)
+        public async Task<IEnumerable<Subreddit>> GetSubredditListByServerId(ulong guildId)
         {
             var queryResult = await QueryAsync<Subreddit>($"SELECT r.Id, Name " +
                 $"FROM Subreddit r " +
@@ -85,7 +84,7 @@ namespace DiscordBot.DataAccess.SQLite
                 $"WHERE ServerId = @GuildId",
                 new { GuildId = guildId });
 
-            return queryResult.ToList();
+            return queryResult;
         }
 
         public async Task<Subreddit> GetSubredditByServerId(ulong guildId, string subreddit)

@@ -31,7 +31,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBot.DataAccess.SQLite
@@ -103,7 +102,7 @@ namespace DiscordBot.DataAccess.SQLite
             {
                 using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
                 {
-                    return connection.Query<T>(query, parameters).ToList();
+                    return connection.Query<T>(query, parameters);
                 }
             }
             catch (Exception ex)
@@ -184,7 +183,7 @@ namespace DiscordBot.DataAccess.SQLite
                 using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
                 {
                     var result = await connection.QueryAsync<T>(query, parameters);
-                    return result.ToList();
+                    return result;
                 }
             }
             catch (Exception ex)

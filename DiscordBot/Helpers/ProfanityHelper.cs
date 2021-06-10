@@ -49,7 +49,7 @@ namespace DiscordBot.Helpers
             "condom", "crack", "crap", "crappy", "dirty", "erect", "erotic", "fart", "fubar", "ganja", "genitals", "god", "hemp", "jerk", "labia", "lmao", "lmfao",
             "maxi", "meth", "moron", "nipple", "nipples", "omg", "opiate", "opium", "organ", "orally", "orgasm", "pcp", "panty", "pee", "penetrate", "penetration",
             "penis", "queers", "rectal", "rectum", "taste my", "teste", "testes", "tied up", "undies", "unwed", "urinal", "vagina", "virgin", "vomit", "vodka",
-            "vulva", "wazoo", "weed", "weiner", "wedgie", "whiz", "womb", "rum", "kill", "murder", "stupid", "flaps"};
+            "vulva", "wazoo", "weed", "weiner", "wedgie", "whiz", "womb", "rum", "kill", "murder", "stupid", "flaps", "hell", "darn"};
 
         // I'm not sure why, but words with symbols (*, !) don't seem to work
         // TODO: Look into another filtering library, writing my own filter, or improving the existing solution some how
@@ -64,7 +64,7 @@ namespace DiscordBot.Helpers
 
         internal async static Task HandleProfanity(SocketUserMessage message, Server server)
         {
-            var checkString = message.Content.Replace(".", String.Empty).Replace('!', 'i');
+            var checkString = message.Content.Replace(".", String.Empty).Replace('!', 'i').Replace("-", String.Empty);
             var badWords = await GetProfanity(server, checkString);
 
             if (badWords.Count > 0)

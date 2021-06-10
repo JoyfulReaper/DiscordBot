@@ -41,7 +41,7 @@ namespace DiscordBot.DataAccess
         Task EnableSubredditLearning(ulong guildId);
         Task<Subreddit> GetSubreddit(string name);
         Task<Subreddit> GetSubredditByServerId(ulong guildId, string subreddit);
-        Task<List<Subreddit>> GetSubredditListByServerId(ulong guildId);
+        Task<IEnumerable<Subreddit>> GetSubredditListByServerId(ulong guildId);
         Task<bool> IsSubredditLearningEnabled(ulong guildId);
     }
 }

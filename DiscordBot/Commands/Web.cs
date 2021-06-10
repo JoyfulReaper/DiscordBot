@@ -62,7 +62,7 @@ namespace DiscordBot.Commands
             }
 
             var url = "https://www.google.com/search?q=" + HttpUtility.UrlEncode(query);
-            await Context.Channel.SendEmbedAsync("Google Results", $"I searched google for you:\n{url}", embedColor, "https://www.computerhope.com/jargon/s/search-engine.jpg");
+            await Context.Channel.SendEmbedAsync("Google Results", $"I searched google for you:\n{url}", embedColor, ImageLookupUtility.GetImageUrl("SEARCH_IMAGES"));
         }
     }
 }

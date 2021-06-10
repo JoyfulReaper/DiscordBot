@@ -287,16 +287,15 @@ namespace DiscordBot.Commands
         private async Task<List<Subreddit>> GetSubreddits( )
         {
             var subreddits = await _subredditRepository.GetSubredditListByServerId(Context.Guild.Id);
-
-            if(subreddits.Count == 0)
+            if(!subreddits.Any())
             {
                 foreach(string seed in _seedSubreddits)
                 {
-                    subreddits.Add(await _subredditRepository.AddAsync(Context.Guild.Id, seed.ToLowerInvariant()));
+                    subreddits = subreddits.Append(await _subredditRepository.AddAsync(Context.Guild.Id, seed.ToLowerInvariant()));
                 }
             }
 
-            return subreddits;
+            return subreddits.ToList();
         }
     }
 }
