@@ -70,6 +70,8 @@ namespace DiscordBot.Helpers
 
         public static readonly string[] UNMUTE_IMAGES = new string[] { "https://imgaz2.staticbg.com/thumb/large/oaupload/ser1/banggood/images/21/07/9474ae00-56ad-43ba-9bf1-97c7e80d34ee.jpg.webp" };
 
+        public static readonly string[] SEARCH_IMAGES = new string[] { "https://www.computerhope.com/jargon/s/search-engine.jpg" };
+
         private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)
