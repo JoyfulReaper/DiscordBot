@@ -29,7 +29,7 @@ namespace DiscordBot.Extensions
 {
     public static class ArrayExtensions
     {
-        private static Random _random = new();
+        private static readonly Random _random = new();
 
         public static T RandomItem<T>(this T[] array)
         {
