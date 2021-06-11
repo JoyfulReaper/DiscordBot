@@ -64,5 +64,27 @@ namespace DiscordBot.Commands
             var url = "https://www.google.com/search?q=" + HttpUtility.UrlEncode(query);
             await Context.Channel.SendEmbedAsync("Google Results", $"I searched google for you:\n{url}", embedColor, ImageLookupUtility.GetImageUrl("SEARCH_IMAGES"));
         }
+
+        [Command("youtube")]
+        [Alias("yt")]
+        [Summary("Search YouTube")]
+        public async Task YouTube([Summary("What to search YT for")][Remainder] string query = null)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed youtube ({query}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, query, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var embedColor = ColorHelper.GetColor(await _servers.GetServer(Context.Guild));
+
+            if (query == null)
+            {
+                await Context.Channel.SendEmbedAsync("Bad Request", "You didn't tell me what to search for!", embedColor);
+                return;
+            }
+
+            var url = "https://www.youtube.com/results?search_query=" + HttpUtility.UrlEncode(query);
+            await Context.Channel.SendEmbedAsync("YouTube Results", $"I searched youtube for you:\n{url}", embedColor, ImageLookupUtility.GetImageUrl("SEARCH_IMAGES"));
+        }
     }
 }
