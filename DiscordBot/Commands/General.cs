@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.DataAccess;
 using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
@@ -46,16 +47,19 @@ namespace DiscordBot.Commands
         private readonly DiscordSocketClient _client;
         private readonly BannerImageService _bannerImageService;
         private readonly IServerService _servers;
+        private readonly IUserTimeZonesRepository _userTimeZones;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
             BannerImageService bannerImageService,
-            IServerService servers)
+            IServerService servers,
+            IUserTimeZonesRepository userTimeZones)
         {
             _logger = logger;
             _client = client;
             _bannerImageService = bannerImageService;
             _servers = servers;
+            _userTimeZones = userTimeZones;
         }
 
         [Command("math")]
@@ -161,6 +165,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("ping")]
+        [Alias("latency")]
         [Summary ("Latency to server!")]
         public async Task Ping()
         {
@@ -207,7 +212,13 @@ namespace DiscordBot.Commands
                 .AddField("User ID", mentionedUser.Id, true)
                 .AddField("Discriminator", mentionedUser.Discriminator, true)
                 .AddField("Created at", mentionedUser.CreatedAt.ToString("MM/dd/yyyy"), true)
-                .WithCurrentTimestamp(); ;
+                .WithCurrentTimestamp();
+
+            var timezone = await _userTimeZones.GetByUserID(mentionedUser.Id);
+            if(timezone != null)
+            {
+                builder.AddField("Timezone", timezone.TimeZone, true);
+            }
 
             SocketGuildUser guildUser = mentionedUser as SocketGuildUser;
             if (guildUser != null)
@@ -245,11 +256,12 @@ namespace DiscordBot.Commands
                 .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
                 .WithCurrentTimestamp();
 
-            var embed = builder.Build();
+            var embed = builder.Build(); 
             await ReplyAsync(null, false, embed);
         }
 
         [Command("image", RunMode = RunMode.Async)]
+        [Alias("banner")]
         [Summary("Show the image banner thing")]
         public async Task Image(SocketGuildUser user = null)
         {
