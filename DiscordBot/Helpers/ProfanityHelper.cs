@@ -53,7 +53,7 @@ namespace DiscordBot.Helpers
 
         // I'm not sure why, but words with symbols (*, !) don't seem to work
         // TODO: Look into another filtering library, writing my own filter, or improving the existing solution some how
-        private static string[] GlobalBannedWords = new[] { "f*ck", "shat", "sh!t" }; 
+        private static string[] GlobalBannedWords = new[] { "fck", "shat", "sh!t", "sht" }; 
 
         internal static async Task<bool> ContainsProfanity(Server server, string sentence)
         {
@@ -64,7 +64,7 @@ namespace DiscordBot.Helpers
 
         internal async static Task HandleProfanity(SocketUserMessage message, Server server)
         {
-            var checkString = message.Content.Replace(".", String.Empty).Replace('!', 'i').Replace("-", String.Empty);
+            var checkString = message.Content.Replace(".", String.Empty).Replace('!', 'i').Replace("-", String.Empty).Replace("*", String.Empty);
             var badWords = await GetProfanity(server, checkString);
 
             if (badWords.Count > 0)
@@ -102,7 +102,7 @@ namespace DiscordBot.Helpers
             return filter.DetectAllProfanities(sentence);
         }
 
-        private static async Task<ProfanityFilter.ProfanityFilter> GetProfanityFilterForServer(Server server)
+        internal static async Task<ProfanityFilter.ProfanityFilter> GetProfanityFilterForServer(Server server)
         {
             // TODO Look into caching this some how...
             // TODO Look into caching in general (Cache servers/guilds also for example)

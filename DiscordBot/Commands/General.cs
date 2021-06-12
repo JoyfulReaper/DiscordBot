@@ -29,6 +29,7 @@ using Discord.WebSocket;
 using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -58,8 +59,8 @@ namespace DiscordBot.Commands
         }
 
         [Command("math")]
-        [Alias("calculate", "calculator", "evaluate", "eval")]
-        [Summary("Do math")]
+        [Alias("calculate", "calculator", "evaluate", "eval", "calc")]
+        [Summary("Do math!")]
         public async Task Math([Remainder] string math)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -144,6 +145,17 @@ namespace DiscordBot.Commands
 
             _logger.LogInformation("{username}#{discriminator} executed echo {message} on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, message, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var server = await _servers.GetServer(Context.Guild);
+            var checkString = message.Replace(".", String.Empty).Replace('!', 'i').Replace("-", String.Empty).Replace("*", String.Empty);
+            var filter = ProfanityHelper.GetProfanityFilterForServer(server);
+            var badWords = await ProfanityHelper.GetProfanity(server, checkString);
+
+            if (badWords.Count > 0)
+            {
+                await ReplyAsync("I'm not going to say that!");
+                return;
+            }
 
             await ReplyAsync($"`{message}`");
         }
