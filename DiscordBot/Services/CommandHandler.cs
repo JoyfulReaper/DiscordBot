@@ -214,23 +214,12 @@ namespace DiscordBot.Services
 
             if (!result.IsSuccess)
             {
-                if(result.Error == CommandError.ObjectNotFound)
-                {
-                    await context.Channel.SendMessageAsync($"Unknown object");
-                }
-
-                if(result.Error == CommandError.UnmetPrecondition)
-                {
-                    // TODO better error message
-                    await context.Channel.SendMessageAsync(result.ErrorReason);
-                }
-
                 _logger.LogError("Error Occured for command {command}: {error} in {server}/{channel}",
                     context.Message.Content, result.Error, context.Guild?.Name ?? "DM", context.Channel);
 
                 Console.WriteLine($"The following error occured: {result.Error}");
 
-                await context.Channel.SendMessageAsync($"The following error occured: {result.Error}");
+                await context.Channel.SendMessageAsync($"The following error occured: {result.ErrorReason}");
             }
         }
     }
