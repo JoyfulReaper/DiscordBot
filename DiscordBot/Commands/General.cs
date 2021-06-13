@@ -26,9 +26,11 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.DataAccess;
 using DiscordBot.Helpers;
 using DiscordBot.Services;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -45,21 +47,24 @@ namespace DiscordBot.Commands
         private readonly DiscordSocketClient _client;
         private readonly BannerImageService _bannerImageService;
         private readonly IServerService _servers;
+        private readonly IUserTimeZonesRepository _userTimeZones;
 
         public General(ILogger<General> logger,
             DiscordSocketClient client,
             BannerImageService bannerImageService,
-            IServerService servers)
+            IServerService servers,
+            IUserTimeZonesRepository userTimeZones)
         {
             _logger = logger;
             _client = client;
             _bannerImageService = bannerImageService;
             _servers = servers;
+            _userTimeZones = userTimeZones;
         }
 
         [Command("math")]
-        [Alias("calculate", "calculator", "evaluate", "eval")]
-        [Summary("Do math")]
+        [Alias("calculate", "calculator", "evaluate", "eval", "calc")]
+        [Summary("Do math!")]
         public async Task Math([Remainder] string math)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -145,10 +150,22 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed echo {message} on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, message, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
+            var server = await _servers.GetServer(Context.Guild);
+            var checkString = message.Replace(".", String.Empty).Replace('!', 'i').Replace("-", String.Empty).Replace("*", String.Empty);
+            var filter = ProfanityHelper.GetProfanityFilterForServer(server);
+            var badWords = await ProfanityHelper.GetProfanity(server, checkString);
+
+            if (badWords.Count > 0)
+            {
+                await ReplyAsync("I'm not going to say that!");
+                return;
+            }
+
             await ReplyAsync($"`{message}`");
         }
 
         [Command("ping")]
+        [Alias("latency")]
         [Summary ("Latency to server!")]
         public async Task Ping()
         {
@@ -195,7 +212,13 @@ namespace DiscordBot.Commands
                 .AddField("User ID", mentionedUser.Id, true)
                 .AddField("Discriminator", mentionedUser.Discriminator, true)
                 .AddField("Created at", mentionedUser.CreatedAt.ToString("MM/dd/yyyy"), true)
-                .WithCurrentTimestamp(); ;
+                .WithCurrentTimestamp();
+
+            var timezone = await _userTimeZones.GetByUserID(mentionedUser.Id);
+            if(timezone != null)
+            {
+                builder.AddField("Timezone", timezone.TimeZone, true);
+            }
 
             SocketGuildUser guildUser = mentionedUser as SocketGuildUser;
             if (guildUser != null)
@@ -233,11 +256,12 @@ namespace DiscordBot.Commands
                 .AddField("Online users", (Context.Guild as SocketGuild).Users.Where(x => x.Status == UserStatus.Offline).Count() + " members", true)
                 .WithCurrentTimestamp();
 
-            var embed = builder.Build();
+            var embed = builder.Build(); 
             await ReplyAsync(null, false, embed);
         }
 
         [Command("image", RunMode = RunMode.Async)]
+        [Alias("banner")]
         [Summary("Show the image banner thing")]
         public async Task Image(SocketGuildUser user = null)
         {
