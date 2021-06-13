@@ -128,7 +128,7 @@ namespace DiscordBot.Commands
             }
             else
             {
-                if (_settings.EnableLavaLink)
+                if (LavaLinkHelper.isLavaLinkRunning())
                 {
                     await _lavaNode.DisconnectAsync();
                 }
