@@ -107,7 +107,7 @@ namespace DiscordBot.Commands
             await Context.Channel.SendEmbedAsync("Lava Link", $"Lavalink was {(enable.ToLowerInvariant() == "start" ? "started" : "stopped")}!",
                 ColorHelper.GetColor(await _servers.GetServer(Context.Guild)));
 
-            await _servers.SendLogsAsync(Context.Guild, "Lavalink", $"Lavalink was {(enable.ToLowerInvariant() == "start" ? "started": "stopped")}!");
+            await _servers.SendLogsAsync(Context.Guild, "Lavalink", $"Lavalink was {(enable.ToLowerInvariant() == "start" ? "started": "stopped")} by {Context.User.Mention}!");
         }
 
         [Command("quit")]
