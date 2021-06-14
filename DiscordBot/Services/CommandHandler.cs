@@ -69,12 +69,18 @@ namespace DiscordBot.Services
             _client.UserJoined += OnUserJoined;
             _client.ReactionAdded += OnReactionAdded;
             _client.MessageUpdated += OnMessageUpated;
+            _client.UserLeft += OnUserLeft;
 
             _commands.CommandExecuted += OnCommandExecuted;
 
             ProfanityHelper.ProfanityRepository = profanityRepository;
 
             Task.Run(async () => await MuteHandler.MuteWorker(client));
+        }
+
+        private async Task OnUserLeft(SocketGuildUser user)
+        {
+            await ShowPartMessage(user);
         }
 
         // Message was edited
@@ -185,12 +191,36 @@ namespace DiscordBot.Services
                     return;
                 }
 
-                await channel.SendMessageAsync($"{userJoining.Username} {_settings.WelcomeMessage}");
+                await channel.SendMessageAsync($"{userJoining.Mention} {_settings.WelcomeMessage}");
 
                 var background = await _servers.GetBackground(userJoining.Guild.Id);
                 var memoryStream = await _bannerImageService.CreateImage(userJoining, background);
                 memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
                 await channel.SendFileAsync(memoryStream, $"{userJoining.Username}.png");
+            }
+        }
+
+        private async Task ShowPartMessage(SocketGuildUser userParting)
+        {
+            var server = await _servers.GetServer(userParting.Guild);
+            if (server.WelcomeUsers)
+            {
+                _logger.LogInformation("Showing parting message for {user} in {server}", userParting.Username, userParting.Guild.Name);
+
+                var channelId = server.WelcomeChannel;
+                if (channelId == 0)
+                {
+                    return;
+                }
+
+                ISocketMessageChannel channel = userParting.Guild.GetTextChannel(channelId);
+                if (channel == null)
+                {
+                    await _servers.ClearWelcomeChannel(userParting.Guild.Id);
+                    return;
+                }
+
+                await channel.SendMessageAsync($"{userParting.Mention} {_settings.PartingMessage}");
             }
         }
 
