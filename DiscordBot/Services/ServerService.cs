@@ -379,6 +379,18 @@ namespace DiscordBot.Services
             }
 
             await channel.SendLogAsync(title, description, await GetEmbedColor(guild.Id), thumbnailUrl);
+
+            // TODO: Send this to the API
+            ServerLogItem serverLogItem = new ServerLogItem
+            {
+                GuildId = guild.Id,
+                GuildName = guild.Name,
+                ChannelId = channelId,
+                ChannelName = channel.Name,
+                Title = title,
+                Description = description,
+                ThumbnailUrl = thumbnailUrl
+            };
         }
     }
 }
