@@ -73,6 +73,11 @@ namespace DiscordBot.Services
         string WelcomeMessage { get; }
 
         /// <summary>
+        /// Parting Message
+        /// </summary>
+        string PartingMessage { get; }
+
+        /// <summary>
         /// Start Lavalink by default or not
         /// </summary>
         bool EnableLavaLink { get; }

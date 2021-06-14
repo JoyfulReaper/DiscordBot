@@ -39,6 +39,7 @@ namespace DiscordBot.Services
         public string OwnerName { get; private set; }
         public string OwnerDiscriminator { get; private set; }
         public string WelcomeMessage { get; private set; }
+        public string PartingMessage { get; private set; }
         public string DefaultPrefix { get; private set; }
         public bool EnableLavaLink
         {
@@ -81,6 +82,7 @@ namespace DiscordBot.Services
             OwnerName = _configuration.GetSection("OwnerName").Value ?? "JoyfulReaper";
             OwnerDiscriminator = _configuration.GetSection("OwnerDiscriminator").Value ?? "7485";
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
+            PartingMessage = _configuration.GetSection("PartingMessage").Value ?? "just bailed!";
             DefaultPrefix = _configuration.GetSection("DefaultPrefix").Value ?? "!";
 
             try
