@@ -24,9 +24,9 @@ SOFTWARE.
 */
 
 using AutoMapper;
-using DiscordBotApi.Data;
+using DiscordBotApiLib.Data;
 using DiscordBotApi.Dtos;
-using DiscordBotApi.Models;
+using DiscordBotApiLib.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;

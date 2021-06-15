@@ -23,23 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using DiscordBotApiLib.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace DiscordBotApi.Data
+namespace DiscordBotApiLib.Data
 {
-    public interface IServerLogItemRepo
+    public class DiscordBotContext : DbContext
     {
-        Task<bool> SaveChanges();
-        Task<IEnumerable<ServerLogItem>> GetAllServerLogItems();
-        Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId);
-        Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId, int page);
-        Task<ServerLogItem> GetServerLogItemById(int id);
-        void CreateServerLogItem(ServerLogItem item);
-        void UpdateServerLogItem(ServerLogItem item);
-        void DeleteServerLogItem(ServerLogItem item);
+        public DiscordBotContext(DbContextOptions<DiscordBotContext> options) : base(options) { }
+
+        public DbSet<ServerLogItem> ServerLogItems { get; set; }
+        public DbSet<BasicAuthorization> BasicAuthorization { get; set; }
     }
 }

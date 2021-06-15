@@ -25,26 +25,20 @@ SOFTWARE.
 
 using System.ComponentModel.DataAnnotations;
 
-namespace DiscordBotApi.Models
+
+namespace DiscordBotApiLib.Models
 {
-    public class ServerLogItem
+    public class BasicAuthorization
     {
         [Key]
         public int Id { get; set; }
 
         [Required]
-        public Guild Guild { get; set; }
+        [MaxLength(250)]
+        public string UserName { get; set; }
 
         [Required]
-        public Channel Channel { get; set; }
-
-        [MaxLength(100)]
-        public string Title { get; set; }
-
-        [MaxLength(2000)]
-        public string Description { get; set; }
-
-        [MaxLength(500)]
-        public string ThumbnailUrl { get; set; }
+        [MaxLength(250)]
+        public string Password { get; set; }
     }
 }

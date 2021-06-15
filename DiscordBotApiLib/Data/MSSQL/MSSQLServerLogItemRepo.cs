@@ -23,14 +23,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApi.Models;
+using DiscordBotApiLib.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DiscordBotApi.Data.MSSQL
+namespace DiscordBotApiLib.Data.MSSQL
 {
     public class MSSQLServerLogItemRepo : IServerLogItemRepo
     {
