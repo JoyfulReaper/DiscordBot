@@ -62,6 +62,18 @@ namespace DiscordBot.Commands
             _userTimeZones = userTimeZones;
         }
 
+        [Command("servers")]
+        [Summary("Report the number of servers the bot it in")]
+        public async Task Servers()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed servers: on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            await ReplyAsync($"I am in {Context.Client.Guilds.Count} servers!");
+        }
+
         [Command("math")]
         [Alias("calculate", "calculator", "evaluate", "eval", "calc")]
         [Summary("Do math!")]
