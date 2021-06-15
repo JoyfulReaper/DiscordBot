@@ -27,11 +27,13 @@ using AutoMapper;
 using DiscordBotApi.Data;
 using DiscordBotApi.Dtos;
 using DiscordBotApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace DiscordBotApi.Controllers
 {
+    [Authorize]
     [Route("api/ServerLogItems")]
     [ApiController]
     public class ServerLogItemsController : ControllerBase
@@ -73,8 +75,6 @@ namespace DiscordBotApi.Controllers
         [HttpPost]
         public async Task<ActionResult<ServerLogItem>> CreateServerLogItem(ServerLogItemCreateDto serverLogItemCreateDto)
         {
-            //var guildModel = _mapper.Map<Guild>(serverLogItemCreateDto.guildCreateDto);
-            //var channelModel = _mapper.Map<Channel>(serverLogItemCreateDto.channelCreateDto);
             var serverLogItemModel = _mapper.Map<ServerLogItem>(serverLogItemCreateDto);
 
             _serverLogItemRepo.CreateServerLogItem(serverLogItemModel);
