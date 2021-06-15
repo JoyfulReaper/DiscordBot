@@ -25,6 +25,8 @@ SOFTWARE.
 
 using DiscordBotApi.Data;
 using DiscordBotApi.Data.MSSQL;
+using DiscordBotApi.Handlers;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -54,6 +56,10 @@ namespace DiscordBotApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // https://www.youtube.com/watch?v=6X6iONXhz2w
+            services.AddAuthentication("BasicAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
             services.AddDbContext<DiscordBotContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
 
             services.AddControllers();
@@ -80,6 +86,7 @@ namespace DiscordBotApi
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
