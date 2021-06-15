@@ -82,6 +82,18 @@ namespace DiscordBotApi.Data.MSSQL
                 .Where(l => l.Guild.GuildId == guildId).ToListAsync();
         }
 
+        public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId, int page, int pageSize = 25)
+        {
+            return await _context.ServerLogItems
+                .Include(l => l.Guild)
+                .Include(l => l.Channel)
+                .Where(l => l.Guild.GuildId == guildId)
+                .OrderByDescending(id => id.Id)
+                .Skip((page -1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
         public async Task<bool> SaveChanges()
         {
             return await _context.SaveChangesAsync() >= 0;

@@ -36,6 +36,7 @@ namespace DiscordBotApi.Data
         Task<bool> SaveChanges();
         Task<IEnumerable<ServerLogItem>> GetAllServerLogItems();
         Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId);
+        Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId, int page);
         Task<ServerLogItem> GetServerLogItemById(int id);
         void CreateServerLogItem(ServerLogItem item);
         void UpdateServerLogItem(ServerLogItem item);
