@@ -26,9 +26,9 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.DataAccess;
-using DiscordBot.Helpers;
-using DiscordBot.Services;
+using DiscordBotLib.DataAccess;
+using DiscordBotLib.Helpers;
+using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Data;

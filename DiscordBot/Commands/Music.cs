@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
-using DiscordBot.Helpers;
-using DiscordBot.Services;
+using DiscordBotLib.Helpers;
+using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Text;

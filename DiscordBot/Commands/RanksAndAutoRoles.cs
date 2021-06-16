@@ -26,8 +26,8 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.Helpers;
-using DiscordBot.Services;
+using DiscordBotLib.Helpers;
+using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;

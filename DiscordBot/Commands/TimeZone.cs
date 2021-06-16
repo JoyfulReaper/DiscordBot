@@ -25,14 +25,14 @@ SOFTWARE.
 
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.DataAccess;
-using DiscordBot.Models;
-using DiscordBot.Helpers;
+using DiscordBotLib.DataAccess;
+using DiscordBotLib.Models;
+using DiscordBotLib.Helpers;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using TimeZoneConverter;
-using DiscordBot.Services;
+using DiscordBotLib.Services;
 
 // TODO Add logging
 

@@ -25,9 +25,9 @@ SOFTWARE.
 
 using Discord;
 using Discord.Commands;
-using DiscordBot.Helpers;
-using DiscordBot.Services;
-using DiscordBot.Extensions;
+using DiscordBotLib.Helpers;
+using DiscordBotLib.Services;
+using DiscordBotLib.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;

@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot", "DiscordBot\Di
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBotApi", "DiscordBotApi\DiscordBotApi.csproj", "{524F1FC0-79E1-49B1-ACDE-FF9510AAFEFF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotApiLib", "DiscordBotApiLib\DiscordBotApiLib.csproj", "{7A5101B7-D87C-4F80-AA01-E576FF5531B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBotLib", "DiscordBotLib\DiscordBotLib.csproj", "{37CC1B25-ECD3-4815-8770-344583557442}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{524F1FC0-79E1-49B1-ACDE-FF9510AAFEFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{524F1FC0-79E1-49B1-ACDE-FF9510AAFEFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{524F1FC0-79E1-49B1-ACDE-FF9510AAFEFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A5101B7-D87C-4F80-AA01-E576FF5531B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A5101B7-D87C-4F80-AA01-E576FF5531B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A5101B7-D87C-4F80-AA01-E576FF5531B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A5101B7-D87C-4F80-AA01-E576FF5531B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37CC1B25-ECD3-4815-8770-344583557442}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37CC1B25-ECD3-4815-8770-344583557442}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37CC1B25-ECD3-4815-8770-344583557442}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37CC1B25-ECD3-4815-8770-344583557442}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,8 +32,8 @@ https://github.com/Directoire/dnbds
 */
 
 
-using DiscordBot.Helpers;
-using DiscordBot.Services;
+using DiscordBotLib.Helpers;
+using DiscordBotLib.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;

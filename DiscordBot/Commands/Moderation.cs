@@ -26,16 +26,16 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.Services;
-using DiscordBot.Helpers;
+using DiscordBotLib.Services;
+using DiscordBotLib.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
-using DiscordBot.Models;
+using DiscordBotLib.Models;
 using System;
-using DiscordBot.DataAccess;
-using DiscordBot.Enums;
+using DiscordBotLib.DataAccess;
+using DiscordBotLib.Enums;
 
 namespace DiscordBot.Commands
 {
