@@ -24,13 +24,23 @@ SOFTWARE.
 */
 
 using Discord;
+using DiscordBotApiWrapper.Dtos;
+using DiscordBotLib.Services;
+using Serilog;
+using System;
 using System.Threading.Tasks;
 
 namespace DiscordBotLib.Helpers
 {
     public static class LoggingChannelExtensions
     {
-        public static async Task<IMessage> SendLogAsync(this ITextChannel channel, string title, string description, Color color, string thumbImage = null)
+        public static async Task<IMessage> SendLogAsync(
+            this ITextChannel channel,
+            string title, 
+            string description, 
+            Color color, 
+            ApiService apiService, 
+            string thumbnailUrl = null)
         {
             var embed = new EmbedBuilder()
                 .WithTitle(title)
@@ -38,9 +48,34 @@ namespace DiscordBotLib.Helpers
                 .WithColor(color)
                 .WithCurrentTimestamp();
 
-            if (thumbImage != null)
+            if (thumbnailUrl != null)
             {
-                embed.WithThumbnailUrl(thumbImage);
+                embed.WithThumbnailUrl(thumbnailUrl);
+            }
+
+            ServerLogItemCreateDto serverLogItem = new ServerLogItemCreateDto
+            {
+                Guild = new GuildCreateDto { GuildId = channel.Guild.Id, GuildName = channel.Guild.Name },
+                Channel = new ChannelCreateDto { ChannelId = channel.Id, ChannelName = channel.Name },
+                Title = title,
+                Description = description,
+                ThumbnailUrl = thumbnailUrl,
+                Date = DateTimeOffset.UtcNow
+            };
+
+            if (apiService != null)
+            {
+                try
+                {
+                    await apiService.serverLogItemApi.SaveServerLogItem(serverLogItem);
+                } catch (Exception e)
+                {
+                    Log.Warning(e, "An exception occured while trying to contact the API");
+                }
+            }
+            else
+            {
+                throw new ArgumentNullException(nameof(apiService));
             }
 
             var message = await channel.SendMessageAsync(embed: embed.Build());

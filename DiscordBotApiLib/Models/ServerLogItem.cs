@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace DiscordBotApiLib.Models
@@ -46,5 +47,8 @@ namespace DiscordBotApiLib.Models
 
         [MaxLength(500)]
         public string ThumbnailUrl { get; set; }
+
+        [Required]
+        public DateTimeOffset Date { get; set; }
     }
 }

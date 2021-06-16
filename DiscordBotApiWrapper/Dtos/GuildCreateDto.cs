@@ -8,7 +8,7 @@ namespace DiscordBotApiWrapper.Dtos
 {
     public class GuildCreateDto
     {
-        public int GuildId { get; set; }
+        public ulong GuildId { get; set; }
         public string GuildName { get; set; }
     }
 }

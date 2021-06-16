@@ -34,6 +34,7 @@ using Discord.WebSocket;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Enums;
 using DiscordBotLib.Models;
+using DiscordBotLib.Services;
 using Serilog;
 
 namespace DiscordBotLib.Helpers
@@ -62,7 +63,7 @@ namespace DiscordBotLib.Helpers
             return filter.ContainsProfanity(sentence);
         }
 
-        internal async static Task HandleProfanity(SocketUserMessage message, Server server)
+        internal async static Task HandleProfanity(SocketUserMessage message, Server server, ApiService apiService)
         {
             var checkString = message.Content.Replace(".", String.Empty).Replace('!', 'i').Replace("-", String.Empty).Replace("*", String.Empty);
             var badWords = await GetProfanity(server, checkString);
@@ -76,13 +77,13 @@ namespace DiscordBotLib.Helpers
                 var loggingChannel = guild.GetChannel(server.LoggingChannel);
                 var badWordsJoined = String.Join(", ", badWords);
 
+                await message.DeleteAsync();
+
                 if (loggingChannel != null)
                 {
                     await (loggingChannel as SocketTextChannel).SendLogAsync("Profanity Filter", $"{message.Author.Mention} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords: `{badWordsJoined}`",
-                        ColorHelper.GetColor(server));
+                        ColorHelper.GetColor(server), apiService);
                 }
-
-                await message.DeleteAsync();
 
                 if (server.ProfanityFilterMode == ProfanityFilterMode.FilterCensor)
                 {

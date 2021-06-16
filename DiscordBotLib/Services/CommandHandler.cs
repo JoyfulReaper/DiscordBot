@@ -45,6 +45,7 @@ namespace DiscordBotLib.Services
         private readonly IServerService _servers;
         private readonly BannerImageService _bannerImageService;
         private readonly IAutoRoleService _autoRoleService;
+        private readonly ApiService _apiService;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
@@ -54,7 +55,8 @@ namespace DiscordBotLib.Services
             IServerService servers,
             BannerImageService bannerImageService,
             IAutoRoleService autoRoleService,
-            IProfanityRepository profanityRepository)
+            IProfanityRepository profanityRepository,
+            ApiService apiService)
         {
             _client = client;
             _commands = commands;
@@ -64,7 +66,7 @@ namespace DiscordBotLib.Services
             _servers = servers;
             _bannerImageService = bannerImageService;
             _autoRoleService = autoRoleService;
-
+            _apiService = apiService;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
             _client.ReactionAdded += OnReactionAdded;
@@ -103,7 +105,7 @@ namespace DiscordBotLib.Services
 
                 if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
-                    await ProfanityHelper.HandleProfanity(message, server);
+                    await ProfanityHelper.HandleProfanity(message, server, _apiService);
                 }
             }
         }
@@ -135,7 +137,7 @@ namespace DiscordBotLib.Services
                 
                 if (server != null && server.ProfanityFilterMode != ProfanityFilterMode.FilterOff)
                 {
-                    await ProfanityHelper.HandleProfanity(message, server);
+                    await ProfanityHelper.HandleProfanity(message, server, _apiService);
                 }
             }
 

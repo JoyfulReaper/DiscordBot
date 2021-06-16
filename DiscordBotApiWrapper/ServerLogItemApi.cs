@@ -34,9 +34,9 @@ namespace DiscordBotApiWrapper
 {
     public class ServerLogItemApi : IServerLogItemApi
     {
-        private readonly ApiClient _client;
+        private readonly IApiClient _client;
 
-        public ServerLogItemApi(ApiClient client)
+        public ServerLogItemApi(IApiClient client)
         {
             _client = client;
         }

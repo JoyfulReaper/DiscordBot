@@ -88,7 +88,7 @@ namespace DiscordBotApi.Controllers
         {
             var serverLogItemModel = _mapper.Map<ServerLogItem>(serverLogItemCreateDto);
 
-            _serverLogItemRepo.CreateServerLogItem(serverLogItemModel);
+            await _serverLogItemRepo.CreateServerLogItem(serverLogItemModel);
             await _serverLogItemRepo.SaveChanges();
 
             return CreatedAtRoute(nameof(GetServerLogItemById), new { Id = serverLogItemModel.Id }, serverLogItemModel);

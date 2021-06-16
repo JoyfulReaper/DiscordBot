@@ -41,11 +41,24 @@ namespace DiscordBotApiLib.Data.MSSQL
             _context = context;
         }
 
-        public void CreateServerLogItem(ServerLogItem item)
+        public async Task CreateServerLogItem(ServerLogItem item)
         {
             if (item == null)
             {
                 throw new ArgumentNullException(nameof(item));
+            }
+
+            var channel = await _context.Channel.SingleOrDefaultAsync(x => x.ChannelId == item.Channel.ChannelId);
+            var guild = await _context.Guild.SingleOrDefaultAsync(x => x.GuildId == item.Guild.GuildId);
+
+            if(channel != null)
+            {
+                item.Channel = channel;
+            }
+
+            if(guild != null)
+            {
+                item.Guild = guild;
             }
 
             _context.Add(item);
@@ -58,17 +71,17 @@ namespace DiscordBotApiLib.Data.MSSQL
                 throw new ArgumentNullException(nameof(item));
             }
 
-            _context.ServerLogItems.Remove(item);
+            _context.ServerLogItem.Remove(item);
         }
 
         public async Task<IEnumerable<ServerLogItem>> GetAllServerLogItems()
         {
-            return await _context.ServerLogItems.ToListAsync();
+            return await _context.ServerLogItem.ToListAsync();
         }
 
         public async Task<ServerLogItem> GetServerLogItemById(int id)
         {
-            return await _context.ServerLogItems
+            return await _context.ServerLogItem
                 .Include(l => l.Guild)
                 .Include(l => l.Channel)
                 .FirstOrDefaultAsync(l => l.Id == id);
@@ -76,7 +89,7 @@ namespace DiscordBotApiLib.Data.MSSQL
 
         public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId)
         {
-            return await _context.ServerLogItems
+            return await _context.ServerLogItem
                 .Include(l => l.Guild)
                 .Include(l => l.Channel)
                 .Where(l => l.Guild.GuildId == guildId).ToListAsync();
@@ -84,7 +97,7 @@ namespace DiscordBotApiLib.Data.MSSQL
 
         public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId, int page, int pageSize = 25)
         {
-            return await _context.ServerLogItems
+            return await _context.ServerLogItem
                 .Include(l => l.Guild)
                 .Include(l => l.Channel)
                 .Where(l => l.Guild.GuildId == guildId)

@@ -33,21 +33,31 @@ using System.Threading.Tasks;
 
 namespace DiscordBotApiWrapper
 {
-    public class ApiClient
+    public class ApiClient : IApiClient
     {
-        private readonly HttpClient _client = new HttpClient();
-        private Uri _baseAddress = new Uri("https://localhost:44383/api/");
-
+        public TimeSpan TimeOut
+        {
+            get
+            {
+                return _client.Timeout;
+            }
+            set
+            {
+                _client.Timeout = value;
+            }
+        }
         public Uri BaseAddress
         {
             get { return _baseAddress; }
-            set 
-            { 
+            set
+            {
                 _baseAddress = value;
                 _client.BaseAddress = _baseAddress;
             }
-        } 
+        }
 
+        private readonly HttpClient _client = new HttpClient();
+        private Uri _baseAddress = new Uri("https://localhost:44383/api/");
 
         public ApiClient(string userName, string password)
         {
@@ -69,7 +79,7 @@ namespace DiscordBotApiWrapper
             return response;
         }
 
-        public async Task<HttpStatusCode> PostAsync<T> (string uri, T request)
+        public async Task<HttpStatusCode> PostAsync<T>(string uri, T request)
         {
             var response = await _client.PostAsJsonAsync<T>(uri, request);
             return response.StatusCode;

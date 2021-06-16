@@ -23,20 +23,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using DiscordBotApiWrapper;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace DiscordBotLib.Models
+namespace DiscordBotLib.Services
 {
-    public class ServerLogItem
+    public class ApiService
     {
-        public ulong GuildId { get; set; }
-        public string GuildName { get; set; }
+        private readonly ILogger<ApiService> _logger;
 
-        public ulong ChannelId { get; set; }
-        public string ChannelName { get; set; }
+        public IApiClient ApiClient { get; set; } = new ApiClient("JoyfulReaper", "DiscordBot123");
+        public IServerLogItemApi serverLogItemApi { get; set; }
 
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string ThumbnailUrl { get; set; }
+        public ApiService(ILogger<ApiService> logger)
+        {
+            _logger = logger;
+
+            serverLogItemApi = new ServerLogItemApi(ApiClient);
+            ApiClient.BaseAddress = new Uri("https://localhost:5001");
+        }
+
+        public void SetBaseUrl(Uri url)
+        {
+            ApiClient.BaseAddress = url;
+        }
     }
 }

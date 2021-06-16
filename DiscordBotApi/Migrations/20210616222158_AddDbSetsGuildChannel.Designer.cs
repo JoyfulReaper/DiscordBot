@@ -4,14 +4,16 @@ using DiscordBotApiLib.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DiscordBotApi.Migrations
 {
     [DbContext(typeof(DiscordBotContext))]
-    partial class DiscordBotContextModelSnapshot : ModelSnapshot
+    [Migration("20210616222158_AddDbSetsGuildChannel")]
+    partial class AddDbSetsGuildChannel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,9 +92,6 @@ namespace DiscordBotApi.Migrations
 
                     b.Property<int?>("ChannelId")
                         .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("Date")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)

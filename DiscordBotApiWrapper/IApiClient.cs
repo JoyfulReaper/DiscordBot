@@ -23,23 +23,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApiLib.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
-namespace DiscordBotApiLib.Data
+namespace DiscordBotApiWrapper
 {
-    public interface IServerLogItemRepo
+    public interface IApiClient
     {
-        Task<bool> SaveChanges();
-        Task<IEnumerable<ServerLogItem>> GetAllServerLogItems();
-        Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId);
-        Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId, int page, int pageSize = 25);
-        Task<ServerLogItem> GetServerLogItemById(int id);
-        Task CreateServerLogItem(ServerLogItem item);
-        void UpdateServerLogItem(ServerLogItem item);
-        void DeleteServerLogItem(ServerLogItem item);
+        Uri BaseAddress { get; set; }
+
+        Task<T> GetAsync<T>(string uri);
+        Task<HttpStatusCode> PostAsync<T>(string uri, T request);
     }
 }

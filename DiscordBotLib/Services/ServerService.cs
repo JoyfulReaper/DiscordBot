@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using Discord;
+using DiscordBotApiWrapper.Dtos;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Helpers;
 using DiscordBotLib.Models;
@@ -39,14 +40,17 @@ namespace DiscordBotLib.Services
         private readonly IServerRepository _serverRepository;
         private readonly ISettings _settings;
         private readonly ILogger<ServerService> _logger;
+        private readonly ApiService _apiService;
 
         public ServerService(IServerRepository serverRepository,
             ISettings settings,
-            ILogger<ServerService> logger)
+            ILogger<ServerService> logger,
+            ApiService apiService)
         {
             _serverRepository = serverRepository;
             _settings = settings;
             _logger = logger;
+            _apiService = apiService;
         }
 
         public async Task<Server> GetServer(IGuild guild)
@@ -378,19 +382,7 @@ namespace DiscordBotLib.Services
                 return;
             }
 
-            await channel.SendLogAsync(title, description, await GetEmbedColor(guild.Id), thumbnailUrl);
-
-            // TODO: Send this to the API
-            ServerLogItem serverLogItem = new ServerLogItem
-            {
-                GuildId = guild.Id,
-                GuildName = guild.Name,
-                ChannelId = channelId,
-                ChannelName = channel.Name,
-                Title = title,
-                Description = description,
-                ThumbnailUrl = thumbnailUrl
-            };
+            await channel.SendLogAsync(title, description, await GetEmbedColor(guild.Id), _apiService, thumbnailUrl);
         }
     }
 }

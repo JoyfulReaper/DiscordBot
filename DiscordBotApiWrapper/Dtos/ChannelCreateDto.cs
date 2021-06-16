@@ -8,7 +8,7 @@ namespace DiscordBotApiWrapper.Dtos
 {
     public  class ChannelCreateDto
     {
-        public int ChannelId { get; set; }
+        public ulong ChannelId { get; set; }
         public string ChannelName { get; set; }
     }
 }
