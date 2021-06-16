@@ -24,14 +24,11 @@ SOFTWARE.
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http;
 
 namespace DiscordBotApiWrapper
 {
@@ -66,16 +63,9 @@ namespace DiscordBotApiWrapper
 
         public async Task<T> GetAsync<T>(string uri)
         {
-            var response = await _client.GetAsync(uri);
-            var result = await response.Content.ReadAsAsync<T>();
+            var response = await _client.GetFromJsonAsync<T>(uri);
 
-            if(!response.IsSuccessStatusCode)
-            {
-                // TODO Better Exception
-                throw new Exception($"API call failed! Status Code: {response.StatusCode}");
-            }
-
-            return result;
+            return response;
         }
     }
 }

@@ -46,12 +46,12 @@ namespace DiscordBotApiWrapper
 
         public async Task<IEnumerable<ServerLogItem>> GetServerLogIdsForGuild(int guildId)
         {
-            return await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/{guildId}");
+            return await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/GuildId/{guildId}");
         }
 
         public async Task<IEnumerable<ServerLogItem>> GetServerLogIdsForGuild(int guildId, int page)
         {
-            return await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/{guildId}?page={page}");
+            return await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/GuildId/{guildId}?page={page}");
         }
 
         public async Task<ServerLogItem> GetServerLogItem(int id)
