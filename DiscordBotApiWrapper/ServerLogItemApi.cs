@@ -23,9 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using DiscordBotApiWrapper.Dtos;
 using DiscordBotApiWrapper.Models;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace DiscordBotApiWrapper
@@ -59,9 +61,9 @@ namespace DiscordBotApiWrapper
             return await _client.GetAsync<ServerLogItem>($"/api/ServerLogItems/{id}");
         }
 
-        public Task SaveServerLogItem(ServerLogItem item)
+        public async Task<HttpStatusCode> SaveServerLogItem(ServerLogItemCreateDto item)
         {
-            throw new NotImplementedException();
+            return await _client.PostAsync<ServerLogItemCreateDto>("/api/ServerLogItems/", item);
         }
     }
 }

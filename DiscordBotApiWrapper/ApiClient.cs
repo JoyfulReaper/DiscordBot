@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -66,6 +67,12 @@ namespace DiscordBotApiWrapper
             var response = await _client.GetFromJsonAsync<T>(uri);
 
             return response;
+        }
+
+        public async Task<HttpStatusCode> PostAsync<T> (string uri, T request)
+        {
+            var response = await _client.PostAsJsonAsync<T>(uri, request);
+            return response.StatusCode;
         }
     }
 }

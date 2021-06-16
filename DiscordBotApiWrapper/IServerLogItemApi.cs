@@ -23,8 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using DiscordBotApiWrapper.Dtos;
 using DiscordBotApiWrapper.Models;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace DiscordBotApiWrapper
@@ -35,6 +37,6 @@ namespace DiscordBotApiWrapper
         Task DeleteServerLogItem(int id);
         Task<IEnumerable<ServerLogItem>> GetServerLogIdsForGuild(int guildId);
         Task<IEnumerable<ServerLogItem>> GetServerLogIdsForGuild(int guildId, int page);
-        Task SaveServerLogItem(ServerLogItem item);
+        Task<HttpStatusCode> SaveServerLogItem(ServerLogItemCreateDto item);
     }
 }
