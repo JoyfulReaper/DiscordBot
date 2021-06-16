@@ -26,7 +26,7 @@ SOFTWARE.
 using System.ComponentModel.DataAnnotations;
 
 
-namespace DiscordBotApi.Models
+namespace DiscordBotApiLib.Models
 {
     public class BasicAuthorization
     {

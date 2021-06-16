@@ -25,18 +25,18 @@ SOFTWARE.
 
 using System.ComponentModel.DataAnnotations;
 
-namespace DiscordBotApi.Models
+namespace DiscordBotApiLib.Models
 {
-    public class Channel
+    public class Guild
     {
         [Key]
         public int Id { get; set; }
 
         [Required]
-        public ulong ChannelId { get; set; }
+        public ulong GuildId { get; set; }
 
         [Required]
         [MaxLength(100)]
-        public string ChannelName { get; set; }
+        public string GuildName { get; set; }
     }
 }

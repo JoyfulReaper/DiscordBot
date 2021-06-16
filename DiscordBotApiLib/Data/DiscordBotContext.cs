@@ -23,28 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.ComponentModel.DataAnnotations;
+using DiscordBotApiLib.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace DiscordBotApi.Models
+namespace DiscordBotApiLib.Data
 {
-    public class ServerLogItem
+    public class DiscordBotContext : DbContext
     {
-        [Key]
-        public int Id { get; set; }
+        public DiscordBotContext(DbContextOptions<DiscordBotContext> options) : base(options) { }
 
-        [Required]
-        public Guild Guild { get; set; }
-
-        [Required]
-        public Channel Channel { get; set; }
-
-        [MaxLength(100)]
-        public string Title { get; set; }
-
-        [MaxLength(2000)]
-        public string Description { get; set; }
-
-        [MaxLength(500)]
-        public string ThumbnailUrl { get; set; }
+        public DbSet<ServerLogItem> ServerLogItems { get; set; }
+        public DbSet<BasicAuthorization> BasicAuthorization { get; set; }
     }
 }

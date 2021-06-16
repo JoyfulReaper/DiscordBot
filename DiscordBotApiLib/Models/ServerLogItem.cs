@@ -23,22 +23,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
-namespace DiscordBotApi.Data
+namespace DiscordBotApiLib.Models
 {
-    public interface IServerLogItemRepo
+    public class ServerLogItem
     {
-        Task<bool> SaveChanges();
-        Task<IEnumerable<ServerLogItem>> GetAllServerLogItems();
-        Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId);
-        Task<ServerLogItem> GetServerLogItemById(int id);
-        void CreateServerLogItem(ServerLogItem item);
-        void UpdateServerLogItem(ServerLogItem item);
-        void DeleteServerLogItem(ServerLogItem item);
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public Guild Guild { get; set; }
+
+        [Required]
+        public Channel Channel { get; set; }
+
+        [MaxLength(100)]
+        public string Title { get; set; }
+
+        [MaxLength(2000)]
+        public string Description { get; set; }
+
+        [MaxLength(500)]
+        public string ThumbnailUrl { get; set; }
     }
 }

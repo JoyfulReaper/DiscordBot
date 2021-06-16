@@ -23,14 +23,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApi.Models;
+using DiscordBotApiLib.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DiscordBotApi.Data.MSSQL
+namespace DiscordBotApiLib.Data.MSSQL
 {
     public class MSSQLServerLogItemRepo : IServerLogItemRepo
     {
@@ -80,6 +80,18 @@ namespace DiscordBotApi.Data.MSSQL
                 .Include(l => l.Guild)
                 .Include(l => l.Channel)
                 .Where(l => l.Guild.GuildId == guildId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId, int page, int pageSize = 25)
+        {
+            return await _context.ServerLogItems
+                .Include(l => l.Guild)
+                .Include(l => l.Channel)
+                .Where(l => l.Guild.GuildId == guildId)
+                .OrderByDescending(id => id.Id)
+                .Skip((page -1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         public async Task<bool> SaveChanges()
