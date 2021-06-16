@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotApi", "DiscordBot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBotApiLib", "DiscordBotApiLib\DiscordBotApiLib.csproj", "{7A5101B7-D87C-4F80-AA01-E576FF5531B6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotApiLib", "DiscordBotApiLib\DiscordBotApiLib.csproj", "{7A5101B7-D87C-4F80-AA01-E576FF5531B6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBotLib", "DiscordBotLib\DiscordBotLib.csproj", "{37CC1B25-ECD3-4815-8770-344583557442}"
 EndProject
 Global
