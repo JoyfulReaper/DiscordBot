@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using DiscordBotApiLib.Models;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace DiscordBotApi.Dtos
@@ -44,5 +45,7 @@ namespace DiscordBotApi.Dtos
 
         [MaxLength(500)]
         public string ThumbnailUrl { get; set; }
+
+        public DateTimeOffset Date { get; set; }
     }
 }
