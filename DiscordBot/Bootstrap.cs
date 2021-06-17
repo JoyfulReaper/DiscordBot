@@ -111,7 +111,7 @@ namespace DiscordBot
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<ISettings, Settings>()
                 .AddSingleton<BannerImageService>()
-                .AddSingleton<ApiService>();
+                .AddSingleton<IApiService, ApiService>();
 
 
             switch(database)

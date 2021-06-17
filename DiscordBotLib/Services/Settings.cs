@@ -32,22 +32,85 @@ namespace DiscordBotLib.Services
 {
     public class Settings : ISettings
     {
+        /// <summary>
+        /// Guild to send testing/debug messages to
+        /// </summary>
         public ulong DevGuild { get; set; }
+
+        /// <summary>
+        /// Channel in gev guild to send testing/debug messages to
+        /// </summary>
         public ulong DevChannel { get; set; }
+
+        /// <summary>
+        /// The datebase to use
+        /// </summary>
         public DatabaseType DatabaseType { get; private set; }
+
+        /// <summary>
+        /// The database connection string
+        /// </summary>
         public string ConnectionString { get; private set; }
+
+        /// <summary>
+        /// The username of the bot owner
+        /// </summary>
         public string OwnerName { get; private set; }
+
+        /// <summary>
+        /// The discriminator of the bot owner
+        /// </summary>
         public string OwnerDiscriminator { get; private set; }
+
+        /// <summary>
+        /// The UserId of the bot owner
+        /// </summary>
+        public ulong OwnerUserId { get; private set; }
+
+        /// <summary>
+        /// Message to send when a user joins. TODO make this per server
+        /// </summary>
         public string WelcomeMessage { get; private set; }
+
+        /// <summary>
+        /// Message to show when a user leaves. TODO make this per server
+        /// </summary>
         public string PartingMessage { get; private set; }
+
+        /// <summary>
+        /// Default bot prefix
+        /// </summary>
         public string DefaultPrefix { get; private set; }
-        public bool EnableLavaLink
+
+        /// <summary>
+        /// Base url of the DiscordBotApi
+        /// </summary>
+        public string ApiBaseAddress { get; set; }
+
+        public string ApiUserName { get; set; }
+
+        public string ApiPassword { get; set; }
+
+        /// <summary>
+        /// True to intergrate with DiscordBotApi, fale to not intergrate
+        /// </summary>
+        public bool UseDiscordBotApi
         {
-            get => enableLavaLink;
-            set { enableLavaLink = value; }
+            get => _useDiscordBotApi;
+            set { _useDiscordBotApi = value; }
         }
 
-        private bool enableLavaLink;
+        /// <summary>
+        /// True to start Lavalink jar when the bot starts
+        /// </summary>
+        public bool EnableLavaLink
+        {
+            get => _enableLavaLink;
+            set { _enableLavaLink = value; }
+        }
+
+        private bool _enableLavaLink;
+        private bool _useDiscordBotApi;
         private readonly IConfiguration _configuration;
         private readonly ILogger<Settings> _logger;
 
@@ -74,13 +137,32 @@ namespace DiscordBotLib.Services
                 throw new InvalidOperationException("DatabaseType is not valid.");
             }
 
-            if (!bool.TryParse(_configuration.GetSection("StartLavaLink").Value, out enableLavaLink))
+            if (!bool.TryParse(_configuration.GetSection("StartLavaLink").Value, out _enableLavaLink))
             {
                 _logger.LogWarning("Unable to parse StartLavaLink, using {value}", EnableLavaLink);
             }
 
+            if (!bool.TryParse(_configuration.GetSection("UseDiscordBotApi").Value, out _useDiscordBotApi))
+            {
+                _logger.LogWarning("Unable to parse UseDiscordBotApi, using {value}", UseDiscordBotApi);
+            }
+
             OwnerName = _configuration.GetSection("OwnerName").Value ?? "JoyfulReaper";
             OwnerDiscriminator = _configuration.GetSection("OwnerDiscriminator").Value ?? "7485";
+            if (!ulong.TryParse(_configuration.GetSection("OwnerUserId").Value, out ulong ownerId))
+            {
+                OwnerUserId = 397107333341118468;
+                _logger.LogWarning("Unable to parse UseDiscordBotApi, using {value}", OwnerUserId);
+            }
+            else
+            {
+                OwnerUserId = ownerId;
+            }
+
+            ApiBaseAddress = _configuration.GetSection("ApiBaseAddress").Value ?? "https://localhost:5001";
+            ApiUserName = _configuration.GetSection("ApiUserName").Value ?? String.Empty;
+            ApiPassword = _configuration.GetSection("ApiPassword").Value ?? String.Empty;
+
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
             PartingMessage = _configuration.GetSection("PartingMessage").Value ?? "just bailed!";
             DefaultPrefix = _configuration.GetSection("DefaultPrefix").Value ?? "!";

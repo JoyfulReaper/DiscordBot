@@ -45,7 +45,7 @@ namespace DiscordBotLib.Services
         private readonly IServerService _servers;
         private readonly BannerImageService _bannerImageService;
         private readonly IAutoRoleService _autoRoleService;
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
@@ -56,7 +56,7 @@ namespace DiscordBotLib.Services
             BannerImageService bannerImageService,
             IAutoRoleService autoRoleService,
             IProfanityRepository profanityRepository,
-            ApiService apiService)
+            IApiService apiService)
         {
             _client = client;
             _commands = commands;

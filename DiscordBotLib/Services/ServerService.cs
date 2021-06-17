@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 using Discord;
-using DiscordBotApiWrapper.Dtos;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Helpers;
 using DiscordBotLib.Models;
@@ -40,12 +39,12 @@ namespace DiscordBotLib.Services
         private readonly IServerRepository _serverRepository;
         private readonly ISettings _settings;
         private readonly ILogger<ServerService> _logger;
-        private readonly ApiService _apiService;
+        private readonly IApiService _apiService;
 
         public ServerService(IServerRepository serverRepository,
             ISettings settings,
             ILogger<ServerService> logger,
-            ApiService apiService)
+            IApiService apiService)
         {
             _serverRepository = serverRepository;
             _settings = settings;

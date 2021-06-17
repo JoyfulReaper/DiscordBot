@@ -32,14 +32,14 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLib.Helpers
 {
-    public static class LoggingChannelExtensions
+    public static class ChannelExtensions
     {
         public static async Task<IMessage> SendLogAsync(
             this ITextChannel channel,
             string title, 
             string description, 
             Color color, 
-            ApiService apiService, 
+            IApiService apiService, 
             string thumbnailUrl = null)
         {
             var embed = new EmbedBuilder()
@@ -63,7 +63,7 @@ namespace DiscordBotLib.Helpers
                 Date = DateTimeOffset.UtcNow
             };
 
-            if (apiService != null)
+            if (apiService != null && apiService.ApiIsEnabled)
             {
                 try
                 {
@@ -73,7 +73,7 @@ namespace DiscordBotLib.Helpers
                     Log.Warning(e, "An exception occured while trying to contact the API");
                 }
             }
-            else
+            else if (apiService == null)
             {
                 throw new ArgumentNullException(nameof(apiService));
             }

@@ -5,11 +5,11 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot", "DiscordBot\DiscordBot.csproj", "{7D4202AF-1F1D-4EEF-96AD-F5E752D3116E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotLib", "DiscordBotLib\DiscordBotLib.csproj", "{37CC1B25-ECD3-4815-8770-344583557442}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotApi", "DiscordBotApi\DiscordBotApi.csproj", "{524F1FC0-79E1-49B1-ACDE-FF9510AAFEFF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotApiLib", "DiscordBotApiLib\DiscordBotApiLib.csproj", "{7A5101B7-D87C-4F80-AA01-E576FF5531B6}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotLib", "DiscordBotLib\DiscordBotLib.csproj", "{37CC1B25-ECD3-4815-8770-344583557442}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotApiWrapper", "DiscordBotApiWrapper\DiscordBotApiWrapper.csproj", "{C42BFF2B-98A5-443B-BA28-9640F4F21A29}"
 EndProject

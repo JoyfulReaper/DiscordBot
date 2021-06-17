@@ -29,6 +29,11 @@ namespace DiscordBotLib.Services
 {
     public interface ISettings
     {
+        bool UseDiscordBotApi { get; set; }
+        string ApiBaseAddress { get; set; }
+        string ApiUserName { get; set; }
+        string ApiPassword { get; set; }
+
         /// <summary>
         /// Development Guild
         /// </summary>
@@ -66,6 +71,8 @@ namespace DiscordBotLib.Services
         /// Bot Owner's Discord Username
         /// </summary>
         string OwnerName { get; }
+
+        ulong OwnerUserId { get; }
 
         /// <summary>
         /// Welcome Message

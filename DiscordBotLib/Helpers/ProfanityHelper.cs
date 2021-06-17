@@ -63,7 +63,7 @@ namespace DiscordBotLib.Helpers
             return filter.ContainsProfanity(sentence);
         }
 
-        internal async static Task HandleProfanity(SocketUserMessage message, Server server, ApiService apiService)
+        internal async static Task HandleProfanity(SocketUserMessage message, Server server, IApiService apiService)
         {
             var checkString = message.Content.Replace(".", String.Empty).Replace('!', 'i').Replace("-", String.Empty).Replace("*", String.Empty);
             var badWords = await GetProfanity(server, checkString);

@@ -24,35 +24,13 @@ SOFTWARE.
 */
 
 using DiscordBotApiWrapper;
-using Microsoft.Extensions.Logging;
-using System;
-
 
 namespace DiscordBotLib.Services
 {
-    public class ApiService : IApiService
+    public interface IApiService
     {
-        public IApiClient ApiClient { get; set; }
-        public IServerLogItemApi serverLogItemApi { get; set; }
-
-        public bool ApiIsEnabled { get; set; }
-
-        private readonly ILogger<ApiService> _logger;
-        private readonly ISettings _settings;
-
-        public ApiService(ILogger<ApiService> logger,
-            ISettings settings)
-        {
-            _logger = logger;
-            _settings = settings;
-
-            ApiClient = new ApiClient(_settings.ApiUserName, _settings.ApiPassword);
-
-            serverLogItemApi = new ServerLogItemApi(ApiClient);
-
-            ApiIsEnabled = _settings.UseDiscordBotApi;
-
-            ApiClient.BaseAddress = new Uri(_settings.ApiBaseAddress);
-        }
+        bool ApiIsEnabled { get; set; }
+        IApiClient ApiClient { get; set; }
+        IServerLogItemApi serverLogItemApi { get; set; }
     }
 }

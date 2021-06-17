@@ -63,7 +63,14 @@ namespace DiscordBotApiWrapper
 
         public async Task<HttpStatusCode> SaveServerLogItem(ServerLogItemCreateDto item)
         {
-            return await _client.PostAsync<ServerLogItemCreateDto>("/api/ServerLogItems/", item);
+            var statusCode = await _client.PostAsync<ServerLogItemCreateDto>("/api/ServerLogItems/", item);
+
+            if(statusCode == HttpStatusCode.Unauthorized)
+            {
+                throw new UnauthorizedAccessException("Your username or password is incorrect!");
+            }
+
+            return statusCode;
         }
     }
 }
