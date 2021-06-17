@@ -35,5 +35,6 @@ namespace DiscordBotApiWrapper
 
         Task<T> GetAsync<T>(string uri);
         Task<HttpStatusCode> PostAsync<T>(string uri, T request);
+        Task<HttpStatusCode> DeleteAsync(string uri);
     }
 }

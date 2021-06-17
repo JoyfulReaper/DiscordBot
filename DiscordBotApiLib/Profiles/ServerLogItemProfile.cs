@@ -23,20 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using AutoMapper;
+using DiscordBotApiLib.Dtos;
 using DiscordBotApiLib.Models;
-using Microsoft.EntityFrameworkCore;
 
-namespace DiscordBotApiLib.Data
+namespace DiscordBotApiLib.Profiles
 {
-    public class DiscordBotContext : DbContext
+    public class ServerLogItemProfile : Profile
     {
-        public DiscordBotContext(DbContextOptions<DiscordBotContext> options) : base(options) { }
-
-        public DbSet<ServerLogItem> ServerLogItem { get; set; }
-        public DbSet<CommandItem> CommandItem { get; set; }
-        public DbSet<User> User { get; set; }
-        public DbSet<Guild> Guild { get; set; }
-        public DbSet<Channel> Channel { get; set; }
-        public DbSet<BasicAuthorization> BasicAuthorization { get; set; }
+        public ServerLogItemProfile()
+        {
+            CreateMap<ServerLogItemCreateDto, ServerLogItem>();
+            CreateMap<ServerLogItem, ServerLogItemCreateDto>();
+        }
     }
 }

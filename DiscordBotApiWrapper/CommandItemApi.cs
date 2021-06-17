@@ -32,40 +32,40 @@ using System.Threading.Tasks;
 
 namespace DiscordBotApiWrapper
 {
-    public class ServerLogItemApi : IServerLogItemApi
+    public class CommandItemApi : ICommandItemApi
     {
         private readonly IApiClient _client;
 
-        public ServerLogItemApi(IApiClient client)
+        public CommandItemApi(IApiClient client)
         {
             _client = client;
         }
 
-        public async Task<HttpStatusCode> DeleteServerLogItem(int id)
+        public async Task<HttpStatusCode> DeleteCommandItem(int id)
         {
-            return await _client.DeleteAsync($"/api/ServerLogItems/{id}");
+            return await _client.DeleteAsync($"/api/CommandItems/{id}");
         }
 
-        public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsForGuild(int guildId)
+        public async Task<IEnumerable<CommandItem>> GetCommandItemsForGuild(int guildId)
         {
-            return await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/GuildId/{guildId}");
+            return await _client.GetAsync<IEnumerable<CommandItem>>($"/api/CommandItems/GuildId/{guildId}");
         }
 
-        public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsForGuild(int guildId, int page)
+        public async Task<IEnumerable<CommandItem>> GetCommandItemsForGuild(int guildId, int page)
         {
-            return await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/GuildId/{guildId}?page={page}");
+            return await _client.GetAsync<IEnumerable<CommandItem>>($"/api/CommandItems/GuildId/{guildId}?page={page}");
         }
 
-        public async Task<ServerLogItem> GetServerLogItem(int id)
+        public async Task<CommandItem> GetCommandItem(int id)
         {
-            return await _client.GetAsync<ServerLogItem>($"/api/ServerLogItems/{id}");
+            return await _client.GetAsync<CommandItem>($"/api/CommandItem/{id}");
         }
 
-        public async Task<HttpStatusCode> SaveServerLogItem(ServerLogItemCreateDto item)
+        public async Task<HttpStatusCode> SaveCommandItem(CommandItemCreateDto item)
         {
-            var statusCode = await _client.PostAsync<ServerLogItemCreateDto>("/api/ServerLogItems/", item);
+            var statusCode = await _client.PostAsync("/api/CommandItems/", item);
 
-            if(statusCode == HttpStatusCode.Unauthorized)
+            if (statusCode == HttpStatusCode.Unauthorized)
             {
                 throw new UnauthorizedAccessException("Your username or password is incorrect!");
             }

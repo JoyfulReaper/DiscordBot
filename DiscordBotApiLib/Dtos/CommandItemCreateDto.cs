@@ -24,19 +24,39 @@ SOFTWARE.
 */
 
 using DiscordBotApiLib.Models;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace DiscordBotApiLib.Data
+namespace DiscordBotApiLib.Dtos
 {
-    public class DiscordBotContext : DbContext
+    public class CommandItemCreateDto
     {
-        public DiscordBotContext(DbContextOptions<DiscordBotContext> options) : base(options) { }
+        [Required]
+        public Guild Guild { get; set; }
 
-        public DbSet<ServerLogItem> ServerLogItem { get; set; }
-        public DbSet<CommandItem> CommandItem { get; set; }
-        public DbSet<User> User { get; set; }
-        public DbSet<Guild> Guild { get; set; }
-        public DbSet<Channel> Channel { get; set; }
-        public DbSet<BasicAuthorization> BasicAuthorization { get; set; }
+        [Required]
+        public Channel Channel { get; set; }
+
+        [Required]
+        public User User { get; set; }
+
+        [Required]
+        [MaxLength(250)]
+        public string Name { get; set; }
+
+        [MaxLength(250)]
+        public string Module { get; set; }
+
+        [MaxLength(2000)]
+        public string Message { get; set; }
+
+        public bool Succesful { get; set; }
+
+        [Required]
+        public DateTimeOffset Date { get; set; }
     }
 }

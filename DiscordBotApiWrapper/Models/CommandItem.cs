@@ -23,18 +23,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using AutoMapper;
-using DiscordBotApi.Dtos;
-using DiscordBotApiLib.Models;
+using System;
 
-namespace DiscordBotApi.Profiles
+namespace DiscordBotApiWrapper.Models
 {
-    public class GuildProfile : Profile
+    public class CommandItem
     {
-        public GuildProfile()
-        {
-            CreateMap<GuildCreateDto, Guild>();
-            CreateMap<Guild, GuildCreateDto>();
-        }
+        public int Id { get; set; }
+        public Guid Guild { get; set; }
+        public Channel Channel { get; set; }
+        public User User { get; set; }
+        public string Name { get; set; }
+        public string Module { get; set; }
+        public string Message { get; set; }
+        public bool Succesful { get; set; }
+        public DateTimeOffset Date { get; set; }
     }
 }

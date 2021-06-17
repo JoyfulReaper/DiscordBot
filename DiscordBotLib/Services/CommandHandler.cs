@@ -29,9 +29,11 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using DiscordBotApiWrapper.Models;
 using DiscordBotLib.Helpers;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Enums;
+using DiscordBotApiWrapper.Dtos;
 
 namespace DiscordBotLib.Services
 {
@@ -228,6 +230,34 @@ namespace DiscordBotLib.Services
 
         private async Task OnCommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
+            if (_apiService.ApiIsEnabled)
+            {
+                if (command.IsSpecified)
+                {
+                    var commandItem = new CommandItemCreateDto
+                    {
+                        Guild = new GuildCreateDto { GuildId = context.Guild.Id, GuildName = context.Guild.Name },
+                        Channel = new ChannelCreateDto { ChannelId = context.Channel.Id, ChannelName = context.Channel.Name },
+                        Name = command.Value.Name,
+                        Module = command.Value.Module.Name,
+                        Message = context.Message.Content,
+                        Succesful = result.IsSuccess,
+                        Date = DateTimeOffset.UtcNow,
+                        User = new UserCreateDto { UserId = context.User.Id, UserName = context.User.Username }
+                    };
+
+                    try
+                    {
+                        await _apiService.CommandItemApi.SaveCommandItem(commandItem);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning(e, "An exception occured while trying to contact the API");
+                    }
+                }
+
+            }
+
             if (result.Error == CommandError.UnknownCommand)
             {
                 //TODO make this optional/a setting

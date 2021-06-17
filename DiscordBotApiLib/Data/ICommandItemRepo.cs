@@ -24,19 +24,23 @@ SOFTWARE.
 */
 
 using DiscordBotApiLib.Models;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DiscordBotApiLib.Data
 {
-    public class DiscordBotContext : DbContext
+    public interface ICommandItemRepo
     {
-        public DiscordBotContext(DbContextOptions<DiscordBotContext> options) : base(options) { }
-
-        public DbSet<ServerLogItem> ServerLogItem { get; set; }
-        public DbSet<CommandItem> CommandItem { get; set; }
-        public DbSet<User> User { get; set; }
-        public DbSet<Guild> Guild { get; set; }
-        public DbSet<Channel> Channel { get; set; }
-        public DbSet<BasicAuthorization> BasicAuthorization { get; set; }
+        Task<bool> SaveChanges();
+        Task<IEnumerable<CommandItem>> GetAllCommandItems();
+        Task<IEnumerable<CommandItem>> GetCommandItemsByGuildId(ulong guildId);
+        Task<IEnumerable<CommandItem>> GetCommandItemsByGuildId(ulong guildId, int page, int pageSize = 25);
+        Task<CommandItem> GetCommandItemById(int id);
+        Task CreateCommandItem(CommandItem item);
+        void UpdateCommandItem(CommandItem item);
+        void DeleteCommandItem(CommandItem item);
     }
 }

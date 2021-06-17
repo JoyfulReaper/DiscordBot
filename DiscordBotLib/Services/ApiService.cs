@@ -33,7 +33,8 @@ namespace DiscordBotLib.Services
     public class ApiService : IApiService
     {
         public IApiClient ApiClient { get; set; }
-        public IServerLogItemApi serverLogItemApi { get; set; }
+        public IServerLogItemApi ServerLogItemApi { get; set; }
+        public ICommandItemApi CommandItemApi { get; set; }
 
         public bool ApiIsEnabled { get; set; }
 
@@ -48,7 +49,8 @@ namespace DiscordBotLib.Services
 
             ApiClient = new ApiClient(_settings.ApiUserName, _settings.ApiPassword);
 
-            serverLogItemApi = new ServerLogItemApi(ApiClient);
+            ServerLogItemApi = new ServerLogItemApi(ApiClient);
+            CommandItemApi = new CommandItemApi(ApiClient);
 
             ApiIsEnabled = _settings.UseDiscordBotApi;
 

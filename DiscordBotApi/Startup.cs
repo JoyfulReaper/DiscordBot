@@ -69,7 +69,8 @@ namespace DiscordBotApi
             });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddScoped<IServerLogItemRepo, MSSQLServerLogItemRepo>();
+            services.AddScoped<IServerLogItemRepo, MSSQLServerLogItemRepo>()
+                .AddScoped<ICommandItemRepo, MSSQLCommandItemRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -26,7 +26,7 @@ namespace ApiWrapperTestDemoThing
                 ThumbnailUrl = "https://example.com/test/jpg"
             });
 
-            var test = await serverLogItem.GetServerLogIdsForGuild(123);
+            var test = await serverLogItem.GetServerLogItemsForGuild(123);
 
             //Console.WriteLine(test.Description);
 

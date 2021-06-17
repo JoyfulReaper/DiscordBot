@@ -60,7 +60,7 @@ namespace DiscordBotLib.Services
             if(message.Exception is CommandException commandException)
             {
                 _logger.LogError("[Command/{severity}}] {command} failed to execute in {server}:{channel}.",
-                    message.Severity, commandException.Command.Aliases.First(), commandException.Context.Guild?.Name ?? "DM", commandException.Context.Channel.Name);
+                    message.Severity, commandException.Command.Aliases[0], commandException.Context.Guild?.Name ?? "DM", commandException.Context.Channel.Name);
 
                 _logger.LogError(commandException, "Exception");
             }

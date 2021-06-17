@@ -84,5 +84,11 @@ namespace DiscordBotApiWrapper
             var response = await _client.PostAsJsonAsync<T>(uri, request);
             return response.StatusCode;
         }
+
+        public async Task<HttpStatusCode> DeleteAsync(string uri)
+        {
+            var response = await _client.DeleteAsync(uri);
+            return response.StatusCode;
+        }
     }
 }

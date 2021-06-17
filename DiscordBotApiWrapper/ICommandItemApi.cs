@@ -23,20 +23,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApiLib.Models;
-using Microsoft.EntityFrameworkCore;
+using DiscordBotApiWrapper.Dtos;
+using DiscordBotApiWrapper.Models;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
-namespace DiscordBotApiLib.Data
+namespace DiscordBotApiWrapper
 {
-    public class DiscordBotContext : DbContext
+    public interface ICommandItemApi
     {
-        public DiscordBotContext(DbContextOptions<DiscordBotContext> options) : base(options) { }
-
-        public DbSet<ServerLogItem> ServerLogItem { get; set; }
-        public DbSet<CommandItem> CommandItem { get; set; }
-        public DbSet<User> User { get; set; }
-        public DbSet<Guild> Guild { get; set; }
-        public DbSet<Channel> Channel { get; set; }
-        public DbSet<BasicAuthorization> BasicAuthorization { get; set; }
+        Task<HttpStatusCode> DeleteCommandItem(int id);
+        Task<CommandItem> GetCommandItem(int id);
+        Task<IEnumerable<CommandItem>> GetCommandItemsForGuild(int guildId);
+        Task<IEnumerable<CommandItem>> GetCommandItemsForGuild(int guildId, int page);
+        Task<HttpStatusCode> SaveCommandItem(CommandItemCreateDto item);
     }
 }

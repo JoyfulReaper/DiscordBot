@@ -34,9 +34,9 @@ namespace DiscordBotApiWrapper
     public interface IServerLogItemApi
     {
         Task<ServerLogItem> GetServerLogItem(int id);
-        Task DeleteServerLogItem(int id);
-        Task<IEnumerable<ServerLogItem>> GetServerLogIdsForGuild(int guildId);
-        Task<IEnumerable<ServerLogItem>> GetServerLogIdsForGuild(int guildId, int page);
+        Task<HttpStatusCode> DeleteServerLogItem(int id);
+        Task<IEnumerable<ServerLogItem>> GetServerLogItemsForGuild(int guildId);
+        Task<IEnumerable<ServerLogItem>> GetServerLogItemsForGuild(int guildId, int page);
         Task<HttpStatusCode> SaveServerLogItem(ServerLogItemCreateDto item);
     }
 }
