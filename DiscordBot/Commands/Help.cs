@@ -1,6 +1,6 @@
 ﻿using Discord.Addons.Interactive;
 using Discord.Commands;
-using DiscordBot.Services;
+using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApi.Data;
-using DiscordBotApi.Data.MSSQL;
+using DiscordBotApiLib.Data;
+using DiscordBotApiLib.Data.MSSQL;
 using DiscordBotApi.Handlers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -60,7 +60,7 @@ namespace DiscordBotApi
             services.AddAuthentication("BasicAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
-            services.AddDbContext<DiscordBotContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
+            services.AddDbContext<DiscordBotContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default"), b => b.MigrationsAssembly("DiscordBotApi")));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

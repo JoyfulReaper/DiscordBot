@@ -34,11 +34,12 @@ using Discord;
 using System.Collections.Generic;
 using DiscordBot.Helpers;
 using Microsoft.Extensions.Configuration;
-using DiscordBot.DataAccess;
-using DiscordBot.Models;
+using DiscordBotLib.DataAccess;
+using DiscordBotLib.Models;
 using System.Linq;
 using DiscordBot.Attributes;
-using DiscordBot.Services;
+using DiscordBotLib.Services;
+using DiscordBotLib.Helpers;
 
 namespace DiscordBot.Commands
 {

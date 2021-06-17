@@ -26,9 +26,9 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.DataAccess;
-using DiscordBot.Helpers;
-using DiscordBot.Services;
+using DiscordBotLib.DataAccess;
+using DiscordBotLib.Helpers;
+using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Data;
@@ -60,6 +60,18 @@ namespace DiscordBot.Commands
             _bannerImageService = bannerImageService;
             _servers = servers;
             _userTimeZones = userTimeZones;
+        }
+
+        [Command("servers")]
+        [Summary("Report the number of servers the bot it in")]
+        public async Task Servers()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed servers: on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            await ReplyAsync($"I am in {Context.Client.Guilds.Count} servers!");
         }
 
         [Command("math")]

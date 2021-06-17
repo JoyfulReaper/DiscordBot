@@ -25,7 +25,7 @@ SOFTWARE.
 
 using AutoMapper;
 using DiscordBotApi.Dtos;
-using DiscordBotApi.Models;
+using DiscordBotApiLib.Models;
 
 namespace DiscordBotApi.Profiles
 {

@@ -23,7 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApi.Models;
+using DiscordBotApiLib.Models;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace DiscordBotApi.Dtos
@@ -44,5 +45,7 @@ namespace DiscordBotApi.Dtos
 
         [MaxLength(500)]
         public string ThumbnailUrl { get; set; }
+
+        public DateTimeOffset Date { get; set; }
     }
 }

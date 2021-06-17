@@ -25,14 +25,14 @@ SOFTWARE.
 
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.DataAccess;
-using DiscordBot.Models;
-using DiscordBot.Helpers;
+using DiscordBotLib.DataAccess;
+using DiscordBotLib.Models;
+using DiscordBotLib.Helpers;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using TimeZoneConverter;
-using DiscordBot.Services;
+using DiscordBotLib.Services;
 
 // TODO Add logging
 
@@ -164,14 +164,14 @@ namespace DiscordBot.Commands
             TimeZoneInfo tzi;
             if (!TZConvert.TryGetTimeZoneInfo(timeZone, out tzi))
             {
-                await Context.Channel.SendEmbedAsync("Invalid Time Zone", $"{timeZone} is *not* a valid windows or IANA timezone.",
+                await Context.Channel.SendEmbedAsync("Invalid Time Zone", $"`{timeZone}` is *not* a valid windows or IANA timezone.",
                     ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
 
                 return;
             }
             else
             {
-                await Context.Channel.SendEmbedAsync("Valid Time Zone", $"{timeZone} *is* a valid windows or IANA timezone.",
+                await Context.Channel.SendEmbedAsync("Valid Time Zone", $"`{timeZone}` *is* a valid windows or IANA timezone.",
                     ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
             }
         }

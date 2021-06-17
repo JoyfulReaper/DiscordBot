@@ -25,7 +25,7 @@ SOFTWARE.
 
 using Discord;
 using Discord.Commands;
-using DiscordBot.Helpers;
+using DiscordBotLib.Helpers;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 

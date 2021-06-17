@@ -24,11 +24,13 @@ SOFTWARE.
 */
 
 using AutoMapper;
-using DiscordBotApi.Data;
+using DiscordBotApiLib.Data;
 using DiscordBotApi.Dtos;
-using DiscordBotApi.Models;
+using DiscordBotApiLib.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBotApi.Controllers
@@ -61,15 +63,24 @@ namespace DiscordBotApi.Controllers
         }
 
         [HttpGet("GuildId/{guildId}", Name = "GetServerLogItemByGuildId")]
-        public async Task<ActionResult<ServerLogItem>> GetServerLogItemByGuildId(ulong guildId)
+        public async Task<ActionResult<ServerLogItem>> GetServerLogItemByGuildId([FromQuery] int page, ulong guildId)
         {
-            var serverLogItem = await _serverLogItemRepo.GetServerLogItemsByGuildId(guildId);
-            if (serverLogItem == null)
+            IEnumerable<ServerLogItem> serverLogItems;
+
+            if (page == 0)
+            {
+                serverLogItems = await _serverLogItemRepo.GetServerLogItemsByGuildId(guildId);
+            }
+            else
+            {
+                serverLogItems = await _serverLogItemRepo.GetServerLogItemsByGuildId(guildId, page);
+            }
+            if (serverLogItems == null || !serverLogItems.Any())
             {
                 return NotFound();
             }
 
-            return Ok(serverLogItem);
+            return Ok(serverLogItems);
         }
 
         [HttpPost]
@@ -77,7 +88,7 @@ namespace DiscordBotApi.Controllers
         {
             var serverLogItemModel = _mapper.Map<ServerLogItem>(serverLogItemCreateDto);
 
-            _serverLogItemRepo.CreateServerLogItem(serverLogItemModel);
+            await _serverLogItemRepo.CreateServerLogItem(serverLogItemModel);
             await _serverLogItemRepo.SaveChanges();
 
             return CreatedAtRoute(nameof(GetServerLogItemById), new { Id = serverLogItemModel.Id }, serverLogItemModel);

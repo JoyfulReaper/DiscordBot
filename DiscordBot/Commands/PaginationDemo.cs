@@ -3,8 +3,8 @@
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
-using DiscordBot.Helpers;
-using DiscordBot.Services;
+using DiscordBotLib.Helpers;
+using DiscordBotLib.Services;
 using System;
 using System.Threading.Tasks;
 
