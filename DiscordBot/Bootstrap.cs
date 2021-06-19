@@ -27,6 +27,7 @@ using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBotApiWrapper;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.DataAccess.SQLite;
 using DiscordBotLib.Services;
@@ -91,6 +92,12 @@ namespace DiscordBot
                 ExclusiveBulkDelete = true,
             });
 
+            ApiClient apiClient = new ApiClient(new ApiClientSettings
+            {
+                UserName = config.GetSection("ApiUserName").Value,
+                Password = config.GetSection("ApiPassword").Value
+            });
+
             var serviceCollection = new ServiceCollection();
             serviceCollection
                 .AddLogging(loggingBuilder =>
@@ -111,7 +118,10 @@ namespace DiscordBot
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<ISettings, Settings>()
                 .AddSingleton<BannerImageService>()
-                .AddSingleton<IApiService, ApiService>();
+                .AddSingleton(apiClient)
+                .AddSingleton<IApiService, ApiService>()
+                .AddSingleton<IServerLogItemApi, ServerLogItemApi>()
+                .AddSingleton<ICommandItemApi, CommandItemApi>();
 
 
             switch(database)
