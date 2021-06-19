@@ -36,6 +36,7 @@ using System.Web;
 using System.Net.Http.Json;
 using DiscordBotLib.Models.GiphyModels;
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace DiscordBot.Commands
 {
@@ -67,7 +68,7 @@ namespace DiscordBot.Commands
         {
             var apiKey = _config.GetSection("GiphyApiKey").Value;
 
-            if(apiKey == null)
+            if(String.IsNullOrWhiteSpace(apiKey))
             {
                 await ReplyAsync("The api key is not correctly set in appsettings.json :(");
                 return;
@@ -76,6 +77,7 @@ namespace DiscordBot.Commands
             var uri = new Uri($"https://api.giphy.com/v1/gifs/search?api_key={apiKey}&q={search}&limit=25&offset=0&rating=pg-13&lang=en");
 
             var response = await HttpClientHelper.HttpClient.GetFromJsonAsync<GiphyRoot>(uri);
+            await Context.Channel.SendFileAsync(Directory.GetCurrentDirectory() + @$"\images\Poweredby_100px-Black_VertLogo.png");
             await ReplyAsync(response.data.RandomItem().embed_url);
         }
 
