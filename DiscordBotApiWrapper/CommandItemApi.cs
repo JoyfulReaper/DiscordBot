@@ -84,7 +84,7 @@ namespace DiscordBotApiWrapper
             {
                 throw new UnauthorizedAccessException("Your username or password is incorrect!");
             }
-            _logger.LogDebug("Posting JSON\n {json}", jsonString);
+            _logger.LogDebug("Posting JSON\n {json}:\nresult: {result}", jsonString, (int)statusCode);
             return statusCode;
         }
     }
