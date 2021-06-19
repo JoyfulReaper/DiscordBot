@@ -73,7 +73,7 @@ namespace DiscordBot.Commands
 
             var upTime = DateTime.Now - startTime;
 
-            await ReplyAsync($"Uptime: {upTime}\nMemory usage: {memoryMb} MB");
+            await ReplyAsync($"Uptime: `{upTime}`\nMemory usage: `{memoryMb} MB`");
             /*
              * Not producing correct results :(
             if(LavaLinkHelper.isLavaLinkRunning())
