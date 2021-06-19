@@ -33,9 +33,6 @@ namespace DiscordBotApiLib.Dtos
 {
     public class GuildCreateDto
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required]
         public ulong GuildId { get; set; }
 
