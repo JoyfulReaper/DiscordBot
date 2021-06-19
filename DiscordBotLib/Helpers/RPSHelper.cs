@@ -56,6 +56,25 @@ namespace DiscordBotLib.Helpers
                 return;
             }
 
+            if (message.Content.StartsWith("Game over: "))
+            {
+                if (message.Reactions.ContainsKey(new Emoji("❗")))
+                {
+                    await message.ModifyAsync(x => x.Content = "Choose Rock, Paper, or Scissors!");
+                    await message.RemoveAllReactionsAsync();
+
+                    IEmote[] rpsReactions = new IEmote[]
+                    {
+                        new Emoji("🪨"),
+                        new Emoji("🧻"),
+                        new Emoji("✂️"),
+                        new Emoji("❗"),
+                    };
+
+                    await message.AddReactionsAsync(rpsReactions);
+                }
+            }
+
             if (message.Content == "Choose Rock, Paper, or Scissors!")
             {
                 var reactions = message.Reactions;
@@ -90,19 +109,19 @@ namespace DiscordBotLib.Helpers
                 ThrowResult computerThrow = EnumHelper.RandomEnumValue<ThrowResult>();
                 var winner = DetermineWinner(computerThrow, playerThrow);
 
-                string outputMessage;
+                string outputMessage = "Game over: ";
                 if (winner == Winner.Bot)
                 {
-                    outputMessage = $"{ message.Author.Mention } *won* by throwing { GetEmoji(computerThrow) } against { usersReaction.Name}!";
+                    outputMessage += $"{ message.Author.Mention } *won* by throwing { GetEmoji(computerThrow) } against { usersReaction.Name}!";
                     
                 }
                 else if (winner == Winner.Player)
                 {
-                    outputMessage = $"{ reactingUser.Mention } *won* by throwing { usersReaction.Name} against { GetEmoji(computerThrow) }!";
+                    outputMessage += $"{ reactingUser.Mention } *won* by throwing { usersReaction.Name} against { GetEmoji(computerThrow) }!";
                 }
                 else
                 {
-                    outputMessage = $"It's a tie! { GetEmoji(computerThrow)} vs { GetEmoji(playerThrow) }!";
+                    outputMessage += $"It's a tie! { GetEmoji(computerThrow)} vs { GetEmoji(playerThrow) }!";
                 }
 
                 await message.ModifyAsync(msg => msg.Content = outputMessage);

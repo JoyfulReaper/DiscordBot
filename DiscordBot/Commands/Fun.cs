@@ -71,6 +71,7 @@ namespace DiscordBot.Commands
                 new Emoji("🪨"),
                 new Emoji("🧻"),
                 new Emoji("✂️"),
+                new Emoji("❗"),
             };
 
             var message = await ReplyAsync("Choose Rock, Paper, or Scissors!");
