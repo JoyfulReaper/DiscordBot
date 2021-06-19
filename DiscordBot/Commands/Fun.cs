@@ -33,6 +33,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web;
+using System.Net.Http.Json;
+using DiscordBotLib.Models.GiphyModels;
+using Microsoft.Extensions.Configuration;
 
 namespace DiscordBot.Commands
 {
@@ -48,12 +51,32 @@ namespace DiscordBot.Commands
         private readonly Random _random = new();
         private readonly ILogger<Fun> _logger;
         private readonly IServerService _servers;
+        private readonly IConfiguration _config;
 
         public Fun(ILogger<Fun> logger,
-            IServerService servers)
+            IServerService servers,
+            IConfiguration config)
         {
             _logger = logger;
             _servers = servers;
+            _config = config;
+        }
+
+        [Command("giphy")]
+        public async Task Giphy([Remainder]string search)
+        {
+            var apiKey = _config.GetSection("GiphyApiKey").Value;
+
+            if(apiKey == null)
+            {
+                await ReplyAsync("The api key is not correctly set in appsettings.json :(");
+                return;
+            }
+
+            var uri = new Uri($"https://api.giphy.com/v1/gifs/search?api_key={apiKey}&q={search}&limit=25&offset=0&rating=pg-13&lang=en");
+
+            var response = await HttpClientHelper.HttpClient.GetFromJsonAsync<GiphyRoot>(uri);
+            await ReplyAsync(response.data.RandomItem().embed_url);
         }
 
         [Command("rockpaperscissors")]
