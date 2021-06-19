@@ -33,29 +33,14 @@ namespace DiscordBotApiLib.Dtos
 {
     public class GuildCreateDto
     {
-        [Required]
-        public GuildCreateDto Guild { get; set; }
+        [Key]
+        public int Id { get; set; }
 
         [Required]
-        public ChannelCreateDto Channel { get; set; }
+        public ulong GuildId { get; set; }
 
         [Required]
-        public UserCreateDto User { get; set; }
-
-        [Required]
-        [MaxLength(250)]
-        public string Name { get; set; }
-
-        [MaxLength(250)]
-        public string Module { get; set; }
-
-        [MaxLength(2000)]
-        public string Message { get; set; }
-
-
-        public bool Succesful { get; set; }
-
-        [Required]
-        public DateTimeOffset Date { get; set; }
+        [MaxLength(100)]
+        public string GuildName { get; set; }
     }
 }
