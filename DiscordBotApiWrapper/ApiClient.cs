@@ -59,7 +59,7 @@ namespace DiscordBotApiWrapper
         private readonly HttpClient _client = new HttpClient();
         private Uri _baseAddress = new Uri("https://localhost:44383/api/");
 
-        public ApiClient(string userName, string password)
+        public ApiClient(ApiClientSettings apiClientSettings)
         {
             _client.BaseAddress = _baseAddress;
             _client.DefaultRequestHeaders.Accept.Clear();
@@ -68,7 +68,7 @@ namespace DiscordBotApiWrapper
             _client.DefaultRequestHeaders.UserAgent.Clear();
             _client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("DiscordBotApiWrapper", "0.0.1"));
 
-            var authArray = Encoding.ASCII.GetBytes($"{userName}:{password}");
+            var authArray = Encoding.ASCII.GetBytes($"{apiClientSettings.UserName}:{apiClientSettings.Password}");
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authArray));
         }
 

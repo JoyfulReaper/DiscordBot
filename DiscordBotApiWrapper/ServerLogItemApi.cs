@@ -25,50 +25,67 @@ SOFTWARE.
 
 using DiscordBotApiWrapper.Dtos;
 using DiscordBotApiWrapper.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace DiscordBotApiWrapper
 {
     public class ServerLogItemApi : IServerLogItemApi
     {
-        private readonly IApiClient _client;
+        private readonly ApiClient _client;
+        private readonly ILogger _logger;
 
-        public ServerLogItemApi(IApiClient client)
+        public ServerLogItemApi(ApiClient client,
+            ILogger<ServerLogItemApi> logger)
         {
             _client = client;
+            _logger = logger;
         }
 
         public async Task<HttpStatusCode> DeleteServerLogItem(int id)
         {
-            return await _client.DeleteAsync($"/api/ServerLogItems/{id}");
+            var result = await _client.DeleteAsync($"/api/ServerLogItems/{id}");
+            _logger.LogDebug("Delete {id}: Result {result}", id, (int)result);
+            return result;
         }
 
         public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsForGuild(int guildId)
         {
-            return await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/GuildId/{guildId}");
+            var result = await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/GuildId/{guildId}");
+            _logger.LogDebug("Get {guildId}: Count {result}", guildId, result.Count());
+            return result;
         }
 
         public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsForGuild(int guildId, int page)
         {
-            return await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/GuildId/{guildId}?page={page}");
+            var result = await _client.GetAsync<IEnumerable<ServerLogItem>>($"/api/ServerLogItems/GuildId/{guildId}?page={page}");
+            _logger.LogDebug("Get {guildId}, Page {page}: Count {result}", guildId, page, result.Count());
+            return result;
         }
 
         public async Task<ServerLogItem> GetServerLogItem(int id)
         {
-            return await _client.GetAsync<ServerLogItem>($"/api/ServerLogItems/{id}");
+            var result = await _client.GetAsync<ServerLogItem>($"/api/ServerLogItems/{id}");
+            _logger.LogDebug("Get {id}", id);
+            return result;
         }
 
         public async Task<HttpStatusCode> SaveServerLogItem(ServerLogItemCreateDto item)
         {
-            var statusCode = await _client.PostAsync<ServerLogItemCreateDto>("/api/ServerLogItems/", item);
+            string jsonString = JsonSerializer.Serialize(item);
+            var statusCode = await _client.PostAsync("/api/ServerLogItems/", item);
 
             if(statusCode == HttpStatusCode.Unauthorized)
             {
                 throw new UnauthorizedAccessException("Your username or password is incorrect!");
             }
+
+            _logger.LogDebug("Posting JSON\n {json}", jsonString);
 
             return statusCode;
         }
