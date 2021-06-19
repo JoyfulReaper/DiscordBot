@@ -33,6 +33,8 @@ namespace DiscordBotApiLib.Data
         public DiscordBotContext(DbContextOptions<DiscordBotContext> options) : base(options) { }
 
         public DbSet<ServerLogItem> ServerLogItem { get; set; }
+        public DbSet<CommandItem> CommandItem { get; set; }
+        public DbSet<User> User { get; set; }
         public DbSet<Guild> Guild { get; set; }
         public DbSet<Channel> Channel { get; set; }
         public DbSet<BasicAuthorization> BasicAuthorization { get; set; }

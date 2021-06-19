@@ -23,14 +23,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApiWrapper;
+using DiscordBotApiLib.Models;
+using System;
+using System.ComponentModel.DataAnnotations;
 
-namespace DiscordBotLib.Services
+namespace DiscordBotApiLib.Dtos
 {
-    public interface IApiService
+    public class ServerLogItemCreateDto
     {
-        bool ApiIsEnabled { get; set; }
-        ICommandItemApi CommandItemApi { get; set; }
-        IServerLogItemApi ServerLogItemApi { get; set; }
+        [Required]
+        public GuildCreateDto Guild { get; set; }
+
+        [Required]
+        public ChannelCreateDto Channel { get; set; }
+
+        [MaxLength(100)]
+        public string Title { get; set; }
+
+        [MaxLength(2000)]
+        public string Description { get; set; }
+
+        [MaxLength(500)]
+        public string ThumbnailUrl { get; set; }
+
+        public DateTimeOffset Date { get; set; }
     }
 }

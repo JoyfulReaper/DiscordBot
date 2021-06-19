@@ -23,14 +23,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApiWrapper;
+using System;
+using System.ComponentModel.DataAnnotations;
 
-namespace DiscordBotLib.Services
+namespace DiscordBotApiLib.Models
 {
-    public interface IApiService
+    public class User
     {
-        bool ApiIsEnabled { get; set; }
-        ICommandItemApi CommandItemApi { get; set; }
-        IServerLogItemApi ServerLogItemApi { get; set; }
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public ulong UserId { get; set; }
+
+        [Required]
+        [MaxLength(32)]
+        public string UserName { get; set; }
     }
 }

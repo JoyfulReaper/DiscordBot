@@ -28,83 +28,92 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBotApiLib.Data.MSSQL
 {
-    public class MSSQLServerLogItemRepo : IServerLogItemRepo
+    public class MSSQLCommandItemRepo : ICommandItemRepo
     {
         private readonly DiscordBotContext _context;
 
-        public MSSQLServerLogItemRepo(DiscordBotContext context)
+        public MSSQLCommandItemRepo(DiscordBotContext context)
         {
             _context = context;
         }
 
-        public async Task CreateServerLogItem(ServerLogItem item)
+        public async Task CreateCommandItem(CommandItem item)
         {
             // TODO check if there is a better way of doing this
-
-            if (item == null)
+            if(item == null)
             {
                 throw new ArgumentNullException(nameof(item));
             }
 
             var channel = await _context.Channel.SingleOrDefaultAsync(x => x.ChannelId == item.Channel.ChannelId);
             var guild = await _context.Guild.SingleOrDefaultAsync(x => x.GuildId == item.Guild.GuildId);
+            var user = await _context.User.SingleOrDefaultAsync(x => x.UserId == item.User.UserId);
 
-            if(channel != null)
+            if (channel != null)
             {
                 item.Channel = channel;
             }
 
-            if(guild != null)
+            if (guild != null)
             {
                 item.Guild = guild;
+            }
+
+            if (user != null)
+            {
+                item.User = user;
             }
 
             _context.Add(item);
         }
 
-        public void DeleteServerLogItem(ServerLogItem item)
+        public void DeleteCommandItem(CommandItem item)
         {
             if (item == null)
             {
                 throw new ArgumentNullException(nameof(item));
             }
 
-            _context.ServerLogItem.Remove(item);
+            _context.CommandItem.Remove(item);
         }
 
-        public async Task<IEnumerable<ServerLogItem>> GetAllServerLogItems()
+        public async Task<IEnumerable<CommandItem>> GetAllCommandItems()
         {
-            return await _context.ServerLogItem.ToListAsync();
+            return await _context.CommandItem.ToListAsync();
         }
 
-        public async Task<ServerLogItem> GetServerLogItemById(int id)
+        public async Task<CommandItem> GetCommandItemById(int id)
         {
-            return await _context.ServerLogItem
-                .Include(l => l.Guild)
-                .Include(l => l.Channel)
-                .FirstOrDefaultAsync(l => l.Id == id);
+            return await _context.CommandItem
+                .Include(c => c.Channel)
+                .Include(c => c.Guild)
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId)
+        public async Task<IEnumerable<CommandItem>> GetCommandItemsByGuildId(ulong guildId)
         {
-            return await _context.ServerLogItem
-                .Include(l => l.Guild)
-                .Include(l => l.Channel)
-                .Where(l => l.Guild.GuildId == guildId).ToListAsync();
+            return await _context.CommandItem
+                .Include(c => c.Channel)
+                .Include(c => c.Guild)
+                .Include(c => c.User)
+                .Where(c => c.Guild.GuildId == guildId).ToListAsync();
         }
 
-        public async Task<IEnumerable<ServerLogItem>> GetServerLogItemsByGuildId(ulong guildId, int page, int pageSize = 25)
+        public async Task<IEnumerable<CommandItem>> GetCommandItemsByGuildId(ulong guildId, int page, int pageSize = 25)
         {
-            return await _context.ServerLogItem
-                .Include(l => l.Guild)
-                .Include(l => l.Channel)
-                .Where(l => l.Guild.GuildId == guildId)
+            return await _context.CommandItem
+                .Include(c => c.Channel)
+                .Include(c => c.Guild)
+                .Include(c => c.User)
+                .Where(c => c.Guild.GuildId == guildId)
                 .OrderByDescending(id => id.Id)
-                .Skip((page -1) * pageSize)
+                .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
         }
@@ -114,7 +123,7 @@ namespace DiscordBotApiLib.Data.MSSQL
             return await _context.SaveChangesAsync() >= 0;
         }
 
-        public void UpdateServerLogItem(ServerLogItem item)
+        public void UpdateCommandItem(CommandItem item)
         {
             // Handeled automaticlly by EF Core :)
         }

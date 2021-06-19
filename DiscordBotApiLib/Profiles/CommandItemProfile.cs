@@ -24,17 +24,18 @@ SOFTWARE.
 */
 
 using AutoMapper;
-using DiscordBotApi.Dtos;
+using DiscordBotApiLib.Dtos;
 using DiscordBotApiLib.Models;
+using System;
 
-namespace DiscordBotApi.Profiles
+namespace DiscordBotApiLib.Profiles
 {
-    public class ServerLogItemProfile : Profile
+    class CommandItemProfile : Profile
     {
-        public ServerLogItemProfile()
+        public CommandItemProfile()
         {
-            CreateMap<ServerLogItemCreateDto, ServerLogItem>();
-            CreateMap<ServerLogItem, ServerLogItemCreateDto>();
+            CreateMap<CommandItemCreateDto, CommandItem>();
+            CreateMap<CommandItem, CommandItemCreateDto>();
         }
     }
 }

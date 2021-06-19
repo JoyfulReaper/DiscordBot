@@ -32,27 +32,35 @@ namespace DiscordBotLib.Services
 {
     public class ApiService : IApiService
     {
-        public IApiClient ApiClient { get; set; }
-        public IServerLogItemApi serverLogItemApi { get; set; }
+        public IServerLogItemApi ServerLogItemApi { get; set; }
+        public ICommandItemApi CommandItemApi { get; set; }
 
         public bool ApiIsEnabled { get; set; }
 
         private readonly ILogger<ApiService> _logger;
         private readonly ISettings _settings;
+        private readonly IServerLogItemApi _serverLogItemApi;
+        private readonly ICommandItemApi _commandItemApi;
+        private readonly IApiClient _apiClient;
 
         public ApiService(ILogger<ApiService> logger,
-            ISettings settings)
+            ISettings settings,
+            IServerLogItemApi serverLogItemApi,
+            ICommandItemApi commandItemApi,
+            ApiClient apiClient)
         {
             _logger = logger;
             _settings = settings;
+            _serverLogItemApi = serverLogItemApi;
+            _commandItemApi = commandItemApi;
+            _apiClient = apiClient;
 
-            ApiClient = new ApiClient(_settings.ApiUserName, _settings.ApiPassword);
-
-            serverLogItemApi = new ServerLogItemApi(ApiClient);
+            ServerLogItemApi = _serverLogItemApi;
+            CommandItemApi = _commandItemApi;
 
             ApiIsEnabled = _settings.UseDiscordBotApi;
 
-            ApiClient.BaseAddress = new Uri(_settings.ApiBaseAddress);
+            _apiClient.BaseAddress = new Uri(_settings.ApiBaseAddress);
         }
     }
 }

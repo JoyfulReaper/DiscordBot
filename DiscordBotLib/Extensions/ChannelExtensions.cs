@@ -67,7 +67,7 @@ namespace DiscordBotLib.Helpers
             {
                 try
                 {
-                    await apiService.serverLogItemApi.SaveServerLogItem(serverLogItem);
+                    await apiService.ServerLogItemApi.SaveServerLogItem(serverLogItem);
                 } catch (Exception e)
                 {
                     Log.Warning(e, "An exception occured while trying to contact the API");

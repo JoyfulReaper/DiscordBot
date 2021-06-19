@@ -23,14 +23,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApiWrapper;
+using DiscordBotApiLib.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace DiscordBotLib.Services
+namespace DiscordBotApiLib.Data
 {
-    public interface IApiService
+    public interface ICommandItemRepo
     {
-        bool ApiIsEnabled { get; set; }
-        ICommandItemApi CommandItemApi { get; set; }
-        IServerLogItemApi ServerLogItemApi { get; set; }
+        Task<bool> SaveChanges();
+        Task<IEnumerable<CommandItem>> GetAllCommandItems();
+        Task<IEnumerable<CommandItem>> GetCommandItemsByGuildId(ulong guildId);
+        Task<IEnumerable<CommandItem>> GetCommandItemsByGuildId(ulong guildId, int page, int pageSize = 25);
+        Task<CommandItem> GetCommandItemById(int id);
+        Task CreateCommandItem(CommandItem item);
+        void UpdateCommandItem(CommandItem item);
+        void DeleteCommandItem(CommandItem item);
     }
 }

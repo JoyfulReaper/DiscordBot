@@ -23,14 +23,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotApiWrapper;
+using DiscordBotApiWrapper.Dtos;
+using DiscordBotApiWrapper.Models;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
-namespace DiscordBotLib.Services
+namespace DiscordBotApiWrapper
 {
-    public interface IApiService
+    public interface ICommandItemApi
     {
-        bool ApiIsEnabled { get; set; }
-        ICommandItemApi CommandItemApi { get; set; }
-        IServerLogItemApi ServerLogItemApi { get; set; }
+        Task<HttpStatusCode> DeleteCommandItem(int id);
+        Task<CommandItem> GetCommandItem(int id);
+        Task<IEnumerable<CommandItem>> GetCommandItemsForGuild(int guildId);
+        Task<IEnumerable<CommandItem>> GetCommandItemsForGuild(int guildId, int page);
+        Task<HttpStatusCode> SaveCommandItem(CommandItemCreateDto item);
     }
 }

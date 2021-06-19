@@ -24,88 +24,88 @@ SOFTWARE.
 */
 
 using AutoMapper;
-using DiscordBotApiLib.Data;
-using DiscordBotApiLib.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using DiscordBotApiLib.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using DiscordBotApiLib.Models;
 using DiscordBotApiLib.Dtos;
 
 namespace DiscordBotApi.Controllers
 {
     [Authorize]
-    [Route("api/ServerLogItems")]
+    [Route("api/CommandItems")]
     [ApiController]
-    public class ServerLogItemsController : ControllerBase
+    public class CommandItemsController : ControllerBase
     {
-        private readonly IServerLogItemRepo _serverLogItemRepo;
+        private readonly ICommandItemRepo _commandItemRepo;
         private readonly IMapper _mapper;
 
-        public ServerLogItemsController(IServerLogItemRepo serverLogItemRepo,
+        public CommandItemsController(ICommandItemRepo commandItemRepo,
             IMapper mapper)
         {
-            _serverLogItemRepo = serverLogItemRepo;
+            _commandItemRepo = commandItemRepo;
             _mapper = mapper;
         }
 
-        [HttpGet("{id}", Name="GetServerLogItemById")]
-        public async Task<ActionResult<ServerLogItem>> GetServerLogItemById(int id)
+        [HttpGet("{id}", Name = "GetCommandItemById")]
+        public async Task<ActionResult<CommandItem>> GetCommandItemById(int id)
         {
-            var serverLogItem = await _serverLogItemRepo.GetServerLogItemById(id);
-            if(serverLogItem == null)
+            var commandItem = await _commandItemRepo.GetCommandItemById(id);
+            if (commandItem == null)
             {
                 return NotFound();
             }
 
-            return Ok(serverLogItem);
+            return Ok(commandItem);
         }
 
-        [HttpGet("GuildId/{guildId}", Name = "GetServerLogItemByGuildId")]
-        public async Task<ActionResult<ServerLogItem>> GetServerLogItemByGuildId([FromQuery] int page, ulong guildId)
+        [HttpGet("GuildId/{guildId}", Name = "GetCommandItemByGuildId")]
+        public async Task<ActionResult<CommandItem>> GetCommandItemByGuildId([FromQuery] int page, ulong guildId)
         {
-            IEnumerable<ServerLogItem> serverLogItems;
+            IEnumerable<CommandItem> commandItem;
 
             if (page == 0)
             {
-                serverLogItems = await _serverLogItemRepo.GetServerLogItemsByGuildId(guildId);
+                commandItem = await _commandItemRepo.GetCommandItemsByGuildId(guildId);
             }
             else
             {
-                serverLogItems = await _serverLogItemRepo.GetServerLogItemsByGuildId(guildId, page);
+                commandItem = await _commandItemRepo.GetCommandItemsByGuildId(guildId, page);
             }
-            if (serverLogItems == null || !serverLogItems.Any())
+            if (commandItem == null || !commandItem.Any())
             {
                 return NotFound();
             }
 
-            return Ok(serverLogItems);
+            return Ok(commandItem);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServerLogItem>> CreateServerLogItem(ServerLogItemCreateDto serverLogItemCreateDto)
+        public async Task<ActionResult<ServerLogItem>> CreateServerLogItem(CommandItemCreateDto commandItemCreate)
         {
-            var serverLogItemModel = _mapper.Map<ServerLogItem>(serverLogItemCreateDto);
+            var commandItemModel = _mapper.Map<CommandItem>(commandItemCreate);
 
-            await _serverLogItemRepo.CreateServerLogItem(serverLogItemModel);
-            await _serverLogItemRepo.SaveChanges();
+            await _commandItemRepo.CreateCommandItem(commandItemModel);
+            await _commandItemRepo.SaveChanges();
 
-            return CreatedAtRoute(nameof(GetServerLogItemById), new { Id = serverLogItemModel.Id }, serverLogItemModel);
+            return CreatedAtRoute(nameof(GetCommandItemById), new { Id = commandItemModel.Id }, commandItemModel);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteServerLogItem(int id)
         {
-            var serverLogItemFromDb = await _serverLogItemRepo.GetServerLogItemById(id);
-            if(serverLogItemFromDb == null)
+            var commandItemFromDb = await _commandItemRepo.GetCommandItemById(id);
+            if (commandItemFromDb == null)
             {
                 return NotFound();
             }
 
-             _serverLogItemRepo.DeleteServerLogItem(serverLogItemFromDb);
-            await _serverLogItemRepo.SaveChanges();
+            _commandItemRepo.DeleteCommandItem(commandItemFromDb);
+            await _commandItemRepo.SaveChanges();
 
             return NoContent();
         }
