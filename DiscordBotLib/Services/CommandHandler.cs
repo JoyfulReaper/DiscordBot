@@ -29,7 +29,6 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using DiscordBotApiWrapper.Models;
 using DiscordBotLib.Helpers;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Enums;
