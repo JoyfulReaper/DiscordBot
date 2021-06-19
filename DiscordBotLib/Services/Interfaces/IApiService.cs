@@ -30,7 +30,6 @@ namespace DiscordBotLib.Services
     public interface IApiService
     {
         bool ApiIsEnabled { get; set; }
-        IApiClient ApiClient { get; set; }
         ICommandItemApi CommandItemApi { get; set; }
         IServerLogItemApi ServerLogItemApi { get; set; }
     }
