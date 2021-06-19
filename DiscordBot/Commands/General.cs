@@ -32,6 +32,7 @@ using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -62,6 +63,28 @@ namespace DiscordBot.Commands
             _userTimeZones = userTimeZones;
         }
 
+        [Command("uptime")]
+        [Alias("proc", "memory")]
+        public async Task ProcInfo()
+        {
+            var process = Process.GetCurrentProcess();
+            var memoryMb = Math.Round((double)process.PrivateMemorySize64 / (1e+6), 2);
+            var startTime = process.StartTime;
+
+            var upTime = DateTime.Now - startTime;
+
+            await ReplyAsync($"Uptime: {upTime}\nMemory usage: {memoryMb} MB");
+            /*
+             * Not producing correct results :(
+            if(LavaLinkHelper.isLavaLinkRunning())
+            {
+                var lavaMb = Math.Round((double)LavaLinkHelper.LavaLink.PrivateMemorySize64 / (1e+6), 2);
+                await ReplyAsync($"Lavalink Memory: {lavaMb} MB");
+            }
+            */
+            process.Dispose();
+        }
+
         [Command("servers")]
         [Summary("Report the number of servers the bot it in")]
         public async Task Servers()
@@ -77,7 +100,7 @@ namespace DiscordBot.Commands
         [Command("math")]
         [Alias("calculate", "calculator", "evaluate", "eval", "calc")]
         [Summary("Do math!")]
-        public async Task Math([Remainder] string math)
+        public async Task DoMath([Remainder] string math)
         {
             await Context.Channel.TriggerTypingAsync();
 
