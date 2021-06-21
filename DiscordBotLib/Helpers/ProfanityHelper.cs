@@ -82,7 +82,7 @@ namespace DiscordBotLib.Helpers
                 if (loggingChannel != null)
                 {
                     await (loggingChannel as SocketTextChannel).SendLogAsync("Profanity Filter", $"{message.Author.Mention} said a bad word: {message.Content}\nin {channel.Guild.Name}/{channel.Name}.\nWords: `{badWordsJoined}`",
-                        ColorHelper.GetColor(server), apiService);
+                        ColorHelper.GetColor(server), apiService, ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
                 }
 
                 if (server.ProfanityFilterMode == ProfanityFilterMode.FilterCensor)

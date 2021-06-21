@@ -9,13 +9,13 @@ DiscordBot has the following features:
 * Auto Roles: Allow Discord roles to be registered with the bot, these registered roles will be given to all members when joining the server.
   * autoroles, addautotole, delautorole, runautorules
 * Fun: 
-  * 8ball, coinflip, rolldie, RussianRoulette, lmgtfy (Let Me Google That for You), RockPaperScissors
+  * 8ball, coinflip, rolldie, RussianRoulette, lmgtfy (Let Me Google That for You), RockPaperScissors, giphy, random
 * General commands including:
-  * Math, ping, about, owner, echo, info, server, image, help
+  * Math, ping, about, owner, echo, info, server, image, help, uptime, servers
 * Moderation commands including:
   * Ability to enable or disable sending invites to other server (serverinvites)
   * Ability to censor or delete messages with profanity, and allow or disallow words. This is pretty basic and doesn't take too much creativity to bypass :(
-  * ban, unban, kick, purge, prefix, welcome, mute, unmute, slowmode, logs, embedcolor
+  * ban, unban, kick, purge, prefix, welcome, mute, unmute, slowmode, logs, embedcolor, profanityallow, profanityblock, profanityfilter
 * Music Commands
   * search, play, join, skip, pause, resume
 * Ranks: Allows discord roles to be registered with the bot as ranks, users can assign these ranks to themselves
@@ -26,7 +26,13 @@ DiscordBot has the following features:
 * Timzone features:
   * registertimezone, userstime, time (get the time in any timezone), validtimezone (validate a timezone)
 * Web
-  * Google (search google)  
+  * google (search google), youtube (search youtube)
+
+DiscordApi is an API that DiscordBot can integrate with to report log events per server, and command usage. DiscordBotApiWrapper is an API wrapper that makes this intergration easier. The next step is to construct a website to show log events and command usage statistics.
 
 This bot uses Dapper as the ORM and currently uses SQLite as the database engine. 
 If you find this bot useful, but would prefer a different database engine please let me know as I would like to look into adding support for other databases later.
+
+Technologies used in the making of this bot: C#, Discord.NET, Serilog, Dapper, Entity Framewore Core, SQL Server, SQLite, ASP.NET Core Web API
+
+Notable Nuget Packages Used: Victora, Profanity.Detector, TimezoneConverter, Discord.Addons.Interactive 

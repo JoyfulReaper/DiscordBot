@@ -177,7 +177,7 @@ namespace DiscordBot.Commands
                 sum += _random.Next(1, sides + 1);
             }
 
-            await Context.Channel.SendEmbedAsync($"{die} die with {sides} Sided Die Rolled", $"🎲 You rolled: {sum} 🎲",
+            await Context.Channel.SendEmbedAsync($"{die} die with {sides} Sides Rolled", $"🎲 You rolled: {sum} 🎲",
                 ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("DIE_IMAGES"));
         }
 
