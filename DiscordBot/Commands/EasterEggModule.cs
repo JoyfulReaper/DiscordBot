@@ -32,11 +32,11 @@ using System.Threading.Tasks;
 namespace DiscordBot.Commands
 {
     [Name("EasterEggsHidden")]
-    public class EasterEggs : ModuleBase<SocketCommandContext>
+    public class EasterEggModule : ModuleBase<SocketCommandContext>
     {
-        private readonly ILogger<EasterEggs> _logger;
+        private readonly ILogger<EasterEggModule> _logger;
 
-        public EasterEggs(ILogger<EasterEggs> logger)
+        public EasterEggModule(ILogger<EasterEggModule> logger)
         {
             _logger = logger;
         }

@@ -40,18 +40,18 @@ using DiscordBotLib.Enums;
 namespace DiscordBot.Commands
 {
     [Name("Moderation")]
-    public class Moderation : ModuleBase<SocketCommandContext>
+    public class ModerationModule : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient _client;
-        private readonly ILogger<Moderation> _logger;
+        private readonly ILogger<ModerationModule> _logger;
         private readonly IServerService _servers;
         private readonly IConfiguration _configuration;
         private readonly IServerRepository _serverRepository;
         private readonly IProfanityRepository _profanityRepository;
         private readonly int _prefixMaxLength;
 
-        public Moderation(DiscordSocketClient client,
-            ILogger<Moderation> logger,
+        public ModerationModule(DiscordSocketClient client,
+            ILogger<ModerationModule> logger,
             IServerService servers,
             IConfiguration configuration,
             IServerRepository serverRepository,

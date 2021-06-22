@@ -32,12 +32,13 @@ using System.Web;
 
 namespace DiscordBot.Commands
 {
-    public class Web : ModuleBase<SocketCommandContext>
+    [Name("Web")]
+    public class WebModule : ModuleBase<SocketCommandContext>
     {
-        private readonly ILogger<Web> _logger;
+        private readonly ILogger<WebModule> _logger;
         private readonly IServerService _servers;
 
-        public Web(ILogger<Web> logger,
+        public WebModule(ILogger<WebModule> logger,
             IServerService servers)
         {
             _logger = logger;

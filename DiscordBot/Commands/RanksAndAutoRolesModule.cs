@@ -36,16 +36,16 @@ using System.Threading.Tasks;
 namespace DiscordBot.Commands
 {
     [Name("Ranks and Auto Roles")]
-    public class RanksAndAutoRoles : ModuleBase<SocketCommandContext>
+    public class RanksAndAutoRolesModule : ModuleBase<SocketCommandContext>
     {
         private readonly IAutoRoleService _autoRoleService;
         private readonly IServerService _servers;
-        private readonly ILogger<RanksAndAutoRoles> _logger;
+        private readonly ILogger<RanksAndAutoRolesModule> _logger;
         private readonly IRankService _rankService;
 
-        public RanksAndAutoRoles(IAutoRoleService autoRoleService,
+        public RanksAndAutoRolesModule(IAutoRoleService autoRoleService,
             IServerService servers,
-            ILogger<RanksAndAutoRoles> logger,
+            ILogger<RanksAndAutoRolesModule> logger,
             IRankService rankService)
         {
             _autoRoleService = autoRoleService;

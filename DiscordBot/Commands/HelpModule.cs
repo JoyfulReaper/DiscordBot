@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 namespace DiscordBot.Commands
 {
     [Name("HelpHidden")]
-    public class Help : InteractiveBase
+    public class HelpModule : InteractiveBase
     {
         private readonly CommandService _commandService;
-        private readonly ILogger<Help> _logger;
+        private readonly ILogger<HelpModule> _logger;
         private readonly IServerService _servers;
 
-        public Help(CommandService commandService,
-            ILogger<Help> logger,
+        public HelpModule(CommandService commandService,
+            ILogger<HelpModule> logger,
             IServerService servers)
         {
             _commandService = commandService;
