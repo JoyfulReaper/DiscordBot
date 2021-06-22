@@ -52,9 +52,19 @@ namespace DiscordBot.Commands
             _logger = logger;
         }
 
+
         [Command("create")]
-        public async Task NoteCreate(string name, [Remainder] string text)
+        [Summary("Create a note")]
+        public async Task NoteCreate([Summary("Note name")]string name, [Summary("Note Text")][Remainder] string text)
         {
+            await ReplyAsync("Command Disabled for now....");
+            return;
+
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed note create (Name: {name} Text: {text}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, name, text, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             User user = await _userRepository.GetByUserId(Context.User.Id);
             if(user == null)
             {
@@ -70,6 +80,8 @@ namespace DiscordBot.Commands
 
             Note note = new Note { Name = name, Text = text };
             await _noteRepository.AddAsync(note, user);
+
+            await ReplyAsync ($"Note `{name}` create!");
         }
     }
 }
