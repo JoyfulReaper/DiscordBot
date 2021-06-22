@@ -31,13 +31,13 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess.SQLite
 {
-    public class UserRepository : Repository<User>
+    public class UserRepository : Repository<User>, IUserRepository
     {
         private readonly ISettings _settings;
         private readonly ILogger<UserRepository> _logger;
 
         public UserRepository(ISettings settings,
-            ILogger<UserRepository> logger) : base (settings, logger)
+            ILogger<UserRepository> logger) : base(settings, logger)
         {
             _settings = settings;
             _logger = logger;

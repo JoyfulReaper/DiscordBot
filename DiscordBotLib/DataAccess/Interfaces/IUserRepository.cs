@@ -23,17 +23,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+using DiscordBotLib.Models;
 using System.Threading.Tasks;
 
-namespace DiscordBotLib.Models
+namespace DiscordBotLib.DataAccess
 {
-    public class Note : DatabaseEntity
+    public interface IUserRepository
     {
-        public string Text { get; set; }
-        public string Name { get; set; }
+        Task AddAsync(User entity);
+        Task DeleteAsync(User entity);
+        Task EditAsync(User entity);
+        Task<User> GetByUserId(ulong userId);
     }
 }

@@ -34,7 +34,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess.SQLite
 {
-    public class NoteRepository : Repository<Note>
+    public class NoteRepository : Repository<Note>, INoteRepository
     {
         private readonly ISettings _settings;
         private readonly ILogger<NoteRepository> _logger;
@@ -60,15 +60,15 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task AddAsync(Note entity, User user)
         {
-            var userDb = await QuerySingleOrDefaultAsync<User>("SELECT * FROM User WHERE UserId = @UserId", new { UserId = user.Id });
+            var userDb = await QuerySingleOrDefaultAsync<User>("SELECT * FROM User WHERE UserId = @UserId", new { UserId = user.UserId });
             if (userDb == null)
             {
                 _logger.LogWarning("User ({user}) does not exist!", user.UserName);
                 throw new ArgumentException("User does not exist.", nameof(user));
             }
 
-            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text) " +
-                $"VALUES (@Text); select last_insert_rowid();", entity);
+            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text, Name) " +
+                $"VALUES (@Text, @Name); select last_insert_rowid();", entity);
             entity.Id = queryResult;
 
             await ExecuteAsync("INSERT INTO UserNote (UserId, NoteId) " +
@@ -77,10 +77,33 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public override async Task AddAsync(Note entity)
         {
-            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text) " +
-                $"VALUES (@Text); select last_insert_rowid();", entity);
+            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text, Name) " +
+                $"VALUES (@Text, @Name); select last_insert_rowid();", entity);
 
             entity.Id = queryResult;
+        }
+
+        public async Task RemoveAsync(int noteId, ulong userId)
+        {
+            var queryResult = await QuerySingleOrDefaultAsync<int>("SELECT COUNT(Text) FROM Note n " +
+                "WHERE NoteId = @NoteId", new { NoteId = noteId });
+
+            if (queryResult < 1)
+            {
+                throw new ArgumentException("Note does not exist", nameof(noteId));
+            }
+
+            queryResult = await QuerySingleOrDefaultAsync<int>("SELECT COUNT(Text) FROM Note n " +
+                 "INNER JOIN UserNote un on un.NoteId = n.id" +
+                 "INNER JOIN User u on u.UserId" +
+                 "WHERE u.UserId = @UserId", new { UserId = userId });
+
+            if (queryResult < 1)
+            {
+                throw new ArgumentException("User does not have any notes!", nameof(userId));
+            }
+
+            await ExecuteAsync("DELETE FROM UserNote WHERE NoteId @NoteId AND UserId = @UserId", new { NoteId = noteId, UserId = userId });
         }
 
         public override async Task DeleteAsync(Note entity)
@@ -90,7 +113,7 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public override async Task EditAsync(Note entity)
         {
-            await ExecuteAsync($"UPDATE {TableName} SET Text = @Text " +
+            await ExecuteAsync($"UPDATE {TableName} SET Text = @Text, Name = @Name " +
                 $"WHERE Id = @Id", entity);
         }
     }
