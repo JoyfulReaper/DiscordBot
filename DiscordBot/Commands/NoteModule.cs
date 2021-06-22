@@ -26,11 +26,9 @@ SOFTWARE.
 using Discord.Commands;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Models;
+using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
@@ -40,16 +38,19 @@ namespace DiscordBot.Commands
     public class NoteModule : ModuleBase<SocketCommandContext>
     {
         private readonly INoteRepository _noteRepository;
-        private readonly IUserRepository _userRepository;
         private readonly ILogger<NoteModule> _logger;
+        private readonly IUserService _userService;
+        private readonly ISettings _settings;
 
         public NoteModule(INoteRepository noteRepository,
-            IUserRepository userRepository,
-            ILogger<NoteModule> logger)
+            ILogger<NoteModule> logger,
+            IUserService userService,
+            ISettings settings)
         {
             _noteRepository = noteRepository;
-            _userRepository = userRepository;
             _logger = logger;
+            _userService = userService;
+            _settings = settings;
         }
 
 
@@ -57,31 +58,44 @@ namespace DiscordBot.Commands
         [Summary("Create a note")]
         public async Task NoteCreate([Summary("Note name")]string name, [Summary("Note Text")][Remainder] string text)
         {
-            await ReplyAsync("Command Disabled for now....");
-            return;
-
             await Context.Channel.TriggerTypingAsync();
 
             _logger.LogInformation("{username}#{discriminator} executed note create (Name: {name} Text: {text}) on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, name, text, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            User user = await _userRepository.GetByUserId(Context.User.Id);
-            if(user == null)
-            {
-                user = new User { UserId = Context.User.Id, UserName = Context.User.Username };
-                await _userRepository.AddAsync(user);
-            }
+            var user = await _userService.GetUser(Context.User);
 
-            if(user.UserName != Context.User.Username)
+            if((await _noteRepository.GetNotesByUserId(user.Id)).Count() >= _settings.MaxUserNotes)
             {
-                user.UserName = Context.User.Username;
-                await _userRepository.EditAsync(user);
+                await ReplyAsync($"You have reached the maximum number of notes (`{_settings.MaxUserNotes}`). Please delete one first!");
+                return;
             }
 
             Note note = new Note { Name = name, Text = text };
             await _noteRepository.AddAsync(note, user);
 
             await ReplyAsync ($"Note `{name}` create!");
+        }
+
+        [Command("list")]
+        [Summary("list user notes")]
+        public async Task NoteList()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed note list on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var user = await _userService.GetUser(Context.User);
+            var notes = (await _noteRepository.GetNotesByUserId(user.UserId)).ToList();
+
+            string output = string.Empty;
+            for(int i = 0; i < notes.Count(); i++)
+            {
+                output += i + 1 + " " + notes[i].Name + "\n";
+            }
+
+            await ReplyAsync(output);
         }
     }
 }

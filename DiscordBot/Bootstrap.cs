@@ -121,7 +121,8 @@ namespace DiscordBot
                 .AddSingleton(apiClient)
                 .AddSingleton<IApiService, ApiService>()
                 .AddSingleton<IServerLogItemApi, ServerLogItemApi>()
-                .AddSingleton<ICommandItemApi, CommandItemApi>();
+                .AddSingleton<ICommandItemApi, CommandItemApi>()
+                .AddSingleton<IUserService, UserService>();
 
 
             switch(database)

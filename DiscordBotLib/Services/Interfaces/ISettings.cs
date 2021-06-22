@@ -34,6 +34,8 @@ namespace DiscordBotLib.Services
         string ApiUserName { get; set; }
         string ApiPassword { get; set; }
 
+        public int MaxUserNotes { get; set; }
+
         /// <summary>
         /// Development Guild
         /// </summary>
