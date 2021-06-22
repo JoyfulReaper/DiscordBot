@@ -97,5 +97,50 @@ namespace DiscordBot.Commands
 
             await ReplyAsync(output);
         }
+
+        [Command("delete")]
+        [Summary("delete user notes")]
+        public async Task NoteDelete([Summary("The name of the note to delete")]string name)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed note delete ({name}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, name, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var user = await _userService.GetUser(Context.User);
+            var notes = (await _noteRepository.GetNotesByUserId(user.UserId)).ToList();
+            var noteToDelete = notes.Where(x => x.Name == name).SingleOrDefault();
+
+            if(noteToDelete == null)
+            {
+                await ReplyAsync($"Note '{name}' could not be found!");
+                return;
+            }
+
+            await _noteRepository.DeleteAsync(noteToDelete);
+            await ReplyAsync($"Deleted `{name}`");
+        }
+
+        [Command("show")]
+        [Summary("show user note")]
+        public async Task NoteShow([Summary("The name of the note to show")] string name)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed note show ({name}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, name, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var user = await _userService.GetUser(Context.User);
+            var notes = (await _noteRepository.GetNotesByUserId(user.UserId)).ToList();
+            var noteToShow = notes.Where(x => x.Name == name).SingleOrDefault();
+
+            if (noteToShow == null)
+            {
+                await ReplyAsync($"Note '{name}' could not be found!");
+                return;
+            }
+
+            await ReplyAsync(noteToShow.Text);
+        }
     }
 }
