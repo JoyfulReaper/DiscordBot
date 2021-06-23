@@ -121,7 +121,8 @@ namespace DiscordBot
                 .AddSingleton(apiClient)
                 .AddSingleton<IApiService, ApiService>()
                 .AddSingleton<IServerLogItemApi, ServerLogItemApi>()
-                .AddSingleton<ICommandItemApi, CommandItemApi>();
+                .AddSingleton<ICommandItemApi, CommandItemApi>()
+                .AddSingleton<IUserService, UserService>();
 
 
             switch(database)
@@ -137,7 +138,9 @@ namespace DiscordBot
                         .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>()
                         .AddSingleton<IServerService, ServerService>()
                         .AddSingleton<IUserTimeZonesRepository, UserTimeZoneRepository>()
-                        .AddSingleton<IProfanityRepository, ProfanityRepository>();
+                        .AddSingleton<IProfanityRepository, ProfanityRepository>()
+                        .AddSingleton<IUserRepository, UserRepository>()
+                        .AddSingleton<INoteRepository, NoteRepository>();
                     break;
                 default:
                     Log.Logger.Fatal("{database} is not supported", database);

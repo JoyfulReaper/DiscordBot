@@ -38,13 +38,14 @@ using DiscordBotLib.Services;
 
 namespace DiscordBot.Commands
 {
-    public class TimeZone : ModuleBase<SocketCommandContext>
+    [Name("Time")]
+    public class TimeModule : ModuleBase<SocketCommandContext>
     {
-        private readonly ILogger<TimeZone> _logger;
+        private readonly ILogger<TimeModule> _logger;
         private readonly IUserTimeZonesRepository _userTimeZones;
         private readonly IServerService _serverService;
 
-        public TimeZone(ILogger<TimeZone> logger,
+        public TimeModule(ILogger<TimeModule> logger,
             IUserTimeZonesRepository userTimeZones,
             IServerService serverService)
         {

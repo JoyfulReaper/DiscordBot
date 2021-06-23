@@ -40,7 +40,8 @@ using System.IO;
 
 namespace DiscordBot.Commands
 {
-    public class Fun : ModuleBase<SocketCommandContext>
+    [Name("Fun")]
+    public class FunModule : ModuleBase<SocketCommandContext>
     {
         private static readonly List<string> _eightBallResponses = new List<string>
         {
@@ -50,11 +51,11 @@ namespace DiscordBot.Commands
             "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful."
         };
         private readonly Random _random = new();
-        private readonly ILogger<Fun> _logger;
+        private readonly ILogger<FunModule> _logger;
         private readonly IServerService _servers;
         private readonly IConfiguration _config;
 
-        public Fun(ILogger<Fun> logger,
+        public FunModule(ILogger<FunModule> logger,
             IServerService servers,
             IConfiguration config)
         {

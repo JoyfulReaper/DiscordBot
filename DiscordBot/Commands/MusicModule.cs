@@ -11,14 +11,15 @@ using Victoria.Enums;
 
 namespace DiscordBot.Commands
 {
-    public class Music : ModuleBase<SocketCommandContext>
+    [Name("Music")]
+    public class MusicModule : ModuleBase<SocketCommandContext>
     {
         private readonly LavaNode _lavaNode;
-        private readonly ILogger<Music> _logger;
+        private readonly ILogger<MusicModule> _logger;
         private readonly ISettings _settings;
 
-        public Music(LavaNode lavaNode,
-            ILogger<Music> logger,
+        public MusicModule(LavaNode lavaNode,
+            ILogger<MusicModule> logger,
             ISettings settings)
         {
             _lavaNode = lavaNode;

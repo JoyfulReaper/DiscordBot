@@ -31,41 +31,43 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess.SQLite
 {
-    public class UserTimeZoneRepository : Repository<UserTimeZone>, IUserTimeZonesRepository
+    public class UserRepository : Repository<User>, IUserRepository
     {
         private readonly ISettings _settings;
-        private readonly ILogger<UserTimeZoneRepository> _logger;
+        private readonly ILogger<UserRepository> _logger;
 
-        public UserTimeZoneRepository(ISettings settings,
-            ILogger<UserTimeZoneRepository> logger) : base(settings, logger)
+        public UserRepository(ISettings settings,
+            ILogger<UserRepository> logger) : base(settings, logger)
         {
             _settings = settings;
             _logger = logger;
         }
 
-        public async Task<UserTimeZone> GetByUserID(ulong userId)
+        public async Task<User> GetByUserId(ulong userId)
         {
-            var queryResult = await QuerySingleOrDefaultAsync<UserTimeZone>($"SELECT * FROM {TableName} " +
+            var queryResult = await QuerySingleOrDefaultAsync<User>($"SELECT * FROM {TableName} " +
                 $"WHERE UserId = @UserId;", new { UserId = userId });
 
             return queryResult;
         }
 
-        public override async Task AddAsync(UserTimeZone entity)
+        public override async Task AddAsync(User entity)
         {
-            await ExecuteAsync($"INSERT INTO {TableName} (UserId, TimeZone) " +
-                $"VALUES (@UserId, @TimeZone);", entity);
+            var queryResult = await QuerySingleOrDefaultAsync<ulong>($"INSERT INTO {TableName} (UserId, UserName) " +
+                $"VALUES (@UserId, @UserName); select last_insert_rowid();", entity);
+
+            entity.Id = queryResult;
         }
 
-        public override async Task DeleteAsync(UserTimeZone entity)
+        public override async Task DeleteAsync(User entity)
         {
             await ExecuteAsync($"DELETE FROM {TableName} WHERE ID = @Id;", entity);
         }
 
-        public override async Task EditAsync(UserTimeZone entity)
+        public override async Task EditAsync(User entity)
         {
-            await ExecuteAsync($"UPDATE {TableName} SET TimeZone = @TimeZone " +
-                $"WHERE UserId = @UserId;", entity);
+            await ExecuteAsync($"UPDATE {TableName} SET UserName = @UserName " +
+                $"WHERE UserId = @UserId", entity);
         }
     }
 }
