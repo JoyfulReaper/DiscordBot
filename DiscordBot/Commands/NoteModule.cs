@@ -89,6 +89,12 @@ namespace DiscordBot.Commands
             var user = await _userService.GetUser(Context.User);
             var notes = (await _noteRepository.GetNotesByUserId(user.UserId)).ToList();
 
+            if(notes == null || !notes.Any())
+            {
+                await ReplyAsync("You haven't created any notes yet!");
+                return;
+            }
+
             string output = string.Empty;
             for(int i = 0; i < notes.Count(); i++)
             {
@@ -113,7 +119,7 @@ namespace DiscordBot.Commands
 
             if(noteToDelete == null)
             {
-                await ReplyAsync($"Note '{name}' could not be found!");
+                await ReplyAsync($"Note `{name}` could not be found!");
                 return;
             }
 
@@ -136,7 +142,7 @@ namespace DiscordBot.Commands
 
             if (noteToShow == null)
             {
-                await ReplyAsync($"Note '{name}' could not be found!");
+                await ReplyAsync($"Note `{name}` could not be found!");
                 return;
             }
 
