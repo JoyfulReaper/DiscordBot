@@ -27,12 +27,14 @@ DiscordBot has the following features:
   * registertimezone, userstime, time (get the time in any timezone), validtimezone (validate a timezone)
 * Web
   * google (search google), youtube (search youtube)
+* Note Commands
+   * note create, note list, note delete, note show
 
 DiscordApi is an API that DiscordBot can integrate with to report log events per server, and command usage. DiscordBotApiWrapper is an API wrapper that makes this intergration easier. The next step is to construct a website to show log events and command usage statistics.
 
 This bot uses Dapper as the ORM and currently uses SQLite as the database engine. 
 If you find this bot useful, but would prefer a different database engine please let me know as I would like to look into adding support for other databases later.
 
-Technologies used in the making of this bot: C#, Discord.NET, Serilog, Dapper, Entity Framewore Core, SQL Server, SQLite, ASP.NET Core Web API
+Technologies used in the making of this bot: C#, Discord.NET, Serilog, Dapper, Entity Framework Core, SQL Server, SQLite, ASP.NET Core Web API
 
 Notable Nuget Packages Used: Victora, Profanity.Detector, TimezoneConverter, Discord.Addons.Interactive 
