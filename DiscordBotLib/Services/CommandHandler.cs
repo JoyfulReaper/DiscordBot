@@ -235,7 +235,7 @@ namespace DiscordBotLib.Services
                 {
                     var commandItem = new CommandItemCreateDto
                     {
-                        Guild = new GuildCreateDto { GuildId = context.Guild.Id, GuildName = context.Guild.Name },
+                        Guild = new GuildCreateDto { GuildId = context.Guild?.Id ?? 0, GuildName = context.Guild?.Name ?? "DM" },
                         Channel = new ChannelCreateDto { ChannelId = context.Channel.Id, ChannelName = context.Channel.Name },
                         Name = command.Value.Name,
                         Module = command.Value.Module.Name,
