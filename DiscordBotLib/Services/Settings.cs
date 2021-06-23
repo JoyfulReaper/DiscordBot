@@ -91,6 +91,8 @@ namespace DiscordBotLib.Services
 
         public string ApiPassword { get; set; }
 
+        public int MaxUserNotes { get; set; }
+
         /// <summary>
         /// True to intergrate with DiscordBotApi, fale to not intergrate
         /// </summary>
@@ -177,6 +179,16 @@ namespace DiscordBotLib.Services
                 DevGuild = 0;
                 DevChannel = 0;
                 _logger.LogWarning("Unable to parse DevGuild or DevChannel, using '0'");
+            }
+
+            try
+            {
+                MaxUserNotes = int.Parse(_configuration.GetSection("MaxUserNotes").Value);
+            }
+            catch
+            {
+                MaxUserNotes = 1;
+                _logger.LogWarning("Unable to parse MaxUserNotes, using: {MaxUserNotes}", MaxUserNotes);
             }
         }
     }

@@ -3,19 +3,20 @@ using Discord.Commands;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Commands
 {
     [Name("HelpHidden")]
-    public class Help : InteractiveBase
+    public class HelpModule : InteractiveBase
     {
         private readonly CommandService _commandService;
-        private readonly ILogger<Help> _logger;
+        private readonly ILogger<HelpModule> _logger;
         private readonly IServerService _servers;
 
-        public Help(CommandService commandService,
-            ILogger<Help> logger,
+        public HelpModule(CommandService commandService,
+            ILogger<HelpModule> logger,
             IServerService servers)
         {
             _commandService = commandService;
@@ -38,14 +39,19 @@ namespace DiscordBot.Commands
 
             foreach(var module in _commandService.Modules)
             {
-                if(module.Name.EndsWith("Hidden"))
+                if (module.Name.EndsWith("Hidden"))
                 {
                     continue;
                 }
                 string page = $"Command Module: ***{module.Name}***\n";
                 foreach(var command in module.Commands)
                 {
-                    page += $"`{prefix}{command.Name}` - {command.Summary ?? "No description provided"}\n";
+                    page += $"`{prefix}";
+                    if (module.Group != null)
+                    {
+                        page += $"{module.Group} ";
+                    }
+                    page += $"{command.Name}` - {command.Summary ?? "No description provided"}\n";
                 }
                 pages.Add(page);
             }

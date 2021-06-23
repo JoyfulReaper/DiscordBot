@@ -43,9 +43,10 @@ using DiscordBotLib.Helpers;
 
 namespace DiscordBot.Commands
 {
-    public class Reddit : ModuleBase<SocketCommandContext>
+    [Name("Reddit")]
+    public class RedditModule : ModuleBase<SocketCommandContext>
     {
-        private readonly ILogger<Reddit> _logger;
+        private readonly ILogger<RedditModule> _logger;
         private readonly IConfiguration _configuration;
         private readonly ISubredditRepository _subredditRepository;
         private readonly IServerRepository _serverRepository;
@@ -62,7 +63,7 @@ namespace DiscordBot.Commands
             "shittyfoodporn", "animalsbeingjerks", "animalsbeingbros", "wigglebutts", "humanporn", "techsupportgore", "iiiiiiitttttttttttt", "fffffffuuuuuuuuuuuu",
             "urbanhell", "wewantplates", "carbage", "oldpeoplefacebook", "funny", "likeus"};
 
-        public Reddit(ILogger<Reddit> logger, 
+        public RedditModule(ILogger<RedditModule> logger, 
             IConfiguration configuration,
             ISubredditRepository subredditRepository,
             IServerRepository serverRepository,

@@ -41,16 +41,16 @@ namespace DiscordBot.Commands
 {
     // So it turns out that the bot needs the Presence and Server member intent in order for
     // All of the members of a channel to be "in scope"
-
-    public class General : ModuleBase<SocketCommandContext>
+    [Name("General")]
+    public class GeneralModule : ModuleBase<SocketCommandContext>
     {
-        private readonly ILogger<General> _logger;
+        private readonly ILogger<GeneralModule> _logger;
         private readonly DiscordSocketClient _client;
         private readonly BannerImageService _bannerImageService;
         private readonly IServerService _servers;
         private readonly IUserTimeZonesRepository _userTimeZones;
 
-        public General(ILogger<General> logger,
+        public GeneralModule(ILogger<GeneralModule> logger,
             DiscordSocketClient client,
             BannerImageService bannerImageService,
             IServerService servers,

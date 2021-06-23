@@ -38,19 +38,19 @@ using Victoria;
 namespace DiscordBot.Commands
 {
     [Name("OwnerHidden")]
-    public class Owner : ModuleBase<SocketCommandContext>
+    public class OwnerModule : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient _client;
         private readonly ISettings _settings;
-        private readonly ILogger<Owner> _logger;
+        private readonly ILogger<OwnerModule> _logger;
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
         private readonly IServerService _servers;
         private readonly Random _random = new Random();
 
-        public Owner(DiscordSocketClient client,
+        public OwnerModule(DiscordSocketClient client,
             ISettings settings,
-            ILogger<Owner> logger,
+            ILogger<OwnerModule> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
             LavaNode lavaNode,
             IServerService servers)

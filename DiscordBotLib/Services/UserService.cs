@@ -23,43 +23,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
-using Discord.Commands;
-using DiscordBotLib.Helpers;
+using Discord.WebSocket;
+using DiscordBotLib.DataAccess;
+using DiscordBotLib.Models;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Commands
+namespace DiscordBotLib.Services
 {
-    [Name("EasterEggsHidden")]
-    public class EasterEggs : ModuleBase<SocketCommandContext>
+    public class UserService : IUserService
     {
-        private readonly ILogger<EasterEggs> _logger;
+        private readonly IUserRepository _userRepository;
+        private readonly ILogger<UserService> _logger;
 
-        public EasterEggs(ILogger<EasterEggs> logger)
+        public UserService(IUserRepository userRepository,
+            ILogger<UserService> logger)
         {
+            _userRepository = userRepository;
             _logger = logger;
         }
 
-        [Command("shelly")]
-        [Summary("A picture of the bot programmer's dog")]
-        [Alias("dog")]
-        public async Task Shelly()
+        public async Task<User> GetUser(SocketUser socketUser)
         {
-            await Context.Channel.TriggerTypingAsync();
+            User user = await _userRepository.GetByUserId(socketUser.Id);
+            if (user == null)
+            {
+                user = new User { UserId = socketUser.Id, UserName = socketUser.Username };
+                await _userRepository.AddAsync(user);
+            }
 
-            _logger.LogInformation("{username}#{discriminator} executed shelly on {server}/{channel}",
-                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+            if (user.UserName != socketUser.Username)
+            {
+                user.UserName = socketUser.Username;
+                await _userRepository.EditAsync(user);
+            }
 
-            EmbedBuilder builder = new EmbedBuilder();
-            builder
-                .WithTitle("JoyfulReaper's dog")
-                .WithDescription("A picture of the DiscordBot programmer's dog 🐕")
-                .WithImageUrl("https://kgivler.com/images/Shelly/Shelly.jpg")
-                .WithColor(ColorHelper.RandomColor())
-                .WithCurrentTimestamp();
-
-            await ReplyAsync(null, false, builder.Build());
+            return user;
         }
     }
 }
