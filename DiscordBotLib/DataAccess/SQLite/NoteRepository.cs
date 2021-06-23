@@ -48,7 +48,7 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task<IEnumerable<Note>> GetNotesByUserId(ulong userId)
         {
-            var queryResult = await QueryAsync<Note>("SELECT Id, Text, Name " +
+            var queryResult = await QueryAsync<Note>("SELECT n.Id, Text, Name " +
                 "FROM Note n " +
                 "INNER JOIN UserNote un on un.NoteId = n.Id " +
                 "INNER JOIN User u on u.UserId " +

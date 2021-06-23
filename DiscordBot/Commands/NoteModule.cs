@@ -74,7 +74,7 @@ namespace DiscordBot.Commands
             Note note = new Note { Name = name, Text = text };
             await _noteRepository.AddAsync(note, user);
 
-            await ReplyAsync ($"Note `{name}` create!");
+            await ReplyAsync ($"Note `{name}` created!");
         }
 
         [Command("list")]
@@ -92,7 +92,7 @@ namespace DiscordBot.Commands
             string output = string.Empty;
             for(int i = 0; i < notes.Count(); i++)
             {
-                output += i + 1 + " " + notes[i].Name + "\n";
+                output += i + 1 + ") " + notes[i].Name + "\n";
             }
 
             await ReplyAsync(output);
@@ -123,7 +123,7 @@ namespace DiscordBot.Commands
 
         [Command("show")]
         [Summary("show user note")]
-        public async Task NoteShow([Summary("The name of the note to show")] string name)
+        public async Task NoteShow([Summary("The name of the note to show")][Remainder] string name)
         {
             await Context.Channel.TriggerTypingAsync();
 
