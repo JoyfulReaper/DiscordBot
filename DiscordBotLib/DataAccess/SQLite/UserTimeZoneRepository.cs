@@ -27,6 +27,7 @@ SOFTWARE.
 using DiscordBotLib.Models;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess.SQLite
@@ -35,18 +36,38 @@ namespace DiscordBotLib.DataAccess.SQLite
     {
         private readonly ISettings _settings;
         private readonly ILogger<UserTimeZoneRepository> _logger;
+        private readonly IUserRepository _userRepository;
 
         public UserTimeZoneRepository(ISettings settings,
-            ILogger<UserTimeZoneRepository> logger) : base(settings, logger)
+            ILogger<UserTimeZoneRepository> logger,
+            IUserRepository userRepository) : base(settings, logger)
         {
             _settings = settings;
             _logger = logger;
+            _userRepository = userRepository;
+        }
+
+        private async Task<User> GetUserOrThrow(ulong userId)
+        {
+            var user = await _userRepository.GetByUserId(userId);
+
+            if(user == null)
+            {
+                _logger.LogWarning("Attempted to lookup non-existant user: {userId}", userId);
+                throw new ArgumentException("User does not exist", nameof(userId));
+            }
+
+            return user;
         }
 
         public async Task<UserTimeZone> GetByUserID(ulong userId)
         {
-            var queryResult = await QuerySingleOrDefaultAsync<UserTimeZone>($"SELECT * FROM {TableName} " +
-                $"WHERE UserId = @UserId;", new { UserId = userId });
+            var user = await GetUserOrThrow(userId);
+
+            var queryResult = await QuerySingleOrDefaultAsync<UserTimeZone>($"SELECT t.Id, t.UserId, t.TimeZone " +
+                $"FROM {TableName} t " +
+                $"INNER JOIN User u ON t.UserId = u.Id " +
+                $"WHERE u.Id = @UserId;", new { UserId = user.Id });
 
             return queryResult;
         }

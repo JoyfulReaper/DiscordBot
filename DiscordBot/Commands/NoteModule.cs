@@ -25,6 +25,7 @@ SOFTWARE.
 
 using Discord.Commands;
 using DiscordBotLib.DataAccess;
+using DiscordBotLib.Helpers;
 using DiscordBotLib.Models;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
@@ -41,16 +42,19 @@ namespace DiscordBot.Commands
         private readonly ILogger<NoteModule> _logger;
         private readonly IUserService _userService;
         private readonly ISettings _settings;
+        private readonly IServerService _serverService;
 
         public NoteModule(INoteRepository noteRepository,
             ILogger<NoteModule> logger,
             IUserService userService,
-            ISettings settings)
+            ISettings settings,
+            IServerService serverService)
         {
             _noteRepository = noteRepository;
             _logger = logger;
             _userService = userService;
             _settings = settings;
+            _serverService = serverService;
         }
 
 
@@ -64,15 +68,22 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, name, text, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             var user = await _userService.GetUser(Context.User);
+            var notes = await _noteRepository.GetNotesByUserId(user.UserId);
 
-            if((await _noteRepository.GetNotesByUserId(user.Id)).Count() >= _settings.MaxUserNotes)
+            if ( notes.Count() >= _settings.MaxUserNotes)
             {
                 await ReplyAsync($"You have reached the maximum number of notes (`{_settings.MaxUserNotes}`). Please delete one first!");
                 return;
             }
 
-            Note note = new Note { Name = name, Text = text };
-            await _noteRepository.AddAsync(note, user);
+            if(notes.Where(x => x.Name.ToLowerInvariant() == name.ToLowerInvariant()).Any())
+            {
+                await ReplyAsync($"You already have a note named `{name}` please pick a different name.");
+                return;
+            }
+
+            Note note = new Note { Name = name, Text = text, UserId = user.Id };
+            await _noteRepository.AddAsync(note);
 
             await ReplyAsync ($"Note `{name}` created!");
         }
@@ -87,7 +98,7 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             var user = await _userService.GetUser(Context.User);
-            var notes = (await _noteRepository.GetNotesByUserId(user.UserId)).ToList();
+            var notes = (await _noteRepository.GetNotesByUserId(user.UserId))?.ToList();
 
             if(notes == null || !notes.Any())
             {
@@ -114,8 +125,8 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, name, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             var user = await _userService.GetUser(Context.User);
-            var notes = (await _noteRepository.GetNotesByUserId(user.UserId)).ToList();
-            var noteToDelete = notes.Where(x => x.Name == name).SingleOrDefault();
+            var notes = (await _noteRepository.GetNotesByUserId(user.UserId))?.ToList();
+            var noteToDelete = notes?.Where(x => x.Name.ToLowerInvariant() == name.ToLowerInvariant()).SingleOrDefault();
 
             if(noteToDelete == null)
             {
@@ -137,8 +148,8 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, name, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             var user = await _userService.GetUser(Context.User);
-            var notes = (await _noteRepository.GetNotesByUserId(user.UserId)).ToList();
-            var noteToShow = notes.Where(x => x.Name == name).SingleOrDefault();
+            var notes = (await _noteRepository.GetNotesByUserId(user.UserId))?.ToList();
+            var noteToShow = notes?.Where(x => x.Name.ToLowerInvariant() == name.ToLowerInvariant()).SingleOrDefault();
 
             if (noteToShow == null)
             {
@@ -146,7 +157,8 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            await ReplyAsync(noteToShow.Text);
+            await Context.Channel.SendEmbedAsync($"{noteToShow.Name}", $"{noteToShow.Text}", await _serverService.GetServer(Context.Guild), ImageLookupUtility.GetImageUrl("NOTE_IMAGES"));
+            //await ReplyAsync(noteToShow.Text);
         }
     }
 }

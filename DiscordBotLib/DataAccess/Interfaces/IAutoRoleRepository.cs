@@ -10,6 +10,6 @@ namespace DiscordBotLib.DataAccess
         Task DeleteAsync(AutoRole entity);
         Task DeleteAutoRole(ulong serverId, ulong roleId);
         Task EditAsync(AutoRole entity);
-        Task<List<AutoRole>> GetAutoRoleByServerId(ulong serverId);
+        Task<IEnumerable<AutoRole>> GetAutoRoleByServerId(ulong serverId);
     }
 }

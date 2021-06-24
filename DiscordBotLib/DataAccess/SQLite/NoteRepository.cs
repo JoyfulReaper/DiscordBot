@@ -48,63 +48,65 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task<IEnumerable<Note>> GetNotesByUserId(ulong userId)
         {
-            var queryResult = await QueryAsync<Note>("SELECT n.Id, Text, Name " +
+            var queryResult = await QueryAsync<Note>("SELECT n.Id, n.Text, n.UserId, n.Name " +
                 "FROM Note n " +
-                "INNER JOIN UserNote un on un.NoteId = n.Id " +
-                "INNER JOIN User u on u.UserId " +
+                "INNER JOIN User u On n.UserId = u.Id " +
                 "WHERE u.UserId = @UserId;",
                 new { UserId = userId });
 
             return queryResult;
         }
 
-        public async Task AddAsync(Note entity, User user)
-        {
-            var userDb = await QuerySingleOrDefaultAsync<User>("SELECT * FROM User WHERE UserId = @UserId", new { UserId = user.UserId });
-            if (userDb == null)
-            {
-                _logger.LogWarning("User ({user}) does not exist!", user.UserName);
-                throw new ArgumentException("User does not exist.", nameof(user));
-            }
+        //public async Task AddAsync(Note entity, User user)
+        //{
+        //    var userDb = await QuerySingleOrDefaultAsync<User>("SELECT * FROM User WHERE UserId = @UserId", new { UserId = user.UserId });
+        //    if (userDb == null)
+        //    {
+        //        _logger.LogWarning("User ({user}) does not exist!", user.UserName);
+        //        throw new ArgumentException("User does not exist.", nameof(user));
+        //    }
 
-            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text, Name) " +
-                $"VALUES (@Text, @Name); select last_insert_rowid();", entity);
-            entity.Id = queryResult;
-
-            await ExecuteAsync("INSERT INTO UserNote (UserId, NoteId) " +
-                "VALUES (@UserId, @NoteId)", new { UserId = userDb.Id, NoteId = entity.Id });
-        }
+        //    var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text, Name, UserId) " +
+        //        $"VALUES (@Text, @Name, @UserId); select last_insert_rowid();", 
+        //        new { Text = entity.Text, Name = entity.Name, UserId = user.UserId });
+        //    entity.Id = queryResult;
+        //}
 
         public override async Task AddAsync(Note entity)
         {
-            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text, Name) " +
-                $"VALUES (@Text, @Name); select last_insert_rowid();", entity);
+            //var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text, Name) " +
+            //    $"VALUES (@Text, @Name); select last_insert_rowid();", entity);
 
+            //entity.Id = queryResult;
+
+            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text, Name, UserId) " +
+                $"VALUES (@Text, @Name, @UserId); select last_insert_rowid();",
+                entity);
             entity.Id = queryResult;
         }
 
-        public async Task RemoveAsync(int noteId, ulong userId)
-        {
-            var queryResult = await QuerySingleOrDefaultAsync<int>("SELECT COUNT(Text) FROM Note n " +
-                "WHERE NoteId = @NoteId", new { NoteId = noteId });
+        //public async Task RemoveAsync(int noteId, ulong userId)
+        //{
+        //    var queryResult = await QuerySingleOrDefaultAsync<int>("SELECT COUNT(Text) FROM Note n " +
+        //        "WHERE NoteId = @NoteId", new { NoteId = noteId });
 
-            if (queryResult < 1)
-            {
-                throw new ArgumentException("Note does not exist", nameof(noteId));
-            }
+        //    if (queryResult < 1)
+        //    {
+        //        throw new ArgumentException("Note does not exist", nameof(noteId));
+        //    }
 
-            queryResult = await QuerySingleOrDefaultAsync<int>("SELECT COUNT(Text) FROM Note n " +
-                 "INNER JOIN UserNote un on un.NoteId = n.id" +
-                 "INNER JOIN User u on u.UserId" +
-                 "WHERE u.UserId = @UserId", new { UserId = userId });
+        //    queryResult = await QuerySingleOrDefaultAsync<int>("SELECT COUNT(Text) FROM Note n " +
+        //         "INNER JOIN UserNote un on un.NoteId = n.id" +
+        //         "INNER JOIN User u on u.UserId" +
+        //         "WHERE u.UserId = @UserId", new { UserId = userId });
 
-            if (queryResult < 1)
-            {
-                throw new ArgumentException("User does not have any notes!", nameof(userId));
-            }
+        //    if (queryResult < 1)
+        //    {
+        //        throw new ArgumentException("User does not have any notes!", nameof(userId));
+        //    }
 
-            await ExecuteAsync("DELETE FROM UserNote WHERE NoteId @NoteId AND UserId = @UserId", new { NoteId = noteId, UserId = userId });
-        }
+        //    await ExecuteAsync("DELETE FROM UserNote WHERE NoteId @NoteId AND UserId = @UserId", new { NoteId = noteId, UserId = userId });
+        //}
 
         public override async Task DeleteAsync(Note entity)
         {
@@ -113,7 +115,7 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public override async Task EditAsync(Note entity)
         {
-            await ExecuteAsync($"UPDATE {TableName} SET Text = @Text, Name = @Name " +
+            await ExecuteAsync($"UPDATE {TableName} SET Text = @Text, Name = @Name, UserId = @UserId " +
                 $"WHERE Id = @Id", entity);
         }
     }
