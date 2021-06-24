@@ -35,5 +35,6 @@ namespace DiscordBotLib.Models
     {
         public string Text { get; set; }
         public string Name { get; set; }
+        public ulong UserId { get; set; }
     }
 }

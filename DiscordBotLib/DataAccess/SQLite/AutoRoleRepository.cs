@@ -21,7 +21,7 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task<IEnumerable<AutoRole>> GetAutoRoleByServerId(ulong serverId)
         {
-            var queryResult = await QueryAsync<AutoRole>($"SELECT a.RoleId, s.Id " +
+            var queryResult = await QueryAsync<AutoRole>($"SELECT a.RoleId, a.Id, a.ServerId " +
                 $"FROM {TableName} a " +
                 $"INNER JOIN Server s ON a.ServerId = s.Id " +
                 $"WHERE s.GuildId = @ServerId;", new { ServerId = serverId });
