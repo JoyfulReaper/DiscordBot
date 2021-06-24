@@ -32,10 +32,10 @@ namespace DiscordBotLib.DataAccess
     public interface INoteRepository
     {
         Task AddAsync(Note entity);
-        Task AddAsync(Note entity, User user);
+        //Task AddAsync(Note entity, User user);
         Task DeleteAsync(Note entity);
         Task EditAsync(Note entity);
         Task<IEnumerable<Note>> GetNotesByUserId(ulong userId);
-        Task RemoveAsync(int noteId, ulong userId);
+        //Task RemoveAsync(int noteId, ulong userId);
     }
 }

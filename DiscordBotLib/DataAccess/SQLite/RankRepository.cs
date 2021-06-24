@@ -26,6 +26,7 @@ SOFTWARE.
 using DiscordBotLib.Models;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,17 +37,34 @@ namespace DiscordBotLib.DataAccess.SQLite
     {
         private readonly ISettings _settings;
         private readonly ILogger<RankRepository> _logger;
+        private readonly IServerRepository _serverRepository;
 
         public RankRepository(ISettings settings,
-        ILogger<RankRepository> logger) : base(settings, logger)
+        ILogger<RankRepository> logger,
+        IServerRepository serverRepository) : base(settings, logger)
         {
             _settings = settings;
             _logger = logger;
+            _serverRepository = serverRepository;
+        }
+
+        private async Task<Server> GetServerOrThrow(ulong serverId)
+        {
+            var server = await _serverRepository.GetByServerId(serverId);
+            if (server == null)
+            {
+                _logger.LogWarning("Attempted to access a server ({server}) that does not exist.", serverId);
+                throw new ArgumentException("Server does not exist!", nameof(serverId));
+            }
+
+            return server;
         }
 
         public async Task<List<Rank>> GetRanksByServerId(ulong serverId)
         {
-            var queryResult = await QueryAsync<Rank>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId;", new { ServerId = serverId });
+            var server = await GetServerOrThrow(serverId);
+
+            var queryResult = await QueryAsync<Rank>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId;", new { ServerId = server.Id });
             return queryResult.ToList();
         }
 
@@ -63,8 +81,10 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task DeleteRank(ulong serverId, ulong roleId)
         {
+            var server = await GetServerOrThrow(serverId);
+
             await ExecuteAsync($"DELETE FROM {TableName} WHERE ServerId = @ServerId AND roleId = @RoleId;",
-                new { ServerId = serverId, RoleId = roleId });
+                new { ServerId = server.Id, RoleId = roleId });
         }
 
         public async override Task EditAsync(Rank entity)

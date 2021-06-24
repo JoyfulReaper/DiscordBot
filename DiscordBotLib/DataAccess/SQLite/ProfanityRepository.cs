@@ -27,6 +27,7 @@ using DiscordBotLib.Enums;
 using DiscordBotLib.Models;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,14 +36,19 @@ namespace DiscordBotLib.DataAccess.SQLite
 {
     public class ProfanityRepository : Repository<Profanity>, IProfanityRepository
     {
+        // TODO take the duplicated code from getting the server and make it into a pricate method
+
         private readonly ILogger<ProfanityRepository> _logger;
         private readonly ISettings _settings;
+        private readonly IServerRepository _serverRepository;
 
         public ProfanityRepository(ILogger<ProfanityRepository> logger,
-            ISettings settings) : base(settings, logger)
+            ISettings settings,
+            IServerRepository serverRepository) : base(settings, logger)
         {
             _logger = logger;
-            _settings = settings;
+            _settings = settings; _serverRepository = serverRepository;
+            ;
         }
 
         public async Task AllowProfanity(ulong serverId, string profanity)
@@ -54,24 +60,31 @@ namespace DiscordBotLib.DataAccess.SQLite
                 await AddAsync(profanityDB);
             }
 
+            var server = await _serverRepository.GetByServerId(serverId);
+            if(server == null)
+            {
+                _logger.LogWarning("Attempted to access a server ({server}) that does not exist.", serverId);
+                throw new ArgumentException("Server does not exist!", nameof(serverId));
+            }
+
             int count = await QueryFirstOrDefaultAsync<int>($"SELECT count(Id) " +
                 $"FROM ProfanityServer WHERE ServerId = @ServerId " +
-                $"AND ProfanityId = @ProfanityId AND ProfanityMode = @ProfanityMode;",
-                new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Block });
+                $"AND ProfanityId = @ProfanityId;",
+                new { ServerId = server.Id, ProfanityId = profanityDB.Id});
 
             if (count != 0)
             {
                 await ExecuteAsync($"UPDATE ProfanityServer " +
                      $"SET ServerId = @ServerId, ProfanityId = @ProfanityId, ProfanityMode = @ProfanityMode " +
                      $"WHERE ServerId = @ServerId AND ProfanityId = @ProfanityId;",
-                     new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow });
+                     new { ServerId = server.Id, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow });
             }
             else
             {
                 await ExecuteAsync($"INSERT INTO ProfanityServer " +
                     $"(ServerId, ProfanityId, ProfanityMode) " +
                     $"VALUES (@ServerId, @ProfanityId, @ProfanityMode);",
-                    new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow });
+                    new { ServerId = server.Id, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow });
             }
         }
 
@@ -84,47 +97,68 @@ namespace DiscordBotLib.DataAccess.SQLite
                 await AddAsync(profanityDB);
             }
 
+            var server = await _serverRepository.GetByServerId(serverId);
+            if (server == null)
+            {
+                _logger.LogWarning("Attempted to access a server ({server}) that does not exist.", serverId);
+                throw new ArgumentException("Server does not exist!", nameof(serverId));
+            }
+
             int count = await QueryFirstOrDefaultAsync<int>($"SELECT count(Id) " +
                 $"FROM ProfanityServer WHERE ServerId = @ServerId " +
-                $"AND ProfanityId = @ProfanityId AND ProfanityMode = @ProfanityMode;",
-                new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Allow });
+                $"AND ProfanityId = @ProfanityId;",
+                new { ServerId = server.Id, ProfanityId = profanityDB.Id});
 
             if (count != 0)
             {
                 await ExecuteAsync($"UPDATE ProfanityServer " +
                  $"SET ServerId = @ServerId, ProfanityId = @ProfanityId, ProfanityMode = @ProfanityMode " +
-                 $"WHERE ServerId = @ServerId AND ProfanityId = @ProfanityId;",
-                 new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Block });
+                 $"WHERE ServerId = @ServerId;",
+                 new { ServerId = server.Id, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Block });
             }
             else
             {
                 await ExecuteAsync($"INSERT INTO ProfanityServer " +
                     $"(ServerId, ProfanityId, ProfanityMode) " +
                     $"VALUES (@ServerId, @ProfanityId, @ProfanityMode);",
-                    new { ServerId = serverId, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Block });
+                    new { ServerId = server.Id, ProfanityId = profanityDB.Id, ProfanityMode = (int)ProfanityMode.Block });
             }
         }
 
         public async Task<List<Profanity>> GetAllowedProfanity(ulong serverId)
         {
-            var QueryResult = await QueryAsync<Profanity>($"SELECT p.Id, Word " +
+            var server = await _serverRepository.GetByServerId(serverId);
+            if (server == null)
+            {
+                _logger.LogWarning("Attempted to access a server ({server}) that does not exist.", serverId);
+                throw new ArgumentException("Server does not exist!", nameof(serverId));
+            }
+
+            var QueryResult = await QueryAsync<Profanity>($"SELECT p.Id, p.Word " +
                 $"FROM Profanity p " +
                 $"INNER JOIN ProfanityServer ps on ps.ProfanityId = p.Id " +
-                $"INNER JOIN Server s on s.GuildId = ps.ServerId " +
+                $"INNER JOIN Server s on s.Id = ps.ServerId " +
                 $"WHERE ServerId = @ServerId and ps.ProfanityMode = {(int)ProfanityMode.Allow};",
-                new { ServerId = serverId });
+                new { ServerId = server.Id });
 
             return QueryResult.ToList();
         }
 
         public async Task<List<Profanity>> GetBlockedProfanity(ulong serverId)
         {
+            var server = await _serverRepository.GetByServerId(serverId);
+            if (server == null)
+            {
+                _logger.LogWarning("Attempted to access a server ({server}) that does not exist.", serverId);
+                throw new ArgumentException("Server does not exist!", nameof(serverId));
+            }
+
             var QueryResult = await QueryAsync<Profanity>($"SELECT p.Id, Word " +
                 $"FROM Profanity p " +
                 $"INNER JOIN ProfanityServer ps on ps.ProfanityId = p.Id " +
-                $"INNER JOIN Server s on s.GuildId = ps.ServerId " +
+                $"INNER JOIN Server s on s.Id = ps.ServerId " +
                 $"WHERE ServerId = @ServerId and ps.ProfanityMode = {(int)ProfanityMode.Block};",
-                new { ServerId = serverId });
+                new { ServerId = server.Id });
 
             return QueryResult.ToList();
         }
@@ -139,6 +173,13 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task<Profanity> AddAsync(ulong serverId, string profanity, ProfanityMode mode)
         {
+            var server = await _serverRepository.GetByServerId(serverId);
+            if (server == null)
+            {
+                _logger.LogWarning("Attempted to access a server ({server}) that does not exist.", serverId);
+                throw new ArgumentException("Server does not exist!", nameof(serverId));
+            }
+
             var profanityObj = await GetProfanity(profanity);
             if (profanityObj == null)
             {
@@ -149,7 +190,7 @@ namespace DiscordBotLib.DataAccess.SQLite
             await ExecuteAsync($"INSERT INTO ProfanityServer " +
                 $"(ServerId, ProfanityId, Mode) " +
                 $"VALUES (@ServerId, @ProfanityId, @Mode);",
-                new { ServerId = serverId, ProfanityId = profanityObj.Id, Mode = mode });
+                new { ServerId = server.Id, ProfanityId = profanityObj.Id, Mode = mode });
 
             return profanityObj;
         }
@@ -162,9 +203,16 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task DeleteAsync(ulong serverId, ulong profanity)
         {
+            var server = await _serverRepository.GetByServerId(serverId);
+            if (server == null)
+            {
+                _logger.LogWarning("Attempted to access a server ({server}) that does not exist.", serverId);
+                throw new ArgumentException("Server does not exist!", nameof(serverId));
+            }
+
             await ExecuteAsync($"DELETE FROM ProfanityServer " +
                 $"WHERE ServerId = @ServerId AND ProfanityId = @ProfanityId;",
-                new { ServerId = serverId, ProfanityId = profanity });
+                new { ServerId = server.Id, ProfanityId = profanity });
         }
 
         public async Task DeleteAsync(string profanity)

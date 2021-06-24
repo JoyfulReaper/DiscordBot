@@ -223,7 +223,7 @@ namespace DiscordBotLib.Services
                     return;
                 }
 
-                await channel.SendMessageAsync($"{userParting.Mention} {_settings.PartingMessage}");
+                await channel.SendMessageAsync($"{userParting.Username} {_settings.PartingMessage}");
             }
         }
 

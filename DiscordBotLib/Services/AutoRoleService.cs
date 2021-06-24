@@ -57,12 +57,16 @@ namespace DiscordBotLib.Services
         /// </summary>
         /// <param name="guild">The server for which to retereive the auto roles</param>
         /// <returns>A list of auto roles for the given server</returns>
-        public async Task<List<IRole>> GetAutoRoles(IGuild guild)
+        public async Task<IEnumerable<IRole>> GetAutoRoles(IGuild guild)
         {
             var roles = new List<IRole>();
             var invalidAutoRoles = new List<AutoRole>();
 
             var autoRoles = await GetAutoRoles(guild.Id);
+            if(autoRoles == null)
+            {
+                return null;
+            }
 
             foreach (var autoRole in autoRoles)
             {
@@ -104,7 +108,7 @@ namespace DiscordBotLib.Services
         /// </summary>
         /// <param name="serverId">The id of the server for which to retereive the auto roles</param>
         /// <returns>A list of auto roles for the given server</returns>
-        public async Task<List<AutoRole>> GetAutoRoles(ulong serverId)
+        public async Task<IEnumerable<AutoRole>> GetAutoRoles(ulong serverId)
         {
             return await _autoRoleRepository.GetAutoRoleByServerId(serverId);
         }
@@ -124,7 +128,7 @@ namespace DiscordBotLib.Services
                 await _serverRepository.AddAsync(new Server { GuildId = serverId, Prefix = _settings.DefaultPrefix });
             }
 
-            await _autoRoleRepository.AddAsync(new AutoRole { RoleId = roleId, ServerId = serverId });
+            await _autoRoleRepository.AddAsync(new AutoRole { RoleId = roleId, ServerId = server.Id });
         }
 
         /// <summary>
@@ -135,7 +139,14 @@ namespace DiscordBotLib.Services
         /// <returns></returns>
         public async Task RemoveAutoRole(ulong serverId, ulong roleId)
         {
-            await _autoRoleRepository.DeleteAutoRole(serverId, roleId);
+            var server = await _serverRepository.GetByServerId(serverId);
+
+            if (server == null)
+            {
+                await _serverRepository.AddAsync(new Server { GuildId = serverId, Prefix = _settings.DefaultPrefix });
+            }
+
+            await _autoRoleRepository.DeleteAutoRole(server.Id, roleId);
         }
 
         /// <summary>

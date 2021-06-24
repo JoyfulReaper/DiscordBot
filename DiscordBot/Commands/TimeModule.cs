@@ -44,14 +44,17 @@ namespace DiscordBot.Commands
         private readonly ILogger<TimeModule> _logger;
         private readonly IUserTimeZonesRepository _userTimeZones;
         private readonly IServerService _serverService;
+        private readonly IUserRepository _userRepository;
 
         public TimeModule(ILogger<TimeModule> logger,
             IUserTimeZonesRepository userTimeZones,
-            IServerService serverService)
+            IServerService serverService,
+            IUserRepository userRepository)
         {
             _logger = logger;
             _userTimeZones = userTimeZones;
             _serverService = serverService;
+            _userRepository = userRepository;
         }
 
         [Command("registertimezone")]
@@ -84,15 +87,22 @@ namespace DiscordBot.Commands
             else
             {
                 var userTimeZone = await _userTimeZones.GetByUserID(Context.User.Id);
+                var user = await _userRepository.GetByUserId(Context.User.Id);
+
                 if (userTimeZone == null)
                 {
-                    await _userTimeZones.AddAsync(new UserTimeZone
+                    if(user == null)
                     {
-                        UserId = Context.User.Id,
-                        TimeZone = timeZone,
-                    });
+                        await _userRepository.AddAsync(new User { UserId = Context.User.Id, UserName = Context.User.Username });
+                    }
 
-                    await _userTimeZones.AddAsync(userTimeZone);
+                    var userTz = new UserTimeZone
+                    {
+                        UserId = user.Id,
+                        TimeZone = timeZone,
+                    };
+
+                    await _userTimeZones.AddAsync(userTz);
                     await Context.Channel.SendEmbedAsync("Succesfully Registered", "Successfully registered your time zone.",
                         ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
                 }

@@ -120,7 +120,7 @@ namespace DiscordBotLib.Services
                 await _serverRepository.AddAsync(new Server { GuildId = serverId, Prefix = _settings.DefaultPrefix });
             }
 
-            await _rankRepository.AddAsync(new Rank { RoleId = roleId, ServerId = serverId });
+            await _rankRepository.AddAsync(new Rank { RoleId = roleId, ServerId = server.Id });
         }
 
         /// <summary>

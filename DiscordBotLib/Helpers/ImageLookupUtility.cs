@@ -73,6 +73,8 @@ namespace DiscordBotLib.Helpers
 
         public static readonly string[] SEARCH_IMAGES = new string[] { "https://www.computerhope.com/jargon/s/search-engine.jpg" };
 
+        public static readonly string[] NOTE_IMAGES = new string[] { "https://cdn.osxdaily.com/wp-content/uploads/2016/03/notes-icon-mac.jpg" };
+
         private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)
