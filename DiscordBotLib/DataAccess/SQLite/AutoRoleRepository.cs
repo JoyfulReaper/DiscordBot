@@ -19,10 +19,13 @@ namespace DiscordBotLib.DataAccess.SQLite
             _logger = logger;
         }
 
-        public async Task<List<AutoRole>> GetAutoRoleByServerId(ulong serverId)
+        public async Task<IEnumerable<AutoRole>> GetAutoRoleByServerId(ulong serverId)
         {
-            var queryResult = await QueryAsync<AutoRole>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId;", new { ServerId = serverId });
-            return queryResult.ToList();
+            var queryResult = await QueryAsync<AutoRole>($"SELECT a.RoleId, s.Id " +
+                $"FROM {TableName} a " +
+                $"INNER JOIN Server s ON a.ServerId = s.Id " +
+                $"WHERE s.GuildId = @ServerId;", new { ServerId = serverId });
+            return queryResult;
         }
 
         public async override Task AddAsync(AutoRole entity)

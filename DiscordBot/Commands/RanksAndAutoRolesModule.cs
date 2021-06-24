@@ -65,7 +65,7 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
-            if(autoRoles.Count == 0)
+            if (autoRoles == null || !autoRoles.Any())
             {
                 await ReplyAsync("This server does not yet have any autoroles!");
                 return;
@@ -106,7 +106,7 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            if(autoRoles.Any(x => x.Id == role.Id))
+            if(autoRoles != null && autoRoles.Any(x => x.Id == role.Id))
             {
                 await ReplyAsync("That role is already an autorole!");
                 return;
@@ -166,14 +166,14 @@ namespace DiscordBot.Commands
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task RunAutoRoles()
         {
-            _logger.LogInformation("{username}#{discriminator} executed runautoroles ({role}) on {server}/{channel}",
+            _logger.LogInformation("{username}#{discriminator} executed runautoroles on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             await ReplyAsync("Please wait, this will hit API rate limiting...");
             await Context.Channel.TriggerTypingAsync();
 
             var autoRoles = await _autoRoleService.GetAutoRoles(Context.Guild);
-            if(autoRoles.Count == 0)
+            if(!autoRoles.Any())
             {
                 await ReplyAsync("No auto roles exists!");
             }

@@ -52,14 +52,14 @@ namespace DiscordBotLib.Services
         /// </summary>
         /// <param name="guild">Guild</param>
         /// <returns>Auto roles for the given guild</returns>
-        Task<List<IRole>> GetAutoRoles(IGuild guild);
+        Task<IEnumerable<IRole>> GetAutoRoles(IGuild guild);
 
         /// <summary>
         /// Get the auto roles for a given server id
         /// </summary>
         /// <param name="serverId">Serve id</param>
         /// <returns>AutoRoles for the given server id</returns>
-        Task<List<AutoRole>> GetAutoRoles(ulong serverId);
+        Task<IEnumerable<AutoRole>> GetAutoRoles(ulong serverId);
 
         /// <summary>
         /// Remove an autorole for the given server id

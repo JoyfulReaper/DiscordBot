@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord.WebSocket;
 using DiscordBotLib.Services;
 using Serilog;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBotLib.Helpers
@@ -35,7 +36,7 @@ namespace DiscordBotLib.Helpers
         internal static async Task AssignAutoRoles(IAutoRoleService autoRoleService, SocketGuildUser userJoining)
         {
             var roles = await autoRoleService.GetAutoRoles(userJoining.Guild);
-            if (roles.Count < 1)
+            if (!roles.Any())
             {
                 Log.Information("AutoRoleHelper: No auto roles to assign to {user} in {server}", userJoining.Username, userJoining.Guild.Name);
                 return;
