@@ -26,6 +26,7 @@ SOFTWARE.
 using DiscordBotLib.Models;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -35,67 +36,92 @@ namespace DiscordBotLib.DataAccess.SQLite
     {
         private readonly ILogger<SubredditRepository> _logger;
         private readonly ISettings _settings;
+        private readonly IServerRepository _serverRepository;
 
         public SubredditRepository(ILogger<SubredditRepository> logger,
-            ISettings settings) : base(settings, logger)
+            ISettings settings,
+            IServerRepository serverRepository) : base(settings, logger)
         {
             _logger = logger;
             _settings = settings;
+            _serverRepository = serverRepository;
+        }
+
+        private async Task<Server> GetServerOrThrow(ulong serverId)
+        {
+            var server = await _serverRepository.GetByServerId(serverId);
+            if (server == null)
+            {
+                _logger.LogWarning("Attempted to access a server ({server}) that does not exist.", serverId);
+                throw new ArgumentException("Server does not exist!", nameof(serverId));
+            }
+
+            return server;
         }
 
         public async Task EnableSubredditLearning(ulong guildId)
         {
+            var server = await GetServerOrThrow(guildId);
+
             var queryResult = await QueryFirstAsync<int>($"SELECT COUNT (Id) FROM ServerReddit WHERE ID = @Id;", new { Id = guildId });
             if (queryResult == 0)
             {
-                await ExecuteAsync("INSERT INTO ServerReddit (SubredditLearning, ServerId) VALUES (1, @ServerId);", new { ServerId = guildId });
+                await ExecuteAsync("INSERT INTO ServerReddit (SubredditLearning, ServerId) VALUES (1, @ServerId);", new { ServerId = server.Id });
             }
             else
             {
-                await ExecuteAsync("UPDATE ServerReddit SET SubredditLearning = 1, ServerId = @ServerId;", new { ServerId = guildId });
+                await ExecuteAsync("UPDATE ServerReddit SET SubredditLearning = 1, ServerId = @ServerId;", new { ServerId = server.Id });
             }
         }
 
         public async Task DisableSubredditLearning(ulong guildId)
         {
-            var queryResult = await QueryFirstAsync<int>($"SELECT COUNT (Id) FROM ServerReddit WHERE ID = @Id;", new { Id = guildId });
+            var server = await GetServerOrThrow(guildId);
+
+            var queryResult = await QueryFirstAsync<int>($"SELECT COUNT (Id) FROM ServerReddit WHERE ID = @Id;", new { Id = server.Id });
             if (queryResult == 0)
             {
-                await ExecuteAsync("INSERT INTO ServerReddit (SubredditLearning, ServerId) VALUES (0, @ServerId);", new { ServerId = guildId });
+                await ExecuteAsync("INSERT INTO ServerReddit (SubredditLearning, ServerId) VALUES (0, @ServerId);", new { ServerId = server.Id });
             }
             else
             {
-                await ExecuteAsync("UPDATE ServerReddit SET SubredditLearning = 0, ServerId = @ServerId;", new { ServerId = guildId });
+                await ExecuteAsync("UPDATE ServerReddit SET SubredditLearning = 0, ServerId = @ServerId;", new { ServerId = server.Id });
             }
         }
 
         public async Task<bool> IsSubredditLearningEnabled(ulong guildId)
         {
-            var queryResult = await QueryFirstAsync<bool>($"SELECT SubredditLearning FROM ServerReddit WHERE ServerId = @ServerId;", new { ServerId = guildId });
+            var server = await GetServerOrThrow(guildId);
+
+            var queryResult = await QueryFirstAsync<bool>($"SELECT SubredditLearning FROM ServerReddit WHERE ServerId = @ServerId;", new { ServerId = server.Id });
             return queryResult;
         }
 
         public async Task<IEnumerable<Subreddit>> GetSubredditListByServerId(ulong guildId)
         {
-            var queryResult = await QueryAsync<Subreddit>($"SELECT r.Id, Name " +
+            var server = await GetServerOrThrow(guildId);
+
+            var queryResult = await QueryAsync<Subreddit>($"SELECT r.Id, r.Name " +
                 $"FROM Subreddit r " +
                 $"INNER JOIN ServerSubreddit ss on ss.SubredditId = r.Id " +
-                $"INNER JOIN Server s on s.GuildId = ss.ServerId " +
-                $"WHERE ServerId = @GuildId",
-                new { GuildId = guildId });
+                $"INNER JOIN Server s on s.Id = ss.ServerId " +
+                $"WHERE ServerId = @ServerId",
+                new { ServerId = server.Id });
 
             return queryResult;
         }
 
         public async Task<Subreddit> GetSubredditByServerId(ulong guildId, string subreddit)
         {
-            var queryResult = await QueryFirstOrDefaultAsync<Subreddit>($"SELECT r.Id, Name " +
+            var server = await GetServerOrThrow(guildId);
+
+            var queryResult = await QueryFirstOrDefaultAsync<Subreddit>($"SELECT r.Id, r.Name " +
                 $"FROM Subreddit r " +
                 $"INNER JOIN ServerSubreddit ss on ss.SubredditId = r.Id " +
-                $"INNER JOIN Server s on s.GuildId = ss.ServerId " +
-                $"WHERE ServerId = @GuildId " +
+                $"INNER JOIN Server s on s.Id = ss.ServerId " +
+                $"WHERE ServerId = @ServerId " +
                 $"AND Name = @Name",
-                new { GuildId = guildId, Name = subreddit });
+                new { ServerId = server.Id, Name = subreddit });
 
             return queryResult;
         }
@@ -119,6 +145,8 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task<Subreddit> AddAsync(ulong serverId, string subreddit)
         {
+            var server = await GetServerOrThrow(serverId);
+
             var sub = await GetSubreddit(subreddit);
             if (sub == null)
             {
@@ -129,7 +157,7 @@ namespace DiscordBotLib.DataAccess.SQLite
             await ExecuteAsync($"INSERT INTO ServerSubreddit " +
                 $"(ServerId, SubredditId) " +
                 $"VALUES (@ServerId, @SubredditId);",
-                new { ServerId = serverId, SubredditId = sub.Id });
+                new { ServerId = server.Id, SubredditId = sub.Id });
 
             return sub;
         }
@@ -142,9 +170,11 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async Task DeleteAsync(ulong serverId, ulong subreddit)
         {
+            var server = await GetServerOrThrow(serverId);
+
             await ExecuteAsync($"DELETE FROM ServerSubreddit " +
                 $"WHERE ServerId = @ServerId AND SubredditId = @SubredditId;",
-                new { ServerId = serverId, SubredditId = subreddit });
+                new { ServerId = server.Id, SubredditId = subreddit });
         }
 
         public async Task DeleteAsync(string subreddit)

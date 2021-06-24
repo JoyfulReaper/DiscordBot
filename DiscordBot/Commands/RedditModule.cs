@@ -61,7 +61,7 @@ namespace DiscordBot.Commands
             "whitepeopletwitter", "blackpeopletwitter", "whitepeoplegifs", "idiotsincars", "natureisfuckinglit", "dankmemes",
             "itookapicture", "catsinsinks", "animalsbeingderps", "acab", "badfaketexts", "abandonedporn", "chihuahua", "chemicalreactiongifs",
             "shittyfoodporn", "animalsbeingjerks", "animalsbeingbros", "wigglebutts", "humanporn", "techsupportgore", "iiiiiiitttttttttttt", "fffffffuuuuuuuuuuuu",
-            "urbanhell", "wewantplates", "carbage", "oldpeoplefacebook", "funny", "likeus"};
+            "urbanhell", "wewantplates", "carbage", "oldpeoplefacebook", "likeus"};
 
         public RedditModule(ILogger<RedditModule> logger, 
             IConfiguration configuration,
@@ -195,7 +195,7 @@ namespace DiscordBot.Commands
             }
             else if (value.ToLowerInvariant() == "off")
             {
-                await _subredditRepository.DisableSubredditLearning(server.Id);
+                await _subredditRepository.DisableSubredditLearning(server.GuildId);
 
                 await Context.Channel.SendEmbedAsync("Subreddit Learning", "Subreddit learning disabled", await _servers.GetEmbedColor(Context.Guild.Id));
                 await _servers.SendLogsAsync(Context.Guild, "Subreddit Learning", $"{Context.User.Mention} disabled subreddit learning");
