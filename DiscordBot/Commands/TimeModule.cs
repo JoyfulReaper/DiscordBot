@@ -86,8 +86,15 @@ namespace DiscordBot.Commands
             }
             else
             {
-                var userTimeZone = await _userTimeZones.GetByUserID(Context.User.Id);
                 var user = await _userRepository.GetByUserId(Context.User.Id);
+
+                if(user == null)
+                {
+                    await _userRepository.AddAsync(new User { UserId = Context.User.Id, UserName = Context.User.Username });
+                    user = await _userRepository.GetByUserId(Context.User.Id);
+                }
+
+                var userTimeZone = await _userTimeZones.GetByUserID(Context.User.Id);
 
                 if (userTimeZone == null)
                 {
@@ -130,6 +137,17 @@ namespace DiscordBot.Commands
 
             _logger.LogInformation("{username}#{discriminator} executed userstime ({user}) on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, user.Username, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var userDb = await _userRepository.GetByUserId(user.Id);
+            if(userDb == null)
+            {
+                userDb = new User
+                {
+                    UserId = user.Id,
+                    UserName = user.Username
+                };
+                await _userRepository.AddAsync(userDb);
+            }
 
             var userTimeZone = await _userTimeZones.GetByUserID(user.Id);
             if(userTimeZone == null)
