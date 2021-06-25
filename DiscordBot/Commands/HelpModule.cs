@@ -25,6 +25,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("help")]
+        [Alias("halp")]
         [Summary("Get some help!")]
         public async Task HelpCommand([Summary("The command to get help with")][Remainder]string command = null)
         {
@@ -47,20 +48,24 @@ namespace DiscordBot.Commands
                         output += ", ";
                     }
                 }
-                output += $"\nSummary: {cmd.Summary}\nParameters: ";
+                output += $"\nSummary: {cmd.Summary}";
 
-                for (int i = 0; i < cmd.Parameters.Count; i++)
+                if (cmd.Parameters.Count > 0)
                 {
-                    output += $"{cmd.Parameters[i]}";
-
-                    if (!string.IsNullOrWhiteSpace(cmd.Parameters[i].Summary))
+                    output += "\nParameters: ";
+                    for (int i = 0; i < cmd.Parameters.Count; i++)
                     {
-                        output += $" ({cmd.Parameters[i].Summary})";
-                    }
+                        output += $"{cmd.Parameters[i]}";
 
-                    if (i != cmd.Parameters.Count - 1)
-                    {
-                        output += ", ";
+                        if (!string.IsNullOrWhiteSpace(cmd.Parameters[i].Summary))
+                        {
+                            output += $" ({cmd.Parameters[i].Summary})";
+                        }
+
+                        if (i != cmd.Parameters.Count - 1)
+                        {
+                            output += ", ";
+                        }
                     }
                 }
 

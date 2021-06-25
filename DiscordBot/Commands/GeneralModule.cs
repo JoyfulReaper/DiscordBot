@@ -65,6 +65,7 @@ namespace DiscordBot.Commands
 
         [Command("uptime")]
         [Alias("proc", "memory")]
+        [Summary("Get bot uptime and memory usage")]
         public async Task ProcInfo()
         {
             var process = Process.GetCurrentProcess();
@@ -100,7 +101,7 @@ namespace DiscordBot.Commands
         [Command("math")]
         [Alias("calculate", "calculator", "evaluate", "eval", "calc")]
         [Summary("Do math!")]
-        public async Task DoMath([Remainder] string math)
+        public async Task DoMath([Summary("Equation to solve")][Remainder] string math)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -298,7 +299,7 @@ namespace DiscordBot.Commands
         [Command("image", RunMode = RunMode.Async)]
         [Alias("banner")]
         [Summary("Show the image banner thing")]
-        public async Task Image(SocketGuildUser user = null)
+        public async Task Image([Summary("The user to show a banner for")] SocketGuildUser user = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
