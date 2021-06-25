@@ -1,5 +1,7 @@
-﻿using Discord.Addons.Interactive;
+﻿using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
+using DiscordBotLib.Helpers;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
@@ -32,44 +34,55 @@ namespace DiscordBot.Commands
             if (command != null)
             {
                 var cmd = _commandService.Commands.Where(x => x.Name.ToLowerInvariant() == command.ToLowerInvariant() || x.Aliases.Contains(command.ToLowerInvariant())).SingleOrDefault();
-                if(cmd == null)
+                if (cmd == null)
                 {
                     await ReplyAsync($"No such command: `{command}`!");
                     return;
                 }
 
-                string output = string.Empty;
-                output = $"Name: {cmd.Name}\nAliases: ";
-                for(int i = 0; i < cmd.Aliases.Count; i++)
+                var helpEmbed = new EmbedBuilder();
+                if (cmd.Name != null)
                 {
-                    output += $"{cmd.Aliases[i]}";
-                    if(i != cmd.Aliases.Count -1)
+                    helpEmbed.WithTitle($"Command: {cmd.Name}");
+                }
+
+                var aliases = string.Empty;
+                for (int i = 0; i < cmd.Aliases.Count; i++)
+                {
+                    aliases += $"{cmd.Aliases[i]}";
+                    if (i != cmd.Aliases.Count - 1)
                     {
-                        output += ", ";
+                        aliases += ", ";
                     }
                 }
-                output += $"\nSummary: {cmd.Summary}";
+                helpEmbed.AddField("Aliasese", aliases);
+                helpEmbed.AddField("Summary", cmd.Summary);
 
+                var parameters = string.Empty;
                 if (cmd.Parameters.Count > 0)
                 {
-                    output += "\nParameters: ";
                     for (int i = 0; i < cmd.Parameters.Count; i++)
                     {
-                        output += $"{cmd.Parameters[i]}";
+                        parameters += $"`{cmd.Parameters[i]}`";
 
                         if (!string.IsNullOrWhiteSpace(cmd.Parameters[i].Summary))
                         {
-                            output += $" ({cmd.Parameters[i].Summary})";
+                            parameters += $" ({cmd.Parameters[i].Summary})";
                         }
 
                         if (i != cmd.Parameters.Count - 1)
                         {
-                            output += ", ";
+                            parameters += ", ";
                         }
                     }
                 }
+                if (!string.IsNullOrEmpty(parameters))
+                {
+                    helpEmbed.AddField("Parameters", parameters);
+                }
+                helpEmbed.WithThumbnailUrl(ImageLookupUtility.GetImageUrl("HELP_IMAGES"));
 
-                await ReplyAsync(output);
+                await ReplyAsync(null, false, helpEmbed.Build());
                 return;
             }
 
