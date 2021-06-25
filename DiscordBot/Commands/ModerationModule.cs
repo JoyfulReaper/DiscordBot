@@ -83,7 +83,7 @@ namespace DiscordBot.Commands
         public async Task Ban(
             [Summary("The user to ban")]SocketGuildUser user, 
             [Summary("The number of days of the banned user's messages to purge")]int days, 
-            [Remainder] string reason = null)
+            [Summary("Reason for the ban")][Remainder] string reason = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -126,7 +126,7 @@ namespace DiscordBot.Commands
         [Alias("pallow")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Add exception to profanity filter")]
-        public async Task ProfanityAllow([Remainder] string profanity)
+        public async Task ProfanityAllow([Summary("The profanity to allow")][Remainder] string profanity)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -146,7 +146,7 @@ namespace DiscordBot.Commands
         [Alias("pblock")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Add new entry to profanity filter")]
-        public async Task ProfanityBlock([Remainder] string profanity)
+        public async Task ProfanityBlock([Summary("The profanity to block")][Remainder] string profanity)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -582,7 +582,7 @@ namespace DiscordBot.Commands
         [RequireUserPermission(GuildPermission.ManageChannels)]
         [RequireBotPermission(GuildPermission.ManageChannels)]
         [Summary("Enable slowmode")]
-        public async Task SlowMode(int interval = 0)
+        public async Task SlowMode([Summary("The number of seconds a user must wait before sending additional messages")]int interval = 0)
         {
             await Context.Channel.TriggerTypingAsync();
             await (Context.Channel as SocketTextChannel).ModifyAsync(x => x.SlowModeInterval = interval);
@@ -596,7 +596,7 @@ namespace DiscordBot.Commands
         [Command("logs")]
         [Summary("Change logging settings")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task Logs(string option = null, string value = null)
+        public async Task Logs([Summary("Option: channel or clear")]string option = null, [Summary("Channel to log to")]string value = null)
         {
             if (option == null && value == null)
             {

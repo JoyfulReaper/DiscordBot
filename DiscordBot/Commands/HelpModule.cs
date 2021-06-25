@@ -1,5 +1,7 @@
-﻿using Discord.Addons.Interactive;
+﻿using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
+using DiscordBotLib.Helpers;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
@@ -25,9 +27,66 @@ namespace DiscordBot.Commands
         }
 
         [Command("help")]
+        [Alias("halp")]
         [Summary("Get some help!")]
-        public async Task HelpCommand()
+        public async Task HelpCommand([Summary("The command to get help with")][Remainder]string command = null)
         {
+            if (command != null)
+            {
+                var cmd = _commandService.Commands.Where(x => x.Name.ToLowerInvariant() == command.ToLowerInvariant() || x.Aliases.Contains(command.ToLowerInvariant())).SingleOrDefault();
+                if (cmd == null)
+                {
+                    await ReplyAsync($"No such command: `{command}`!");
+                    return;
+                }
+
+                var helpEmbed = new EmbedBuilder();
+                if (cmd.Name != null)
+                {
+                    helpEmbed.WithTitle($"Command: {cmd.Name}");
+                }
+
+                var aliases = string.Empty;
+                for (int i = 0; i < cmd.Aliases.Count; i++)
+                {
+                    aliases += $"{cmd.Aliases[i]}";
+                    if (i != cmd.Aliases.Count - 1)
+                    {
+                        aliases += ", ";
+                    }
+                }
+                helpEmbed.AddField("Aliasese", aliases);
+                helpEmbed.AddField("Summary", cmd.Summary);
+
+                var parameters = string.Empty;
+                if (cmd.Parameters.Count > 0)
+                {
+                    for (int i = 0; i < cmd.Parameters.Count; i++)
+                    {
+                        parameters += $"`{cmd.Parameters[i]}`";
+
+                        if (!string.IsNullOrWhiteSpace(cmd.Parameters[i].Summary))
+                        {
+                            parameters += $" ({cmd.Parameters[i].Summary})";
+                        }
+
+                        if (i != cmd.Parameters.Count - 1)
+                        {
+                            parameters += ", ";
+                        }
+                    }
+                }
+                if (!string.IsNullOrEmpty(parameters))
+                {
+                    helpEmbed.AddField("Parameters", parameters);
+                }
+                helpEmbed.WithThumbnailUrl(ImageLookupUtility.GetImageUrl("HELP_IMAGES"));
+
+                await ReplyAsync(null, false, helpEmbed.Build());
+                return;
+            }
+
+
             // Changing pages seems a little broken when DMing the bot, TODO: Look into later
             string prefix = string.Empty;
             if(Context.Guild != null)
@@ -44,14 +103,14 @@ namespace DiscordBot.Commands
                     continue;
                 }
                 string page = $"Command Module: ***{module.Name}***\n";
-                foreach(var command in module.Commands)
+                foreach(var cmd in module.Commands)
                 {
                     page += $"`{prefix}";
                     if (module.Group != null)
                     {
                         page += $"{module.Group} ";
                     }
-                    page += $"{command.Name}` - {command.Summary ?? "No description provided"}\n";
+                    page += $"{cmd.Name}` - {cmd.Summary ?? "No description provided"}\n";
                 }
                 pages.Add(page);
             }

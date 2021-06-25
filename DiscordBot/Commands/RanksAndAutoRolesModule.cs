@@ -294,11 +294,11 @@ namespace DiscordBot.Commands
         [Command("rank", RunMode = RunMode.Async)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
         [Summary("Assign yourself a rank")]
-        public async Task Rank([Remainder] string identifier = null)
+        public async Task Rank([Summary("The rank to assign yourself")][Remainder] string rank = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
-            if (identifier == null)
+            if (rank == null)
             {
                 await ReplyAsync("Please specifiy the rank to add/remove");
                 return;
@@ -308,7 +308,7 @@ namespace DiscordBot.Commands
 
             IRole role;
 
-            if (ulong.TryParse(identifier, out ulong roleId))
+            if (ulong.TryParse(rank, out ulong roleId))
             {
                 var roleById = Context.Guild.Roles.FirstOrDefault(x => x.Id == roleId);
                 if (roleById == null)
@@ -321,7 +321,7 @@ namespace DiscordBot.Commands
             }
             else
             {
-                var roleByName = Context.Guild.Roles.FirstOrDefault(x => string.Equals(x.Name, identifier, StringComparison.CurrentCultureIgnoreCase));
+                var roleByName = Context.Guild.Roles.FirstOrDefault(x => string.Equals(x.Name, rank, StringComparison.CurrentCultureIgnoreCase));
                 if (roleByName == null)
                 {
                     await ReplyAsync("That role does not exists!");

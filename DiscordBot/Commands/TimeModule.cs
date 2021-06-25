@@ -60,7 +60,7 @@ namespace DiscordBot.Commands
         [Command("registertimezone")]
         [Alias("registertz", "regtz", "settz", "settimezone")]
         [Summary("Register your timezone with the bot")]
-        public async Task RegisterTimeZone([Remainder] string timeZone = null)
+        public async Task RegisterTimeZone([Summary("Your IANA or Windows timezone")][Remainder] string timeZone = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -126,7 +126,7 @@ namespace DiscordBot.Commands
         [Command("userstime")]
         [Alias("usertime", "utime")]
         [Summary("Get the time for a given user")]
-        public async Task UserTime([Remainder] SocketUser user = null)
+        public async Task UserTime([Summary("The user to get the time and date for")][Remainder] SocketUser user = null)
         {
             if (user == null)
             {
@@ -175,7 +175,7 @@ namespace DiscordBot.Commands
         [Command("validtimezone")]
         [Alias("validtz")]
         [Summary("Validate a windows or IANA timezone")]
-        public async Task ValidTimeZone([Remainder] string timeZone = null)
+        public async Task ValidTimeZone([Summary("The time zone to validate")][Remainder] string timeZone = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -207,7 +207,7 @@ namespace DiscordBot.Commands
 
         [Command("time")]
         [Summary("Get the time in the given timezone")]
-        public async Task GetTime([Remainder] string timeZone = null)
+        public async Task GetTime([Summary("The IANA or Windows time zone to get the time for")][Remainder] string timeZone = null)
         {
             await Context.Channel.TriggerTypingAsync();
 

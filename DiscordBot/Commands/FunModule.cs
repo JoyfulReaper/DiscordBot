@@ -65,7 +65,8 @@ namespace DiscordBot.Commands
         }
 
         [Command("giphy")]
-        public async Task Giphy([Remainder]string search)
+        [Summary("Search giphy for some gifs!")]
+        public async Task Giphy([Summary("What to search giphy for")][Remainder]string search)
         {
             var apiKey = _config.GetSection("GiphyApiKey").Value;
 

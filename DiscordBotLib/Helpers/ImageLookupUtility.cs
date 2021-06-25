@@ -75,6 +75,8 @@ namespace DiscordBotLib.Helpers
 
         public static readonly string[] NOTE_IMAGES = new string[] { "https://cdn.osxdaily.com/wp-content/uploads/2016/03/notes-icon-mac.jpg" };
 
+        public static readonly string[] HELP_IMAGES = new string[] { "http://2.bp.blogspot.com/-VOD5zQ-mHGE/VAxpj6tzZMI/AAAAAAAALx8/nVeA7AJe8Ek/s1600/help-emoticon.png", "https://farm3.staticflickr.com/2541/3971525059_b358acdd48_z.jpg" };
+
         private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)

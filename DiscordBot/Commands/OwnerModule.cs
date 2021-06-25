@@ -66,7 +66,7 @@ namespace DiscordBot.Commands
         [Command("lavalink")]
         [RequireOwner]
         [Summary("Start or stop lavalink")]
-        public async Task LavaLink(string enable = null)
+        public async Task LavaLink([Summary("start or stop lavalink")]string enable = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -114,7 +114,7 @@ namespace DiscordBot.Commands
         [RequireOwner]
         [Alias("stop")]
         [Summary("Make the bot quit!")]
-        public async Task Quit(string imageUrl = null)
+        public async Task Quit([Summary("The image to display when the bot quits")]string imageUrl = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -166,7 +166,7 @@ namespace DiscordBot.Commands
         [Command("game")]
         [RequireOwner]
         [Summary("Set the same the bot is playing")]
-        public async Task SetGame([Remainder]string game)
+        public async Task SetGame([Summary("The game for the bot to play")][Remainder]string game)
         {
             await Context.Channel.TriggerTypingAsync();
 
