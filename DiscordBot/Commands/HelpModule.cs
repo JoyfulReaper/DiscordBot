@@ -26,8 +26,49 @@ namespace DiscordBot.Commands
 
         [Command("help")]
         [Summary("Get some help!")]
-        public async Task HelpCommand()
+        public async Task HelpCommand([Summary("The command to get help with")][Remainder]string command = null)
         {
+            if (command != null)
+            {
+                var cmd = _commandService.Commands.Where(x => x.Name.ToLowerInvariant() == command.ToLowerInvariant() || x.Aliases.Contains(command.ToLowerInvariant())).SingleOrDefault();
+                if(cmd == null)
+                {
+                    await ReplyAsync($"No such command: `{command}`!");
+                    return;
+                }
+
+                string output = string.Empty;
+                output = $"Name: {cmd.Name}\nAliases: ";
+                for(int i = 0; i < cmd.Aliases.Count; i++)
+                {
+                    output += $"{cmd.Aliases[i]}";
+                    if(i != cmd.Aliases.Count -1)
+                    {
+                        output += ", ";
+                    }
+                }
+                output += $"\nSummary: {cmd.Summary}\nParameters: ";
+
+                for (int i = 0; i < cmd.Parameters.Count; i++)
+                {
+                    output += $"{cmd.Parameters[i]}";
+
+                    if (!string.IsNullOrWhiteSpace(cmd.Parameters[i].Summary))
+                    {
+                        output += $" ({cmd.Parameters[i].Summary})";
+                    }
+
+                    if (i != cmd.Parameters.Count - 1)
+                    {
+                        output += ", ";
+                    }
+                }
+
+                await ReplyAsync(output);
+                return;
+            }
+
+
             // Changing pages seems a little broken when DMing the bot, TODO: Look into later
             string prefix = string.Empty;
             if(Context.Guild != null)
@@ -44,14 +85,14 @@ namespace DiscordBot.Commands
                     continue;
                 }
                 string page = $"Command Module: ***{module.Name}***\n";
-                foreach(var command in module.Commands)
+                foreach(var cmd in module.Commands)
                 {
                     page += $"`{prefix}";
                     if (module.Group != null)
                     {
                         page += $"{module.Group} ";
                     }
-                    page += $"{command.Name}` - {command.Summary ?? "No description provided"}\n";
+                    page += $"{cmd.Name}` - {cmd.Summary ?? "No description provided"}\n";
                 }
                 pages.Add(page);
             }
