@@ -30,8 +30,11 @@ namespace DiscordBotLib.DataAccess.SQLite
 
         public async override Task AddAsync(AutoRole entity)
         {
-            await ExecuteAsync($"INSERT INTO {TableName} (ServerId, RoleId) " +
-                $"VALUES (@ServerId, @RoleId);", new { ServerId = entity.ServerId, RoleId = entity.RoleId });
+            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (ServerId, RoleId) " +
+                $"VALUES (@ServerId, @RoleId); select last_insert_rowid();",
+                new { ServerId = entity.ServerId, RoleId = entity.RoleId });
+
+            entity.Id = queryResult;
         }
 
         public async override Task DeleteAsync(AutoRole entity)
