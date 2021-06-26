@@ -85,7 +85,7 @@ namespace DiscordBotApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServerLogItem>> CreateServerLogItem(CommandItemCreateDto commandItemCreate)
+        public async Task<ActionResult<CommandItem>> CreateServerLogItem(CommandItemCreateDto commandItemCreate)
         {
             var commandItemModel = _mapper.Map<CommandItem>(commandItemCreate);
 
