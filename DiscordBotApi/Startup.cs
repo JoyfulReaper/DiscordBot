@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 using DiscordBotApiLib.Data;
-using DiscordBotApiLib.Data.MSSQL;
+using DiscordBotApiLib.Data.Repositories;
 using DiscordBotApi.Handlers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -69,8 +69,9 @@ namespace DiscordBotApi
             });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddScoped<IServerLogItemRepo, MSSQLServerLogItemRepo>()
-                .AddScoped<ICommandItemRepo, MSSQLCommandItemRepo>();
+            services.AddScoped<IServerLogItemRepo, ServerLogItemRepo>()
+                .AddScoped<ICommandItemRepo, CommandItemRepo>()
+                .AddScoped<IUserRepo, UserRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

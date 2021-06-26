@@ -30,13 +30,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DiscordBotApiLib.Data.MSSQL
+namespace DiscordBotApiLib.Data.Repositories
 {
-    public class MSSQLServerLogItemRepo : IServerLogItemRepo
+    public class ServerLogItemRepo : IServerLogItemRepo
     {
         private readonly DiscordBotContext _context;
 
-        public MSSQLServerLogItemRepo(DiscordBotContext context)
+        public ServerLogItemRepo(DiscordBotContext context)
         {
             _context = context;
         }

@@ -31,13 +31,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBotApiLib.Data.MSSQL
+namespace DiscordBotApiLib.Data.Repositories
 {
-    public class MSSQLCommandItemRepo : ICommandItemRepo
+    public class CommandItemRepo : ICommandItemRepo
     {
         private readonly DiscordBotContext _context;
 
-        public MSSQLCommandItemRepo(DiscordBotContext context)
+        public CommandItemRepo(DiscordBotContext context)
         {
             _context = context;
         }
