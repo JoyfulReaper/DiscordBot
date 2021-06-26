@@ -176,7 +176,7 @@ namespace DiscordBot.Commands
 
                 await ReplyAsync(message);
             }
-            await _servers.SendLogsAsync(Context.Guild, $"Warn Action Set", $"{Context.User.Mention} warned {user.Username} for: {reason}", ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
+            await _servers.SendLogsAsync(Context.Guild, $"User Warned", $"{Context.User.Mention} warned {user.Username} for: {reason}", ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
         }
 
         [Command("warnaction")]
