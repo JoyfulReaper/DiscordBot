@@ -34,7 +34,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLib.Helpers
 {
-    internal class PomodoroHandler
+    public static class PomodoroHandler
     {
         private static List<Pomodoro> _pomodoros = new List<Pomodoro>();
 
@@ -43,7 +43,7 @@ namespace DiscordBotLib.Helpers
             _pomodoros.Add(pomodoro);
         }
 
-        internal static async Task MuteWorker(DiscordSocketClient client)
+        internal static async Task PomodoroWorker(DiscordSocketClient client)
         {
             List<Pomodoro> remove = new List<Pomodoro>();
 
@@ -63,9 +63,17 @@ namespace DiscordBotLib.Helpers
             {
                 foreach (var pomo in remove)
                 {
+                    string message =
+                        $"Your {Enum.GetName(typeof(PomodoroTimerType), pomo.TimerType)} timer for {pomo.Task} has expired!";
+
                     var dmChannel = await pomo.User.GetOrCreateDMChannelAsync();
-                    await dmChannel.SendMessageAsync($"Your Pomodoro Timer has expired!");
-                    await pomo.Channel.SendMessageAsync("Your Pomodoro Timer has expired!");
+                    await dmChannel.SendMessageAsync(message);
+
+                    var channel = pomo.Channel as SocketTextChannel;
+                    if (pomo.Channel != null && channel != null)
+                    {
+                        await channel.SendMessageAsync(message);
+                    }
 
                     Log.Debug("Pomodoro Timer Expired: {pomodoroExpired} Type: {Type}", pomo.User.Username,
                         Enum.GetName(typeof(PomodoroTimerType), pomo.TimerType));
@@ -75,7 +83,7 @@ namespace DiscordBotLib.Helpers
             _pomodoros = _pomodoros.Except(remove).ToList();
 
             await Task.Delay(TimeSpan.FromMinutes(1));
-            await MuteWorker(client);
+            await PomodoroWorker(client);
         }
     }
 }

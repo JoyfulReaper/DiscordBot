@@ -32,8 +32,8 @@ namespace DiscordBotLib.Models
     public class Pomodoro
     {
         public SocketGuild Guild { get; set; }
-        public SocketGuildUser User { get; set; }
-        public SocketTextChannel Channel { get; set; }
+        public SocketUser User { get; set; }
+        public SocketChannel Channel { get; set; }
         public DateTime End { get; set; }
         public PomodoroTimerType TimerType { get; set; }
         public string Task { get; set; }
