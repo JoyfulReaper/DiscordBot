@@ -36,7 +36,6 @@ using DiscordBotLib.Models;
 using System;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Enums;
-using DiscordBotLib.Models.DatabaseEntities;
 
 namespace DiscordBot.Commands
 {
@@ -50,6 +49,7 @@ namespace DiscordBot.Commands
         private readonly IServerRepository _serverRepository;
         private readonly IProfanityRepository _profanityRepository;
         private readonly IWarningRepository _warningRepository;
+        private readonly IUserRepository _userRepository;
         private readonly int _prefixMaxLength;
 
         public ModerationModule(DiscordSocketClient client,
@@ -58,7 +58,8 @@ namespace DiscordBot.Commands
             IConfiguration configuration,
             IServerRepository serverRepository,
             IProfanityRepository profanityRepository,
-            IWarningRepository warningRepository)
+            IWarningRepository warningRepository,
+            IUserRepository userRepository)
         {
             _client = client;
             _logger = logger;
@@ -67,6 +68,7 @@ namespace DiscordBot.Commands
             _serverRepository = serverRepository;
             _profanityRepository = profanityRepository;
             _warningRepository = warningRepository;
+            _userRepository = userRepository;
             var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
             if (int.TryParse(prefixConfigValue, out int maxLength))
             {
@@ -81,16 +83,68 @@ namespace DiscordBot.Commands
 
         [Command("warn")]
         [RequireUserPermission(GuildPermission.BanMembers)]
+        [RequireBotPermission(GuildPermission.BanMembers)]
         [Summary("Warn a user")]
-        public async Task Warn(SocketUser user, string reason)
+        public async Task Warn([Summary("The user to warn")]SocketGuildUser user, [Summary("The reason for the warning")][Remainder]string reason)
         {
+            if(user.Id == _client.CurrentUser.Id)
+            {
+                await ReplyAsync("Nice try, but I am immune from warnings!");
+                return;
+            }
 
+            if(user.Id == Context.User.Id)
+            {
+                await ReplyAsync("Lol, you are warning yourself!");
+            }
+
+            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
+            var userDb = await UserHelper.GetOrAddUser(user, _userRepository);
+
+            var warning = new Warning
+            {
+                UserId = userDb.Id,
+                ServerId = server.Id,
+                Text = reason
+            };
+            await _warningRepository.AddAsync(warning);
+
+            var warn = await _warningRepository.GetUsersWarnings(server, userDb);
+            var wAction = await _warningRepository.GetWarningAction(server);
+
+            await Context.Channel.SendEmbedAsync("You have been warned!", $"{user.Mention} you have been warned for: `{reason}`!\n" +
+                $"This is warning #`{warn.Count()}` of `{wAction.ActionThreshold}`\n" +
+                $"The action is set to: { Enum.GetName(typeof(WarningAction), wAction.Action)}",
+                ColorHelper.GetColor(server));
+
+            if(warn.Count() >= wAction.ActionThreshold)
+            {
+                var message = $"The maximum number of warnings has been reached, because of the warn action ";
+                switch (wAction.Action)
+                {
+                    case WarningAction.NoAction:
+                        message += "nothing happens.";
+                        break;
+                    case WarningAction.Kick:
+                        message += $"{user.Username} has been kicked.";
+                        await user.KickAsync("Maximum Warnings Reached!");
+                        break;
+                    case WarningAction.Ban:
+                        message += $"{user.Username} has been banned.";
+                        await user.BanAsync(0, "Maximum Warnings Reached!");
+                        break;
+                    default:
+                        message += "default switch statement :(";
+                        break;
+                }
+
+                await ReplyAsync(message);
+            }
         }
 
         [Command("warnaction")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Change the warn action")]
-        // TODO De-duplicate code
         public async Task WarnAction([Summary("Action: none, kick or ban")] string action = null,
             [Summary("The number of warnings before the action is performed")] int maxWarns = -1)
         {

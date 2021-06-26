@@ -29,11 +29,24 @@ using Discord.WebSocket;
 using DiscordBotLib.Models;
 using System.Threading.Tasks;
 using Serilog;
+using DiscordBotLib.DataAccess;
 
 namespace DiscordBotLib.Helpers
 {
     public static class ServerHelper
     {
+        public async static Task<Server> GetOrAddServer(ulong serverId, IServerRepository serverRepository)
+        {
+            var server = await serverRepository.GetByServerId(serverId);
+            if (server == null)
+            {
+                server = new Server { GuildId = serverId };
+                await serverRepository.AddAsync(server);
+            }
+
+            return server;
+        }
+
         /// <summary>
         /// Check if Context is a DM
         /// </summary>

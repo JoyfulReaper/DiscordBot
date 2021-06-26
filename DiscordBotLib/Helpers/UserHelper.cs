@@ -23,14 +23,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotLib.Enums;
+using Discord.WebSocket;
+using DiscordBotLib.DataAccess;
+using System.Threading.Tasks;
 
-namespace DiscordBotLib.Models
+namespace DiscordBotLib.Helpers
 {
-    public class WarnAction : DatabaseEntity
+    public static class UserHelper
     {
-        public ulong ServerId { get; set; }
-        public WarningAction Action { get; set; }
-        public int ActionThreshold { get; set; }
+        public static async Task<DiscordBotLib.Models.User> GetOrAddUser(SocketUser user, IUserRepository userRepository)
+        {
+            var userDb = await userRepository.GetByUserId(user.Id);
+            if (userDb == null)
+            {
+                userDb = new DiscordBotLib.Models.User { UserId = user.Id, UserName = user.Username };
+                await userRepository.AddAsync(userDb);
+            }
+            if(userDb.UserName != user.Username)
+            {
+                userDb.UserName = user.Username;
+                await userRepository.EditAsync(userDb);
+            }
+
+            return userDb;
+        }
     }
 }

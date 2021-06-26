@@ -23,15 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotLib.Enums;
 using DiscordBotLib.Models;
-using DiscordBotLib.Models.DatabaseEntities;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess
 {
     public interface IWarningRepository
     {
+        Task<IEnumerable<Warning>> GetUsersWarnings(Server server, User user);
         Task AddAsync(Warning entity);
         Task DeleteAsync(Warning entity);
         Task EditAsync(Warning entity);

@@ -23,15 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotLib.Enums;
 using DiscordBotLib.Models;
-using DiscordBotLib.Models.DatabaseEntities;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess.SQLite
@@ -46,6 +41,14 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             _settings = settings;
             _logger = logger;
+        }
+
+        public async Task<IEnumerable<Warning>> GetUsersWarnings(Server server, User user)
+        {
+            var queryResult = await QueryAsync<Warning>("SELECT * FROM Warning " +
+                "WHERE UserId = @UserId AND ServerId = @ServerId", new { ServerId = server.Id, UserId = user.Id});
+
+            return queryResult;
         }
 
         public async Task SetWarnAction(WarnAction action)
