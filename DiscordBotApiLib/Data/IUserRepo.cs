@@ -23,10 +23,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace DiscordBotLib.DataAccess.SQLite
+using DiscordBotApiLib.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace DiscordBotApiLib.Data
 {
-    public enum DatabaseType
+    public interface IUserRepo
     {
-        SQLite
+        void CreateUser(User item);
+        void DeleteUser(User item);
+        Task<IEnumerable<User>> GetAllUsers();
+        Task<User> GetUserByDiscordUserId(ulong userId);
+        Task<User> GetUserByDiscordUserName(string userName);
+        Task<User> GetUserById(int id);
+        Task<bool> SaveChanges();
+        void UpdateCommandItem(CommandItem item);
     }
 }

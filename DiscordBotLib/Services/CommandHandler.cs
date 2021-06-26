@@ -79,6 +79,7 @@ namespace DiscordBotLib.Services
             ProfanityHelper.ProfanityRepository = profanityRepository;
 
             Task.Run(async () => await MuteHandler.MuteWorker(client));
+            Task.Run(async () => await PomodoroHandler.PomodoroWorker(client));
         }
 
         private async Task OnUserLeft(SocketGuildUser user)

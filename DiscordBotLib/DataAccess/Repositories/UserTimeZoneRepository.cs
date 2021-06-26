@@ -30,7 +30,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-namespace DiscordBotLib.DataAccess.SQLite
+namespace DiscordBotLib.DataAccess.Repositories
 {
     public class UserTimeZoneRepository : Repository<UserTimeZone>, IUserTimeZonesRepository
     {

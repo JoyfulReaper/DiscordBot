@@ -30,7 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DiscordBotLib.DataAccess.SQLite
+namespace DiscordBotLib.DataAccess.Repositories
 {
     public class SubredditRepository : Repository<Subreddit>, ISubredditRepository
     {

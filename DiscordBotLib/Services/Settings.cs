@@ -23,15 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotLib.DataAccess.SQLite;
+using DiscordBotLib.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Data.SqlClient;
+using System.Data.SQLite;
 
 namespace DiscordBotLib.Services
 {
     public class Settings : ISettings
     {
+        public Type DbConnectionType { get; private set; }
+
         /// <summary>
         /// Guild to send testing/debug messages to
         /// </summary>
@@ -133,6 +137,7 @@ namespace DiscordBotLib.Services
             {
                 DatabaseType = DatabaseType.SQLite;
                 ConnectionString = _configuration.GetConnectionString("SQLite");
+                DbConnectionType = typeof(SQLiteConnection);
             }
             else
             {
