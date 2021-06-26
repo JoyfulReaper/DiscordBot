@@ -76,6 +76,23 @@ namespace DiscordBot.Commands
             }
         }
 
+        [Command("warn")]
+        [RequireUserPermission(GuildPermission.BanMembers)]
+        [Summary("Warn a user")]
+        public async Task Warn(SocketUser user, string reason)
+        {
+
+        }
+
+        [Command("warnaction")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Summary("Change the warn action")]
+        public async Task WarnAction([Summary("Action: none, kick or ban")] string action, 
+            [Summary("The number of warnings before the action is performed")]int maxWarns)
+        {
+
+        }
+
         [Command("ban")]
         [RequireBotPermission(GuildPermission.BanMembers)]
         [RequireUserPermission(GuildPermission.BanMembers)]
