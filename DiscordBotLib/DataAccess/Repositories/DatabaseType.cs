@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace DiscordBotLib.DataAccess.SQLite
+namespace DiscordBotLib.DataAccess.Repositories
 {
     public enum DatabaseType
     {

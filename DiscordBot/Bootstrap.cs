@@ -29,7 +29,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBotApiWrapper;
 using DiscordBotLib.DataAccess;
-using DiscordBotLib.DataAccess.SQLite;
+using DiscordBotLib.DataAccess.Repositories;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -122,26 +122,25 @@ namespace DiscordBot
                 .AddSingleton<IApiService, ApiService>()
                 .AddSingleton<IServerLogItemApi, ServerLogItemApi>()
                 .AddSingleton<ICommandItemApi, CommandItemApi>()
-                .AddSingleton<IUserService, UserService>();
+                .AddSingleton<IUserService, UserService>()
+                .AddSingleton<IServerRepository, ServerRepository>()
+                .AddSingleton<IRankService, RankService>()
+                .AddSingleton<IAutoRoleService, AutoRoleService>()
+                .AddSingleton<IRankRepository, RankRepository>()
+                .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
+                .AddSingleton<ISubredditRepository, SubredditRepository>()
+                .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>()
+                .AddSingleton<IServerService, ServerService>()
+                .AddSingleton<IUserTimeZonesRepository, UserTimeZoneRepository>()
+                .AddSingleton<IProfanityRepository, ProfanityRepository>()
+                .AddSingleton<IUserRepository, UserRepository>()
+                .AddSingleton<INoteRepository, NoteRepository>()
+                .AddSingleton<IWarningRepository, WarningRepository>();
 
 
             switch(database)
             {
                 case "SQLite":
-                    serviceCollection
-                        .AddSingleton<IServerRepository, ServerRepository>()
-                        .AddSingleton<IRankService, RankService>()
-                        .AddSingleton<IAutoRoleService, AutoRoleService>()
-                        .AddSingleton<IRankRepository, RankRepository>()
-                        .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
-                        .AddSingleton<ISubredditRepository, SubredditRepository>()
-                        .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>()
-                        .AddSingleton<IServerService, ServerService>()
-                        .AddSingleton<IUserTimeZonesRepository, UserTimeZoneRepository>()
-                        .AddSingleton<IProfanityRepository, ProfanityRepository>()
-                        .AddSingleton<IUserRepository, UserRepository>()
-                        .AddSingleton<INoteRepository, NoteRepository>()
-                        .AddSingleton<IWarningRepository, WarningRepository>();
                     break;
                 default:
                     Log.Logger.Fatal("{database} is not supported", database);

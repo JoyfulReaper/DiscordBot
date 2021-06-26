@@ -29,7 +29,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DiscordBotLib.DataAccess.SQLite
+namespace DiscordBotLib.DataAccess.Repositories
 {
     public class WarningRepository : Repository<Warning>, IWarningRepository
     {

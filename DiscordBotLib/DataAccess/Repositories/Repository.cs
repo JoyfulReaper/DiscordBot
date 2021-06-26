@@ -33,7 +33,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.Threading.Tasks;
 
-namespace DiscordBotLib.DataAccess.SQLite
+namespace DiscordBotLib.DataAccess.Repositories
 {
     public abstract class Repository<T> : IRepository<T> where T: DatabaseEntity
     {
@@ -70,7 +70,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     connection.Execute(query, parameters);
                 }
@@ -85,7 +85,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     await connection.ExecuteAsync(query, parameters);
                 }
@@ -100,7 +100,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return connection.Query<T>(query, parameters);
                 }
@@ -116,7 +116,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return connection.QueryFirst<T>(query, parameters);
                 }
@@ -132,7 +132,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return connection.QueryFirstOrDefault<T>(query, parameters);
                 }
@@ -148,7 +148,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return connection.QuerySingle<T>(query, parameters);
                 }
@@ -164,7 +164,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return connection.QuerySingleOrDefault<T>(query, parameters);
                 }
@@ -180,7 +180,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     var result = await connection.QueryAsync<T>(query, parameters);
                     return result;
@@ -197,7 +197,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return await connection.QueryFirstAsync<T>(query, parameters);
                 }
@@ -213,7 +213,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return await connection.QueryFirstOrDefaultAsync<T>(query, parameters);
                 }
@@ -229,7 +229,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return await connection.QuerySingleAsync<T>(query, parameters);
                 }
@@ -245,7 +245,7 @@ namespace DiscordBotLib.DataAccess.SQLite
         {
             try
             {
-                using (IDbConnection connection = new SQLiteConnection(_settings.ConnectionString))
+                using (IDbConnection connection = (IDbConnection)Activator.CreateInstance(_settings.DbConnectionType, _settings.ConnectionString))
                 {
                     return await connection.QuerySingleOrDefaultAsync<T>(query, parameters);
                 }

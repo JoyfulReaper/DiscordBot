@@ -23,12 +23,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotLib.DataAccess.SQLite;
+using DiscordBotLib.DataAccess.Repositories;
+using System;
 
 namespace DiscordBotLib.Services
 {
     public interface ISettings
     {
+        Type DbConnectionType { get; }
         bool UseDiscordBotApi { get; set; }
         string ApiBaseAddress { get; set; }
         string ApiUserName { get; set; }
