@@ -36,6 +36,7 @@ using DiscordBotLib.Models;
 using System;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Enums;
+using DiscordBotLib.Models.DatabaseEntities;
 
 namespace DiscordBot.Commands
 {
@@ -48,6 +49,7 @@ namespace DiscordBot.Commands
         private readonly IConfiguration _configuration;
         private readonly IServerRepository _serverRepository;
         private readonly IProfanityRepository _profanityRepository;
+        private readonly IWarningRepository _warningRepository;
         private readonly int _prefixMaxLength;
 
         public ModerationModule(DiscordSocketClient client,
@@ -55,7 +57,8 @@ namespace DiscordBot.Commands
             IServerService servers,
             IConfiguration configuration,
             IServerRepository serverRepository,
-            IProfanityRepository profanityRepository)
+            IProfanityRepository profanityRepository,
+            IWarningRepository warningRepository)
         {
             _client = client;
             _logger = logger;
@@ -63,7 +66,7 @@ namespace DiscordBot.Commands
             _configuration = configuration;
             _serverRepository = serverRepository;
             _profanityRepository = profanityRepository;
-
+            _warningRepository = warningRepository;
             var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
             if (int.TryParse(prefixConfigValue, out int maxLength))
             {
@@ -87,10 +90,76 @@ namespace DiscordBot.Commands
         [Command("warnaction")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Change the warn action")]
-        public async Task WarnAction([Summary("Action: none, kick or ban")] string action, 
-            [Summary("The number of warnings before the action is performed")]int maxWarns)
+        // TODO De-duplicate code
+        public async Task WarnAction([Summary("Action: none, kick or ban")] string action = null,
+            [Summary("The number of warnings before the action is performed")] int maxWarns = -1)
         {
+            var server = await _serverRepository.GetByServerId(Context.Guild.Id);
+            if (server == null)
+            {
+                server = new Server { GuildId = Context.Guild.Id };
+                await _serverRepository.AddAsync(server);
+            }
 
+            if (action == null && maxWarns < 0)
+            {
+                var wAction = await _warningRepository.GetWarningAction(server);
+                if (wAction == null)
+                {
+                    await ReplyAsync("The warn action has not been set.");
+                    return;
+                }
+                await Context.Channel.SendEmbedAsync("Warn Action", $"The warn action is set to: `{ Enum.GetName(typeof(WarningAction), wAction.Action)}`. The threshold is: `{wAction.ActionThreshold}`", 
+                    ColorHelper.GetColor(server));
+
+                return;
+            }
+
+            var message = $"Warn action set to `{action.ToLowerInvariant()}`, Max Warnings { maxWarns} by {Context.User.Mention}";
+            bool valid = false;
+            WarnAction warnAction = null;
+
+            if (action.ToLowerInvariant() == "none" && maxWarns > 0)
+            {
+                valid = true;
+                warnAction = new WarnAction
+                {
+                    ServerId = server.Id,
+                    Action = WarningAction.NoAction,
+                    ActionThreshold = maxWarns
+                };
+            }
+            else if (action.ToLowerInvariant() == "kick" && maxWarns > 0)
+            {
+                valid = true;
+                warnAction = new WarnAction
+                {
+                    ServerId = server.Id,
+                    Action = WarningAction.Kick,
+                    ActionThreshold = maxWarns
+                };
+            }
+            else if (action.ToLowerInvariant() == "ban" && maxWarns > 0)
+            {
+                valid = true;
+                warnAction = new WarnAction
+                {
+                    ServerId = server.Id,
+                    Action = WarningAction.Ban,
+                    ActionThreshold = maxWarns
+                };
+            }
+
+            if (valid)
+            {
+                await _warningRepository.SetWarnAction(warnAction);
+                await _servers.SendLogsAsync(Context.Guild, $"Warn Action Set", message, ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
+                await Context.Channel.SendEmbedAsync("Warn Action Set", $"Warn action set to: `{action.ToLowerInvariant()}`. Threshold set to: `{maxWarns}`",
+                    ColorHelper.GetColor(server));
+            } else
+            {
+                await ReplyAsync("Please provide a valid option: `none`, `kick`, `ban` and positive maximum warnings.");
+            }
         }
 
         [Command("ban")]

@@ -1,4 +1,29 @@
-﻿using DiscordBotLib.Enums;
+﻿/*
+MIT License
+
+Copyright(c) 2021 Kyle Givler
+https://github.com/JoyfulReaper
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using DiscordBotLib.Enums;
 using DiscordBotLib.Models;
 using DiscordBotLib.Models.DatabaseEntities;
 using DiscordBotLib.Services;
@@ -11,43 +36,43 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess.SQLite
 {
-    public class WarningRepository : Repository<Warning>
+    public class WarningRepository : Repository<Warning>, IWarningRepository
     {
         private readonly ISettings _settings;
         private readonly ILogger<WarningRepository> _logger;
 
         public WarningRepository(ISettings settings,
-            ILogger<WarningRepository> logger) : base (settings, logger)
+            ILogger<WarningRepository> logger) : base(settings, logger)
         {
             _settings = settings;
             _logger = logger;
         }
 
-        public async Task SetWarnAction(WarningAction action, Server server)
+        public async Task SetWarnAction(WarnAction action)
         {
             int count = await QueryFirstOrDefaultAsync<int>($"SELECT count(Id) " +
                 $"FROM WarningAction WHERE ServerId = @ServerId;",
-                new { ServerId = server.Id });
+                new { ServerId = action.ServerId });
 
             if (count != 0)
             {
                 await ExecuteAsync($"UPDATE WarningAction " +
-                     $"SET ServerId = @ServerId, Action = @Action " +
-                     $"WHERE ServerId = @ServerId",
-                     new { ServerId = server.Id, Action = (int)action });
+                     $"SET ServerId = @ServerId, Action = @Action, ActionThreshold = @ActionThreshold " +
+                     $"WHERE ServerId = @ServerId;",
+                     new { ServerId = action.ServerId, Action = (int)action.Action, ActionThreshold = action.ActionThreshold });
             }
             else
             {
                 await ExecuteAsync($"INSERT INTO WarningAction " +
-                    $"(ServerId, Action) " +
-                    $"VALUES (@ServerId, @Action);",
-                    new { ServerId = server.Id, Action = (int)action });
+                    $"(ServerId, Action, ActionThreshold) " +
+                    $"VALUES (@ServerId, @Action, @ActionThreshold);",
+                    new { ServerId = action.ServerId, Action = (int)action.Action, ActionThreshold = action.ActionThreshold });
             }
         }
 
-        public async Task<WarningAction> GetWarningAction(Server server)
+        public async Task<WarnAction> GetWarningAction(Server server)
         {
-            var action = await QueryFirstOrDefaultAsync<WarningAction>("SELECT Action FROM " +
+            var action = await QueryFirstOrDefaultAsync<WarnAction>("SELECT * FROM " +
                 "WarningAction WHERE @ServerId = ServerId", new { ServerId = server.Id });
 
             return action;
