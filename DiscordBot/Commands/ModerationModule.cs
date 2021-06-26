@@ -81,13 +81,49 @@ namespace DiscordBot.Commands
             }
         }
 
+        [Command("getwarnings")]
+        [RequireUserPermission(GuildPermission.BanMembers)]
+        [Summary("Get a users warnings")]
+        [Alias("getwarns")]
+        public async Task GetWarnings(SocketGuildUser user)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked getwarnings ({user}) in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, user.Username, user.Username, Context.Channel.Name, Context.Guild?.Name ?? "DM");
+
+            var userDb = await UserHelper.GetOrAddUser(user, _userRepository);
+            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
+            var warnings = await _warningRepository.GetUsersWarnings(server, userDb);
+
+            if(warnings.Count() < 1)
+            {
+                await ReplyAsync($"{user.Username} has not been warned!");
+                return;
+            }
+
+            var warnNum = 1;
+            var message = $"{user.Username} has been warned for:\n";
+            foreach(var w in warnings)
+            {
+                message += $"{warnNum++}) {w.Text}\n";
+            }
+
+            await ReplyAsync(message);
+        }
+
         [Command("warn")]
         [RequireUserPermission(GuildPermission.BanMembers)]
         [RequireBotPermission(GuildPermission.BanMembers)]
         [Summary("Warn a user")]
         public async Task Warn([Summary("The user to warn")]SocketGuildUser user, [Summary("The reason for the warning")][Remainder]string reason)
         {
-            if(user.Id == _client.CurrentUser.Id)
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} warned {user} for {reason} in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, user.Username, reason, Context.Channel.Name, Context.Guild?.Name ?? "DM");
+
+            if (user.Id == _client.CurrentUser.Id)
             {
                 await ReplyAsync("Nice try, but I am immune from warnings!");
                 return;
@@ -140,6 +176,7 @@ namespace DiscordBot.Commands
 
                 await ReplyAsync(message);
             }
+            await _servers.SendLogsAsync(Context.Guild, $"Warn Action Set", $"{Context.User.Mention} warned {user.Username} for: {reason}", ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
         }
 
         [Command("warnaction")]
@@ -148,6 +185,11 @@ namespace DiscordBot.Commands
         public async Task WarnAction([Summary("Action: none, kick or ban")] string action = null,
             [Summary("The number of warnings before the action is performed")] int maxWarns = -1)
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked warnaction ({action}, {maxWarns}) messages in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, action, maxWarns, Context.Channel.Name, Context.Guild?.Name ?? "DM");
+
             var server = await _serverRepository.GetByServerId(Context.Guild.Id);
             if (server == null)
             {
@@ -232,8 +274,8 @@ namespace DiscordBot.Commands
                 await ReplyAsync("Please provide a user to ban!");
             }
 
-            _logger.LogInformation("{user}#{discriminator} banned {user} messages in {channel} on {server}",
-                Context.User.Username, Context.User.Discriminator, user.Username, Context.Channel.Name, Context.Guild.Name);
+            _logger.LogInformation("{user}#{discriminator} banned {user} in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, user.Username, Context.Channel.Name, Context.Guild?.Name ?? "DM");
 
             await Context.Channel.SendEmbedAsync("Ban Hammer", $"{user.Mention} has been banned for *{(reason ?? "no reason")}*",
                 ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("BAN_IMAGES"));
@@ -251,7 +293,7 @@ namespace DiscordBot.Commands
         {
             await Context.Channel.TriggerTypingAsync();
 
-            _logger.LogInformation("{user}#{discriminator} unbanned {userId} messages in {channel} on {server}",
+            _logger.LogInformation("{user}#{discriminator} unbanned {userId} in {channel} on {server}",
                 Context.User.Username, Context.User.Discriminator, userId, Context.Channel.Name, Context.Guild.Name);
 
             await Context.Channel.SendEmbedAsync("Un-Banned", $"{userId} has been un-banned",
