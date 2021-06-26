@@ -51,12 +51,12 @@ namespace DiscordBot.Commands
 
         [Command("start")]
         [Summary("start the Pomodoro timer")]
-        public async Task Start([Summary("length of timer")] int length = 25)
+        public async Task Start([Summary("length of timer")] int length = 25,[Summary("Task Name")][Remainder]string name = "Pomodoro")
         {
             await Context.Channel.TriggerTypingAsync();
 
-            _logger.LogInformation("{username}#{discriminator} executed pomodoro start (Length: {length}) on {server}/{channel}",
-                Context.User.Username, Context.User.Discriminator, length, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+            _logger.LogInformation("{username}#{discriminator} executed pomodoro start (Length: {length} Name {name}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, length, name, Context.Guild?.Name ?? "DM", Context.Channel.Name);
         }
 
         [Command("shortbreak")]
