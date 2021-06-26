@@ -54,8 +54,6 @@ namespace DiscordBotLib.Helpers
                     continue;
                 }
 
-                var guild = client.GetGuild(pomodoro.Guild.Id);
-                var user = guild.GetUser(pomodoro.User.Id);
                 remove.Add(pomodoro);
             }
 
@@ -64,7 +62,7 @@ namespace DiscordBotLib.Helpers
                 foreach (var pomo in remove)
                 {
                     string message =
-                        $"Your {Enum.GetName(typeof(PomodoroTimerType), pomo.TimerType)} timer for {pomo.Task} has expired!";
+                        $"{pomo.User.Mention}, your {Enum.GetName(typeof(PomodoroTimerType), pomo.TimerType)} timer for {pomo.Task} has expired!";
 
                     var dmChannel = await pomo.User.GetOrCreateDMChannelAsync();
                     await dmChannel.SendMessageAsync(message);
