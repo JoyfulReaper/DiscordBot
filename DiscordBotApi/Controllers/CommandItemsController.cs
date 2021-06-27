@@ -85,9 +85,15 @@ namespace DiscordBotApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CommandItem>> CreateServerLogItem(CommandItemCreateDto commandItemCreate)
+        public async Task<ActionResult<CommandItem>> CreateCommandItem(CommandItemCreateDto commandItemCreate)
         {
             var commandItemModel = _mapper.Map<CommandItem>(commandItemCreate);
+
+            if (commandItemModel.Channel.ChannelName.StartsWith("@"))
+            {
+                commandItemModel.Channel.ChannelName = "DM";
+                commandItemModel.Channel.ChannelId = 0;
+            }
 
             await _commandItemRepo.CreateCommandItem(commandItemModel);
             await _commandItemRepo.SaveChanges();
