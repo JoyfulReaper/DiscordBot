@@ -79,7 +79,7 @@ namespace DiscordBot.Commands
             var uri = new Uri($"https://api.giphy.com/v1/gifs/search?api_key={apiKey}&q={search}&limit=25&offset=0&rating=pg-13&lang=en");
 
             var response = await HttpClientHelper.HttpClient.GetFromJsonAsync<GiphyRoot>(uri);
-            await Context.Channel.SendFileAsync(Directory.GetCurrentDirectory() + @$"\images\Poweredby_100px-Black_VertLogo.png");
+            await Context.Channel.SendFileAsync(Directory.GetCurrentDirectory() + @$"{Path.DirectorySeparatorChar}images{Path.DirectorySeparatorChar}Poweredby_100px-Black_VertLogo.png");
             await ReplyAsync(response.data.RandomItem().embed_url);
         }
 
