@@ -11,10 +11,11 @@ DiscordBot has the following features:
 * Fun: 
   * 8ball, coinflip, rolldie, RussianRoulette, lmgtfy (Let Me Google That for You), RockPaperScissors, giphy, random
 * General commands including:
-  * Math, ping, about, owner, echo, info, server, image, help, uptime, servers
+  * Math, ping, about, owner, echo, info, server, image, help {command_name}, uptime, servers
 * Moderation commands including:
   * Ability to enable or disable sending invites to other server (serverinvites)
   * Ability to censor or delete messages with profanity, and allow or disallow words. This is pretty basic and doesn't take too much creativity to bypass :(
+  * Ability to warn users and kick or ban them after a given number of warnings (warn, warnaction, getwarnings)
   * ban, unban, kick, purge, prefix, welcome, mute, unmute, slowmode, logs, embedcolor, profanityallow, profanityblock, profanityfilter
 * Music Commands
   * search, play, join, skip, pause, resume
@@ -29,6 +30,8 @@ DiscordBot has the following features:
   * google (search google), youtube (search youtube)
 * Note Commands
    * note create, note list, note delete, note show
+* Pomodoro Timer Commands. Bot DMs you when time is up, and responds in channel the command was used in.
+   * pomodoro start, pomodoro shortbreak, pomodoro longbreak
 
 DiscordApi is an API that DiscordBot can integrate with to report log events per server, and command usage. DiscordBotApiWrapper is an API wrapper that makes this intergration easier. The next step is to construct a website to show log events and command usage statistics.
 

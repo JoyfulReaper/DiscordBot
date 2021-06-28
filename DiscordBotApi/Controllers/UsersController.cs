@@ -89,7 +89,7 @@ namespace DiscordBotApi.Controllers
 
         //TODO: Database changes required
         //[HttpGet("GuildId/{guildId}", Name = "GetUsersByGuildId")]
-        //public async Task<ActionResult<CommandItem>> GetUsersByGuildId([FromQuery] int page, ulong guildId)
+        //public async Task<ActionResult<User>> GetUsersByGuildId([FromQuery] int page, ulong guildId)
         //{
         //    IEnumerable<CommandItem> commandItem;
 
@@ -110,7 +110,7 @@ namespace DiscordBotApi.Controllers
         //}
 
         [HttpPost]
-        public async Task<ActionResult<ServerLogItem>> CreateUser(UserCreateDto userCreateDto)
+        public async Task<ActionResult<User>> CreateUser(UserCreateDto userCreateDto)
         {
             var UserModel = _mapper.Map<User>(userCreateDto);
 
