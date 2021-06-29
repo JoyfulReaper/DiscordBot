@@ -1,8 +1,12 @@
 DiscordBot
 ==========
-A Discord Bot written in C# using the Discord.NET library. I plan to continue to expand this bot with common Discord bot features. If you would like to see a command/feature/different database or ORM/etc please open an issues, I love a challenge :)
+A Discord Bot written in C# using the Discord.NET library. I plan to continue to expand this bot with common Discord bot features. If you found a bug, would like to see a command/feature/different database or ORM/etc please open an issues, I love a challenge :)
 
-If you would like to contribute, offer suggestion/criticism or hang out on the Discord server I test the bot in join here: https://discord.gg/2bxgHyfN6A If you want to invite the bot to your server then ask in the server linked above. For now it's just running on my PC as I develop it though.
+If you would like to contribute, offer suggestion/criticism or hang out on the Discord server I test the bot in join here: https://discord.gg/2bxgHyfN6A If you would like to invite the bot to your sever please use this link: https://discord.com/api/oauth2/authorize?client_id=832404891379957810&permissions=268443670&scope=bot
+
+**Important:** The bot is currently running on a free tier AWS EC2 instance. Currently it is FAR from reaching the free tier limits, but please know I have the bot set to automaticlly shutdown if I were to be charged more than $5/month. I don't forsee this being an issue at the moment, but please keep this in mind that the bot may go off line if these limits are reached.
+
+I am open to doing custom Discord Bot development as well, if you are interested please join the discord above and we can discuss pricing.
 
 DiscordBot has the following features:
 
