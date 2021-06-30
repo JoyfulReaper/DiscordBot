@@ -31,7 +31,6 @@ using DiscordBotLib.Helpers;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Victoria;
 
@@ -46,7 +45,6 @@ namespace DiscordBot.Commands
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
         private readonly IServerService _servers;
-        private readonly Random _random = new Random();
 
         public OwnerModule(DiscordSocketClient client,
             ISettings settings,
@@ -61,6 +59,35 @@ namespace DiscordBot.Commands
             _discordBotSettingsRepository = discordBotSettingsRepository;
             _lavaNode = lavaNode;
             _servers = servers;
+        }
+
+        [Command("broadcast")]
+        [RequireOwner]
+        [Summary("Send a message to the logging channel of ever server the bot is in (if set)")]
+        public async Task BroadCast([Summary("Broadcast message")][Remainder]string message)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed broadcast ({message}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, message, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var sent = 0;
+            foreach (var guild in _client.Guilds)
+            {
+                var server = await _servers.GetServer(guild);
+                if(server.LoggingChannel != 0)
+                {
+                    var channel = _client.GetChannel(server.LoggingChannel) as ISocketMessageChannel;
+                    if(channel != null)
+                    {
+                        await channel.SendEmbedAsync("Owner Broadcast Message", $"Message: {message}", ColorHelper.GetColor(server), ImageLookupUtility.GetImageUrl("BROADCAST_IMAGES"));
+                    }
+                    sent++;
+                }
+            }
+
+            await _servers.SendLogsAsync(Context.Guild, "Broadcast Message Sent", $"{Context.User.Mention} sent a broadcast message: {message}", ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
+            await ReplyAsync($"Broadcast message has been sent to {sent} server out of {_client.Guilds.Count} ({_client.Guilds.Count - sent} do not have logging channel set!)");
         }
 
         [Command("lavalink")]
