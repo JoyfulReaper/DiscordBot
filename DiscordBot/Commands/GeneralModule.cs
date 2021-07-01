@@ -49,18 +49,33 @@ namespace DiscordBot.Commands
         private readonly BannerImageService _bannerImageService;
         private readonly IServerService _servers;
         private readonly IUserTimeZonesRepository _userTimeZones;
+        private readonly ISettings _settings;
 
         public GeneralModule(ILogger<GeneralModule> logger,
             DiscordSocketClient client,
             BannerImageService bannerImageService,
             IServerService servers,
-            IUserTimeZonesRepository userTimeZones)
+            IUserTimeZonesRepository userTimeZones,
+            ISettings settings)
         {
             _logger = logger;
             _client = client;
             _bannerImageService = bannerImageService;
             _servers = servers;
             _userTimeZones = userTimeZones;
+            _settings = settings;
+        }
+
+        [Command("invite")]
+        [Summary("invite the bot to your server!")]
+        public async Task Invite()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed uptime: on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            await ReplyAsync(_settings.InviteLink);
         }
 
         [Command("uptime")]
@@ -68,6 +83,11 @@ namespace DiscordBot.Commands
         [Summary("Get bot uptime and memory usage")]
         public async Task ProcInfo()
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed uptime: on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             var process = Process.GetCurrentProcess();
             var memoryMb = Math.Round((double)process.PrivateMemorySize64 / (1e+6), 2);
             var startTime = process.StartTime;
@@ -138,10 +158,16 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             var server = await _servers.GetServer(Context.Guild);
+            var prefix = server?.Prefix;
+            if(prefix == null)
+            {
+                prefix = string.Empty;
+            }
 
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
-                .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
+                .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot\n" +
+                $"See {prefix}invite for the link to invite DiscordBot to your server!")
                 .WithColor(ColorHelper.GetColor(server))
                 .WithCurrentTimestamp();
 

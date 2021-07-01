@@ -77,6 +77,8 @@ namespace DiscordBotLib.Helpers
 
         public static readonly string[] HELP_IMAGES = new string[] { "http://2.bp.blogspot.com/-VOD5zQ-mHGE/VAxpj6tzZMI/AAAAAAAALx8/nVeA7AJe8Ek/s1600/help-emoticon.png", "https://farm3.staticflickr.com/2541/3971525059_b358acdd48_z.jpg" };
 
+        public static readonly string[] BROADCAST_IMAGES = new string[] { "https://memegenerator.net/img/images/600x600/14916770/spongebob-yelling-at-squidward.jpg", "http://www.phillyemploymentlawyer.com/wp-content/uploads/2016/01/boss-yelling.jpg" };
+
         private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)

@@ -34,6 +34,8 @@ namespace DiscordBotLib.Services
 {
     public class Settings : ISettings
     {
+        public String InviteLink { get; private set; }
+
         public Type DbConnectionType { get; private set; }
 
         /// <summary>
@@ -173,6 +175,7 @@ namespace DiscordBotLib.Services
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
             PartingMessage = _configuration.GetSection("PartingMessage").Value ?? "just bailed!";
             DefaultPrefix = _configuration.GetSection("DefaultPrefix").Value ?? "!";
+            InviteLink = _configuration.GetSection("InviteLink").Value ?? "https://discord.com/api/oauth2/authorize?client_id=832404891379957810&permissions=268443670&scope=bot";
 
             try
             {
