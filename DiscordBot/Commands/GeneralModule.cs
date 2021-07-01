@@ -49,18 +49,21 @@ namespace DiscordBot.Commands
         private readonly BannerImageService _bannerImageService;
         private readonly IServerService _servers;
         private readonly IUserTimeZonesRepository _userTimeZones;
+        private readonly ISettings _settings;
 
         public GeneralModule(ILogger<GeneralModule> logger,
             DiscordSocketClient client,
             BannerImageService bannerImageService,
             IServerService servers,
-            IUserTimeZonesRepository userTimeZones)
+            IUserTimeZonesRepository userTimeZones,
+            ISettings settings)
         {
             _logger = logger;
             _client = client;
             _bannerImageService = bannerImageService;
             _servers = servers;
             _userTimeZones = userTimeZones;
+            _settings = settings;
         }
 
         [Command("invite")]
@@ -72,7 +75,7 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed uptime: on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            await ReplyAsync("https://discord.com/api/oauth2/authorize?client_id=832404891379957810&permissions=268443670&scope=bot");
+            await ReplyAsync(_settings.InviteLink);
         }
 
         [Command("uptime")]
@@ -155,10 +158,16 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
             var server = await _servers.GetServer(Context.Guild);
+            var prefix = server?.Prefix;
+            if(prefix == null)
+            {
+                prefix = string.Empty;
+            }
 
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
-                .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot")
+                .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot\n" +
+                $"See {prefix}invite for the link to invite DiscordBot to your server!")
                 .WithColor(ColorHelper.GetColor(server))
                 .WithCurrentTimestamp();
 

@@ -30,6 +30,7 @@ namespace DiscordBotLib.Services
 {
     public interface ISettings
     {
+        string InviteLink { get; }
         Type DbConnectionType { get; }
         bool UseDiscordBotApi { get; set; }
         string ApiBaseAddress { get; set; }
