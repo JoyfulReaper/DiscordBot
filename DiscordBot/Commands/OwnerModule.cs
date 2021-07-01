@@ -77,12 +77,24 @@ namespace DiscordBot.Commands
                 var server = await _servers.GetServer(guild);
                 if(server.LoggingChannel != 0)
                 {
+                    // Logging channel set
                     var channel = _client.GetChannel(server.LoggingChannel) as ISocketMessageChannel;
                     if(channel != null)
                     {
                         await channel.SendEmbedAsync("Owner Broadcast Message", $"Message: {message}", ColorHelper.GetColor(server), ImageLookupUtility.GetImageUrl("BROADCAST_IMAGES"));
                     }
                     sent++;
+                }
+                else
+                {
+                    // Logging channel not set
+                    var owner = guild.Owner as SocketUser;
+                    var ownerChannel = await owner?.GetOrCreateDMChannelAsync() as SocketDMChannel;
+                    if (ownerChannel != null)
+                    {
+                        await ownerChannel.SendEmbedAsync("Owner Broadcast Message", $"Message: {message}\n" +
+                            $"Set the logging channel with: {server.Prefix}logs channel {{channelMention}} to avoid DMs from the bot!", ColorHelper.GetColor(server), ImageLookupUtility.GetImageUrl("BROADCAST_IMAGES"));
+                    }
                 }
             }
 
