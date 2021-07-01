@@ -63,11 +63,28 @@ namespace DiscordBot.Commands
             _userTimeZones = userTimeZones;
         }
 
+        [Command("invite")]
+        [Summary("invite the bot to your server!")]
+        public async Task Invite()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed uptime: on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            await ReplyAsync("https://discord.com/api/oauth2/authorize?client_id=832404891379957810&permissions=268443670&scope=bot");
+        }
+
         [Command("uptime")]
         [Alias("proc", "memory")]
         [Summary("Get bot uptime and memory usage")]
         public async Task ProcInfo()
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed uptime: on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             var process = Process.GetCurrentProcess();
             var memoryMb = Math.Round((double)process.PrivateMemorySize64 / (1e+6), 2);
             var startTime = process.StartTime;
