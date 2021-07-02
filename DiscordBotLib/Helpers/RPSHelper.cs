@@ -51,7 +51,7 @@ namespace DiscordBotLib.Helpers
             var message = (SocketUserMessage) cachedEntity.Value;
             var reactingUser = (SocketUser)reaction.User;
 
-            if(reactingUser.IsBot)
+            if(reactingUser.IsBot || message == null)
             {
                 return;
             }
