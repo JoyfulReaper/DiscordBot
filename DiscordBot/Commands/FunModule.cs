@@ -68,6 +68,11 @@ namespace DiscordBot.Commands
         [Summary("Search giphy for some gifs!")]
         public async Task Giphy([Summary("What to search giphy for")][Remainder]string search)
         {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed giphy ({search}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, search, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
             var apiKey = _config.GetSection("GiphyApiKey").Value;
 
             if(String.IsNullOrWhiteSpace(apiKey))
