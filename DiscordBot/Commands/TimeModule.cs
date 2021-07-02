@@ -30,9 +30,11 @@ using DiscordBotLib.Models;
 using DiscordBotLib.Helpers;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using TimeZoneConverter;
 using DiscordBotLib.Services;
+using Discord.Rest;
 
 // TODO Add logging
 
@@ -79,7 +81,7 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            if (!TryParseTimeZone(timeZone, out _))
+            if (!TryParseTimeZone(timeZone, out TimeZoneInfo timeZoneInfo))
             {
                 await Context.Channel.SendEmbedAsync("Invalid Time Zone", "Please provide a valid windows or IANA timezone.",
                     ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
@@ -110,14 +112,14 @@ namespace DiscordBot.Commands
                     };
 
                     await _userTimeZones.AddAsync(userTz);
-                    await Context.Channel.SendEmbedAsync("Succesfully Registered", "Successfully registered your time zone.",
+                    await Context.Channel.SendEmbedAsync("Succesfully Registered", $"Successfully registered your time zone: `{timeZoneInfo.DisplayName}`",
                         ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
                 }
                 else
                 {
                     userTimeZone.TimeZone = timeZone;
                     await _userTimeZones.EditAsync(userTimeZone);
-                    await Context.Channel.SendEmbedAsync("Succesfully Updated", "Successfully updated your time zone.",
+                    await Context.Channel.SendEmbedAsync("Succesfully Updated", $"Successfully updated your time zone: `{timeZoneInfo.DisplayName}`",
                         ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
                 }
             }
@@ -214,26 +216,66 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed time ({timezone}) on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, timeZone, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            if (timeZone == null)
-            {
-                await Context.Channel.SendEmbedAsync("Unable to parse time zone", "Please provide a windows or IANA timezone",
-                    ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+            //if (timeZone == null)
+            //{
+            //    await Context.Channel.SendEmbedAsync("Unable to parse time zone", "Please provide a windows or IANA timezone",
+            //        ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
 
-                return;
-            }
+            //    //return;
+            //}
 
-            TimeZoneInfo tzi;
-            if (!TZConvert.TryGetTimeZoneInfo(timeZone, out tzi))
-            {
-                await Context.Channel.SendEmbedAsync("Invalid Time Zone", $"{timeZone} is *not* a valid windows or IANA timezone.",
-                    ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
-            }
-            else
+            if(timeZone != null && TryParseTimeZone(timeZone, out TimeZoneInfo tzi))
             {
                 DateTime time = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tzi);
                 await Context.Channel.SendEmbedAsync("Current Time", $"The current time in {timeZone} is:\n`{time}`",
                     ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+
+                return;
             }
+            else
+            {
+                await Context.Channel.SendEmbedAsync("Invalid Time Zone", $"{timeZone} is *not* a valid windows or IANA timezone.",
+                    ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+            }
+
+            //TimeZoneInfo tzi;
+            //if (!TZConvert.TryGetTimeZoneInfo(timeZone, out tzi))
+            //{
+            //    await Context.Channel.SendEmbedAsync("Invalid Time Zone", $"{timeZone} is *not* a valid windows or IANA timezone.",
+            //        ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+            //}
+            //else
+            //{
+            //    DateTime time = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tzi);
+            //    await Context.Channel.SendEmbedAsync("Current Time", $"The current time in {timeZone} is:\n`{time}`",
+            //        ColorHelper.GetColor(await _serverService.GetServer(Context.Guild)));
+            //}
+
+            RestGuildUser user = null;
+            if (timeZone != null)
+            {
+                user = (await Context.Guild.SearchUsersAsync(timeZone, 1)).FirstOrDefault();
+            }
+
+            if (user == null)
+            {
+                user = (await Context.Guild.SearchUsersAsync(Context.User.Username)).FirstOrDefault();
+                if(user == null)
+                {
+                    await ReplyAsync("Couldn't find you....");
+                    return;
+                }
+            }
+            var server = await _serverService.GetServer(Context.Guild);
+            var prefix = String.Empty;
+            if (server != null)
+            {
+                prefix = server.Prefix;
+            }
+
+            await ReplyAsync($"The command you are looking for is `{prefix}utime`, but I helped you out anyway!");
+            await UserTime(Context.Guild.GetUser(user.Id));
+
         }
 
         private bool TryParseTimeZone(string timeZone, out TimeZoneInfo tzi)
@@ -241,6 +283,23 @@ namespace DiscordBot.Commands
             tzi = null;
             if (!TZConvert.TryGetTimeZoneInfo(timeZone, out tzi))
             {
+                foreach(string tz in TZConvert.KnownIanaTimeZoneNames)
+                {
+                    if(tz.ToLowerInvariant().Contains(timeZone.ToLowerInvariant()))
+                    {
+                        tzi = TZConvert.GetTimeZoneInfo(tz);
+                        return true;
+                    }
+                }
+
+                foreach (string tz in TZConvert.KnownWindowsTimeZoneIds)
+                {
+                    if (tz.ToLowerInvariant().Contains(timeZone.ToLowerInvariant()))
+                    {
+                        tzi = TZConvert.GetTimeZoneInfo(tz);
+                        return true;
+                    }
+                }
                 return false;
             }
 
