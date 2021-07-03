@@ -79,6 +79,8 @@ namespace DiscordBotLib.Helpers
 
         public static readonly string[] BROADCAST_IMAGES = new string[] { "https://memegenerator.net/img/images/600x600/14916770/spongebob-yelling-at-squidward.jpg", "http://www.phillyemploymentlawyer.com/wp-content/uploads/2016/01/boss-yelling.jpg" };
 
+        public static readonly string[] INVITE_IMAGES = new string[] { "https://i.etsystatic.com/5981074/r/il/1ceb12/820186932/il_1140xN.820186932_nv5d.jpg", "https://www.partyatlewis.com/Merchant2/graphics/00000001/33080.jpg" };
+
         private static readonly Random _random = new Random();
 
         public static string GetImageUrl(string key)

@@ -60,12 +60,19 @@ namespace DiscordBot.Commands
 
         [Command("create")]
         [Summary("Create a note")]
-        public async Task NoteCreate([Summary("Note name")]string name, [Summary("Note Text")][Remainder] string text)
+        public async Task NoteCreate([Summary("Note name")]string name = null, [Summary("Note Text")][Remainder] string text = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
             _logger.LogInformation("{username}#{discriminator} executed note create (Name: {name} Text: {text}) on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, name, text, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            if(text == null || name == null)
+            {
+                var server = await _serverService.GetServer(Context.Guild);
+                await ReplyAsync($"Usage: {server.Prefix}note create {{name}} {{note text}}");
+                return;
+            }
 
             var user = await _userService.GetUser(Context.User);
             var notes = await _noteRepository.GetNotesByUserId(user.UserId);

@@ -105,7 +105,7 @@ namespace DiscordBot
                 .AddLavaNode(x =>
                 {
                     x.SelfDeaf = true;
-                    x.Authorization = "notarealpassword";
+                    x.Authorization = config.GetSection("LavaLinkPassword").Value ?? "youshallnotpass";
                     x.LogSeverity = LogSeverity.Verbose;
                     x.UserAgent = "DiscordBot by JoyfulReaper";
                 })

@@ -39,36 +39,27 @@ using DiscordBotLib.Enums;
 
 namespace DiscordBot.Commands
 {
-    [Name("Moderation")]
+    [Name("Moderation Commands")]
     public class ModerationModule : ModuleBase<SocketCommandContext>
     {
-        private readonly DiscordSocketClient _client;
         private readonly ILogger<ModerationModule> _logger;
         private readonly IServerService _servers;
         private readonly IConfiguration _configuration;
         private readonly IServerRepository _serverRepository;
         private readonly IProfanityRepository _profanityRepository;
-        private readonly IWarningRepository _warningRepository;
-        private readonly IUserRepository _userRepository;
         private readonly int _prefixMaxLength;
 
-        public ModerationModule(DiscordSocketClient client,
-            ILogger<ModerationModule> logger,
+        public ModerationModule(ILogger<ModerationModule> logger,
             IServerService servers,
             IConfiguration configuration,
             IServerRepository serverRepository,
-            IProfanityRepository profanityRepository,
-            IWarningRepository warningRepository,
-            IUserRepository userRepository)
+            IProfanityRepository profanityRepository)
         {
-            _client = client;
             _logger = logger;
             _servers = servers;
             _configuration = configuration;
             _serverRepository = serverRepository;
             _profanityRepository = profanityRepository;
-            _warningRepository = warningRepository;
-            _userRepository = userRepository;
             var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
             if (int.TryParse(prefixConfigValue, out int maxLength))
             {
@@ -78,183 +69,6 @@ namespace DiscordBot.Commands
             {
                 _prefixMaxLength = 8;
                 _logger.LogError("Unable to set max prefix length, using default: {defaultValue}", _prefixMaxLength);
-            }
-        }
-
-        [Command("getwarnings")]
-        [RequireUserPermission(GuildPermission.BanMembers)]
-        [Summary("Get a users warnings")]
-        [Alias("getwarns")]
-        public async Task GetWarnings(SocketGuildUser user)
-        {
-            await Context.Channel.TriggerTypingAsync();
-
-            _logger.LogInformation("{user}#{discriminator} invoked getwarnings ({user}) in {channel} on {server}",
-                Context.User.Username, Context.User.Discriminator, user.Username, user.Username, Context.Channel.Name, Context.Guild?.Name ?? "DM");
-
-            var userDb = await UserHelper.GetOrAddUser(user, _userRepository);
-            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
-            var warnings = await _warningRepository.GetUsersWarnings(server, userDb);
-
-            if(warnings.Count() < 1)
-            {
-                await ReplyAsync($"{user.Username} has not been warned!");
-                return;
-            }
-
-            var warnNum = 1;
-            var message = $"{user.Username} has been warned for:\n";
-            foreach(var w in warnings)
-            {
-                message += $"{warnNum++}) {w.Text}\n";
-            }
-
-            await ReplyAsync(message);
-        }
-
-        [Command("warn")]
-        [RequireUserPermission(GuildPermission.BanMembers)]
-        [RequireBotPermission(GuildPermission.BanMembers)]
-        [Summary("Warn a user")]
-        public async Task Warn([Summary("The user to warn")]SocketGuildUser user, [Summary("The reason for the warning")][Remainder]string reason)
-        {
-            await Context.Channel.TriggerTypingAsync();
-
-            _logger.LogInformation("{user}#{discriminator} warned {user} for {reason} in {channel} on {server}",
-                Context.User.Username, Context.User.Discriminator, user.Username, reason, Context.Channel.Name, Context.Guild?.Name ?? "DM");
-
-            if (user.Id == _client.CurrentUser.Id)
-            {
-                await ReplyAsync("Nice try, but I am immune from warnings!");
-                return;
-            }
-
-            if(user.Id == Context.User.Id)
-            {
-                await ReplyAsync("Lol, you are warning yourself!");
-            }
-
-            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
-            var userDb = await UserHelper.GetOrAddUser(user, _userRepository);
-
-            var warning = new Warning
-            {
-                UserId = userDb.Id,
-                ServerId = server.Id,
-                Text = reason
-            };
-            await _warningRepository.AddAsync(warning);
-
-            var warn = await _warningRepository.GetUsersWarnings(server, userDb);
-            var wAction = await _warningRepository.GetWarningAction(server);
-
-            await Context.Channel.SendEmbedAsync("You have been warned!", $"{user.Mention} you have been warned for: `{reason}`!\n" +
-                $"This is warning #`{warn.Count()}` of `{wAction.ActionThreshold}`\n" +
-                $"The action is set to: { Enum.GetName(typeof(WarningAction), wAction.Action)}",
-                ColorHelper.GetColor(server));
-
-            if(warn.Count() >= wAction.ActionThreshold)
-            {
-                var message = $"The maximum number of warnings has been reached, because of the warn action ";
-                switch (wAction.Action)
-                {
-                    case WarningAction.NoAction:
-                        message += "nothing happens.";
-                        break;
-                    case WarningAction.Kick:
-                        message += $"{user.Username} has been kicked.";
-                        await user.KickAsync("Maximum Warnings Reached!");
-                        break;
-                    case WarningAction.Ban:
-                        message += $"{user.Username} has been banned.";
-                        await user.BanAsync(0, "Maximum Warnings Reached!");
-                        break;
-                    default:
-                        message += "default switch statement :(";
-                        break;
-                }
-
-                await ReplyAsync(message);
-            }
-            await _servers.SendLogsAsync(Context.Guild, $"User Warned", $"{Context.User.Mention} warned {user.Username} for: {reason}", ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
-        }
-
-        [Command("warnaction")]
-        [RequireUserPermission(GuildPermission.Administrator)]
-        [Summary("Change the warn action")]
-        public async Task WarnAction([Summary("Action: none, kick or ban")] string action = null,
-            [Summary("The number of warnings before the action is performed")] int maxWarns = -1)
-        {
-            await Context.Channel.TriggerTypingAsync();
-
-            _logger.LogInformation("{user}#{discriminator} invoked warnaction ({action}, {maxWarns}) messages in {channel} on {server}",
-                Context.User.Username, Context.User.Discriminator, action, maxWarns, Context.Channel.Name, Context.Guild?.Name ?? "DM");
-
-            var server = await _serverRepository.GetByServerId(Context.Guild.Id);
-            if (server == null)
-            {
-                server = new Server { GuildId = Context.Guild.Id };
-                await _serverRepository.AddAsync(server);
-            }
-
-            if (action == null && maxWarns < 0)
-            {
-                var wAction = await _warningRepository.GetWarningAction(server);
-                if (wAction == null)
-                {
-                    await ReplyAsync("The warn action has not been set.");
-                    return;
-                }
-                await Context.Channel.SendEmbedAsync("Warn Action", $"The warn action is set to: `{ Enum.GetName(typeof(WarningAction), wAction.Action)}`. The threshold is: `{wAction.ActionThreshold}`", 
-                    ColorHelper.GetColor(server));
-
-                return;
-            }
-
-            var message = $"Warn action set to `{action.ToLowerInvariant()}`, Max Warnings { maxWarns} by {Context.User.Mention}";
-            bool valid = false;
-            WarnAction warnAction = null;
-
-            if (action.ToLowerInvariant() == "none" && maxWarns > 0)
-            {
-                valid = true;
-                warnAction = new WarnAction
-                {
-                    ServerId = server.Id,
-                    Action = WarningAction.NoAction,
-                    ActionThreshold = maxWarns
-                };
-            }
-            else if (action.ToLowerInvariant() == "kick" && maxWarns > 0)
-            {
-                valid = true;
-                warnAction = new WarnAction
-                {
-                    ServerId = server.Id,
-                    Action = WarningAction.Kick,
-                    ActionThreshold = maxWarns
-                };
-            }
-            else if (action.ToLowerInvariant() == "ban" && maxWarns > 0)
-            {
-                valid = true;
-                warnAction = new WarnAction
-                {
-                    ServerId = server.Id,
-                    Action = WarningAction.Ban,
-                    ActionThreshold = maxWarns
-                };
-            }
-
-            if (valid)
-            {
-                await _warningRepository.SetWarnAction(warnAction);
-                await _servers.SendLogsAsync(Context.Guild, $"Warn Action Set", message, ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
-                await Context.Channel.SendEmbedAsync("Warn Action Set", $"Warn action set to: `{action.ToLowerInvariant()}`. Threshold set to: `{maxWarns}`",
-                    ColorHelper.GetColor(server));
-            } else
-            {
-                await ReplyAsync("Please provide a valid option: `none`, `kick`, `ban` and positive maximum warnings.");
             }
         }
 
@@ -346,7 +160,7 @@ namespace DiscordBot.Commands
 
 
         [Command("profanityfilter")]
-        [Alias("profanity")]
+        [Alias("profanity", "pfilter")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [Summary("Enable or Disable profanity filtering")]
         public async Task ProfanityFilter([Summary("On to allow, censor to censor, delete to delete")] string enabled = null)
@@ -525,149 +339,6 @@ namespace DiscordBot.Commands
                 Context.User.Username, Context.User.Discriminator, Context.Guild.Name, prefix);
         }
 
-        [Command("welcome")]
-        [Summary("Change user welcoming settings")]
-        [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task Welcome(
-            [Summary("Option to change: channel, background or clear")]string option = null,
-            [Summary("Value to assign to the option")]string value = null)
-        {
-            await Context.Channel.TriggerTypingAsync();
-
-            var server = await _servers.GetServer(Context.Guild);
-            if (option == null && value == null)
-            {
-                SendWelcomeChannelInformation(server);
-                return;
-            }
-
-            if(option.ToLowerInvariant() == "channel" && value != null)
-            {
-                SetWelcomeChannelInformation(value);
-                return;
-            }
-
-            if (option.ToLowerInvariant() == "background" && value != null)
-            {
-                SetWelcomeBannerBackgroundInformation(value);
-                return;
-            }
-
-            if(option.ToLowerInvariant() == "clear" && value == null)
-            {
-                await _servers.ClearWelcomeChannel(Context.Guild.Id);
-                await ReplyAsync("Successfully cleared the welcome channel!");
-
-                await _servers.SendLogsAsync(Context.Guild, "Welcome channel cleared", $"{Context.User.Mention} cleared the welcome channel");
-                _logger.LogInformation("Welcome channel cleared by {user} in server {server}", Context.User.Username, Context.Guild.Name);
-                return;
-            }
-
-            if (option.ToLowerInvariant() == "on" && value == null)
-            {
-                server.WelcomeUsers = true;
-                await _serverRepository.EditAsync(server);
-
-                await _servers.SendLogsAsync(Context.Guild, "Welcome Users", $"{Context.User.Mention} set User Welcoming `on`");
-                _logger.LogInformation("User Welcoming enabled by {user} in server {server}", Context.User.Username, Context.Guild.Name);
-
-                await ReplyAsync("User welcoming has been enabled!");
-
-                return;
-            }
-
-            if (option.ToLowerInvariant() == "off" && value == null)
-            {
-                server.WelcomeUsers = false;
-                await _serverRepository.EditAsync(server);
-
-                await _servers.SendLogsAsync(Context.Guild, "Welcome Users", $"{Context.User.Mention} set User Welcoming `off`");
-                _logger.LogInformation("User Welcoming disabled by {user} in server {server}", Context.User.Username, Context.Guild.Name);
-
-                await ReplyAsync("User welcoming has been disabled!");
-
-                return;
-            }
-
-            await ReplyAsync("You did not use this command properly!\n" +
-                "*options:*\n" +
-                "channel (channel): Change welcome channel\n" +
-                "background (image url): Change welcome banner background\n" +
-                "clear: Clear the welcome channel\n" +
-                "on/off: Turn user welcoming `on` or `off`");
-        }
-
-        private async void SetWelcomeChannelInformation(string value)
-        {
-            if (!MentionUtils.TryParseChannel(value, out ulong parserId))
-            {
-                await ReplyAsync("Please pass in a valid channel!");
-                return;
-            }
-
-            var parsedChannel = Context.Guild.GetTextChannel(parserId);
-            if (parsedChannel == null)
-            {
-                await ReplyAsync("Please pass in a valid channel!");
-                return;
-            }
-
-            await _servers.ModifyWelcomeChannel(Context.Guild.Id, parserId);
-            await ReplyAsync($"Successfully modified the welcome channel to {parsedChannel.Mention}");
-            await _servers.SendLogsAsync(Context.Guild, "Welcome Channel Modified", $"{Context.User} modified the welcome channel to {value}");
-
-            _logger.LogInformation("Welcome channel modified to {channel} by {user} in {server}",
-                value, Context.Channel.Name, Context.User);
-        }
-
-        private async void SendWelcomeChannelInformation(Server server)
-        {
-            if (!server.WelcomeUsers)
-            {
-                await ReplyAsync("User welcoming is *`not`* enabled!");
-            }
-
-            var welcomeChannelId = server.WelcomeChannel;
-            if (welcomeChannelId == 0)
-            {
-                await ReplyAsync("The welcome channel has not yet been set!");
-                return;
-            }
-
-            var welcomeChannel = Context.Guild.GetTextChannel(welcomeChannelId);
-            if (welcomeChannel == null)
-            {
-                await ReplyAsync("The welcome channel has not yet been set!");
-                await _servers.ClearWelcomeChannel(Context.Guild.Id);
-                return;
-            }
-
-            var welcomeBackground = await _servers.GetBackground(Context.Guild.Id);
-            if (welcomeBackground != null)
-            {
-                await ReplyAsync($"The welcome channel is {welcomeChannel.Mention}.\nThe background is {welcomeBackground}.");
-            }
-            else
-            {
-                await ReplyAsync($"The welcome channel is {welcomeChannel.Mention}.\nThe background is not set.");
-            }
-        }
-
-        private async void SetWelcomeBannerBackgroundInformation(string value)
-        {
-            if (value == "clear")
-            {
-                await _servers.ClearBackground(Context.Guild.Id);
-                await ReplyAsync("Successfully cleared background!");
-                await _servers.SendLogsAsync(Context.Guild, "Background cleared", $"{Context.User} cleared the welcome image background.");
-                return;
-            }
-
-            await _servers.ModifyWelcomeBackground(Context.Guild.Id, value);
-            await _servers.SendLogsAsync(Context.Guild, "Background Modified", $"{Context.User} modified the welcome image background to {value}");
-            _logger.LogInformation("Background image modified to {image} by {user} in {server}", value, Context.User, Context.Guild.Name);
-            await ReplyAsync($"Successfully modified the background to {value}");
-        }
 
         [Command("mute")]
         [Summary("mute a user")]
@@ -776,6 +447,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("logs")]
+        [Alias("log")]
         [Summary("Change logging settings")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Logs([Summary("Option: channel or clear")]string option = null, [Summary("Channel to log to")]string value = null)

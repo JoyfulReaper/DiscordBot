@@ -45,13 +45,15 @@ namespace DiscordBot.Commands
         private readonly IDiscordBotSettingsRepository _discordBotSettingsRepository;
         private readonly LavaNode _lavaNode;
         private readonly IServerService _servers;
+        private readonly IServerRepository _serverRepository;
 
         public OwnerModule(DiscordSocketClient client,
             ISettings settings,
             ILogger<OwnerModule> logger,
             IDiscordBotSettingsRepository discordBotSettingsRepository,
             LavaNode lavaNode,
-            IServerService servers)
+            IServerService servers,
+            IServerRepository serverRepository)
         {
             _client = client;
             _settings = settings;
@@ -59,6 +61,7 @@ namespace DiscordBot.Commands
             _discordBotSettingsRepository = discordBotSettingsRepository;
             _lavaNode = lavaNode;
             _servers = servers;
+            _serverRepository = serverRepository;
         }
 
         [Command("broadcast")]
@@ -74,12 +77,13 @@ namespace DiscordBot.Commands
             var sent = 0;
             foreach (var guild in _client.Guilds)
             {
-                var server = await _servers.GetServer(guild);
+                //var server = await _servers.GetServer(guild);
+                var server = await ServerHelper.GetOrAddServer(guild.Id, _serverRepository);
                 if(server.LoggingChannel != 0)
                 {
                     // Logging channel set
                     var channel = _client.GetChannel(server.LoggingChannel) as ISocketMessageChannel;
-                    if(channel != null)
+                    if (channel != null)
                     {
                         await channel.SendEmbedAsync("Owner Broadcast Message", $"Message: {message}", ColorHelper.GetColor(server), ImageLookupUtility.GetImageUrl("BROADCAST_IMAGES"));
                     }
@@ -89,11 +93,20 @@ namespace DiscordBot.Commands
                 {
                     // Logging channel not set
                     var owner = guild.Owner as SocketUser;
-                    var ownerChannel = await owner?.GetOrCreateDMChannelAsync() as SocketDMChannel;
+                    var ownerChannel = await owner?.GetOrCreateDMChannelAsync();
                     if (ownerChannel != null)
                     {
-                        await ownerChannel.SendEmbedAsync("Owner Broadcast Message", $"Message: {message}\n" +
-                            $"Set the logging channel with: {server.Prefix}logs channel {{channelMention}} to avoid DMs from the bot!", ColorHelper.GetColor(server), ImageLookupUtility.GetImageUrl("BROADCAST_IMAGES"));
+                        //await ownerChannel.SendEmbedAsync("Owner Broadcast Message", $"Message: {message}\n" +
+                        //    $"Set the logging channel with: {server.Prefix}logs channel {{channelMention}} to avoid DMs from the bot!", ColorHelper.GetColor(server), ImageLookupUtility.GetImageUrl("BROADCAST_IMAGES"));
+                        EmbedBuilder builder = new EmbedBuilder();
+                        builder.Title = "Owner Broadcast Message";
+                        builder.Description = $"Message: { message}\n" +
+                            $"Set the logging channel with: {server.Prefix}logs channel {{channelMention}} to avoid DMs from the bot!";
+                        builder.Color = ColorHelper.GetColor(server);
+                        builder.ThumbnailUrl = ImageLookupUtility.GetImageUrl("BROADCAST_IMAGES");
+                        builder.WithCurrentTimestamp();
+
+                        await ownerChannel.SendMessageAsync(null, false, builder.Build());
                     }
                 }
             }
