@@ -47,19 +47,22 @@ namespace DiscordBot.Commands
         private readonly IConfiguration _configuration;
         private readonly IServerRepository _serverRepository;
         private readonly IProfanityRepository _profanityRepository;
+        private readonly DiscordSocketClient _client;
         private readonly int _prefixMaxLength;
 
         public ModerationModule(ILogger<ModerationModule> logger,
             IServerService servers,
             IConfiguration configuration,
             IServerRepository serverRepository,
-            IProfanityRepository profanityRepository)
+            IProfanityRepository profanityRepository,
+            DiscordSocketClient client)
         {
             _logger = logger;
             _servers = servers;
             _configuration = configuration;
             _serverRepository = serverRepository;
             _profanityRepository = profanityRepository;
+            _client = client;
             var prefixConfigValue = _configuration.GetSection("PrefixMaxLength").Value;
             if (int.TryParse(prefixConfigValue, out int maxLength))
             {
@@ -472,7 +475,10 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            await ReplyAsync("You did not use this command properly!");
+            var server =await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
+            await ReplyAsync($"You did not use this command properly!\n" +
+                $"use `{server.Prefix}logs channel {{channel}}` to set the logging channel\n" +
+                $"use `{server.Prefix}logs clear` to clear the logging channel.");
         }
 
         private async void SetLoggingChannelInformation(string value)
@@ -492,6 +498,13 @@ namespace DiscordBot.Commands
 
             await _servers.ModifyLoggingChannel(Context.Guild.Id, parserId);
             await ReplyAsync($"Successfully modified the logging channel to {parsedChannel.Mention}");
+
+            var perms = Context.Guild.CurrentUser.GetPermissions(parsedChannel);
+            if (!perms.SendMessages)
+            {
+                await ReplyAsync("`Warning` the bot does not have permisson to send messages to the logging channel!");
+            }
+
             _logger.LogInformation("{user} set the logging channel to {value} for {server}",
                 Context.User.Username, value, Context.Guild.Name);
         }
@@ -505,8 +518,8 @@ namespace DiscordBot.Commands
                 return;
             }
 
-            var welcomeChannel = Context.Guild.GetTextChannel(loggingChannelId);
-            if (welcomeChannel == null)
+            var loggingChannel = Context.Guild.GetTextChannel(loggingChannelId);
+            if (loggingChannel == null)
             {
                 await ReplyAsync("The logging channel has not yet been set!");
                 await _servers.ClearLoggingChannel(Context.Guild.Id);
@@ -514,7 +527,12 @@ namespace DiscordBot.Commands
             }
             else
             {
-                await ReplyAsync($"The logging channel is {welcomeChannel.Mention}");
+                var perms = Context.Guild.CurrentUser.GetPermissions(loggingChannel);
+                if(!perms.SendMessages)
+                {
+                    await ReplyAsync("`Warning` the bot does not have permisson to send messages to the logging channel!");
+                }
+                await ReplyAsync($"The logging channel is {loggingChannel.Mention}");
             }
         }
 

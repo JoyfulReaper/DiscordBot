@@ -53,6 +53,18 @@ namespace DiscordBotLib.Helpers
                 embed.WithThumbnailUrl(thumbnailUrl);
             }
 
+            IMessage message = null;
+            try
+            {
+                message = await channel.SendMessageAsync(embed: embed.Build());
+            } catch (Discord.Net.HttpException)
+            {
+                // The bot does not have access to the logging channel, WUT SHOULD WE DO?
+                // We don't really have any good options, the only thing we can send a message
+                // to is the channel we don't have access to.
+                // So for now I think we will just eat the exception... YUMMY!
+            }
+
             ServerLogItemCreateDto serverLogItem = new ServerLogItemCreateDto
             {
                 Guild = new GuildCreateDto { GuildId = channel.Guild.Id, GuildName = channel.Guild.Name },
@@ -78,7 +90,6 @@ namespace DiscordBotLib.Helpers
                 throw new ArgumentNullException(nameof(apiService));
             }
 
-            var message = await channel.SendMessageAsync(embed: embed.Build());
             return message;
         }
     }
