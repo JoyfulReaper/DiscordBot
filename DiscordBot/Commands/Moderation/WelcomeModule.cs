@@ -384,6 +384,13 @@ namespace DiscordBot.Commands.Moderation
             //}
 
             await _servers.ModifyWelcomeChannel(Context.Guild.Id, channel.Id);
+
+            var perms = Context.Guild.CurrentUser.GetPermissions(Context.Guild.GetTextChannel(channel.Id));
+            if (!perms.SendMessages)
+            {
+                await ReplyAsync("`Warning` the bot does not have permisson to send messages to the welcome channel!");
+            }
+
             await ReplyAsync($"Successfully modified the welcome channel to {channel.Mention}");
             await _servers.SendLogsAsync(Context.Guild, "Welcome Channel Modified", $"{Context.User} modified the welcome channel to {channel.Mention}");
 
@@ -416,6 +423,11 @@ namespace DiscordBot.Commands.Moderation
             }
             else
             {
+                var perms = Context.Guild.CurrentUser.GetPermissions(Context.Guild.GetTextChannel(welcomeChannelId));
+                if (!perms.SendMessages)
+                {
+                    await ReplyAsync("`Warning` the bot does not have permisson to send messages to the welcome channel!");
+                }
                 await ReplyAsync($"The welcome channel is {Context.Guild.GetTextChannel(welcomeChannelId).Mention}");
             }
 
