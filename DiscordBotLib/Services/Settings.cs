@@ -34,7 +34,7 @@ namespace DiscordBotLib.Services
 {
     public class Settings : ISettings
     {
-        public String InviteLink { get; private set; }
+        public string InviteLink { get; private set; }
 
         public Type DbConnectionType { get; private set; }
 
@@ -163,7 +163,7 @@ namespace DiscordBotLib.Services
             if (!ulong.TryParse(_configuration.GetSection("OwnerUserId").Value, out ulong ownerId))
             {
                 OwnerUserId = 397107333341118468;
-                _logger.LogWarning("Unable to parse UseDiscordBotApi, using {value}", OwnerUserId);
+                _logger.LogWarning("Unable to parse OwnerUserId, using {value}", OwnerUserId);
             }
             else
             {
