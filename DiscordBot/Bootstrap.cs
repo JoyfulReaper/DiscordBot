@@ -135,7 +135,9 @@ namespace DiscordBot
                 .AddSingleton<IProfanityRepository, ProfanityRepository>()
                 .AddSingleton<IUserRepository, UserRepository>()
                 .AddSingleton<INoteRepository, NoteRepository>()
-                .AddSingleton<IWarningRepository, WarningRepository>();
+                .AddSingleton<IWarningRepository, WarningRepository>()
+                .AddSingleton<IWelcomeMessageRepository, WelcomeMessageRepository>()
+                .AddSingleton<IPartMessageRepository, PartMessageRepository>();
 
 
             switch(database)

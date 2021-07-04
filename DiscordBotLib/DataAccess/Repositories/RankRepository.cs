@@ -70,8 +70,11 @@ namespace DiscordBotLib.DataAccess.Repositories
 
         public async override Task AddAsync(Rank entity)
         {
-            await ExecuteAsync($"INSERT INTO {TableName} (ServerId, RoleId) " +
-                $"VALUES (@ServerId, @RoleId);", new { ServerId = entity.ServerId, RoleId = entity.RoleId });
+            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (ServerId, RoleId) " +
+                $"VALUES (@ServerId, @RoleId); select last_insert_rowid();",
+                new { ServerId = entity.ServerId, RoleId = entity.RoleId });
+
+            entity.Id = queryResult;
         }
 
         public async override Task DeleteAsync(Rank entity)

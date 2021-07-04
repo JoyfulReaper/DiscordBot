@@ -34,7 +34,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess.Repositories
 {
-    public class WelcomeMessageRepository : Repository<WelcomeMessage>
+    public class WelcomeMessageRepository : Repository<WelcomeMessage>, IWelcomeMessageRepository
     {
         private readonly ILogger<WelcomeMessageRepository> _logger;
         private readonly ISettings _settings;
@@ -42,7 +42,7 @@ namespace DiscordBotLib.DataAccess.Repositories
 
         public WelcomeMessageRepository(ILogger<WelcomeMessageRepository> logger,
             ISettings settings,
-            IServerRepository serverRepository) : base (settings, logger)
+            IServerRepository serverRepository) : base(settings, logger)
         {
             _settings = settings;
             _serverRepository = serverRepository;
@@ -63,16 +63,17 @@ namespace DiscordBotLib.DataAccess.Repositories
 
         public async Task<List<WelcomeMessage>> GetWelcomeMessagesByServerId(ulong serverId)
         {
-            var server = await GetServerOrThrow(serverId);
-
-            var queryResult = await QueryAsync<WelcomeMessage>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId;", new { ServerId = server.Id });
+            var queryResult = await QueryAsync<WelcomeMessage>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId;", new { ServerId = serverId });
             return queryResult.ToList();
         }
 
         public async override Task AddAsync(WelcomeMessage entity)
         {
-            await ExecuteAsync($"INSERT INTO {TableName} (ServerId, Message) " +
-                $"VALUES (@ServerId, @Message);", new { ServerId = entity.ServerId, Message = entity.Message });
+            var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (ServerId, Message) " +
+                $"VALUES (@ServerId, @Message); select last_insert_rowid();",
+                new { ServerId = entity.ServerId, Message = entity.Message });
+
+            entity.Id = queryResult;
         }
 
         public async override Task DeleteAsync(WelcomeMessage entity)

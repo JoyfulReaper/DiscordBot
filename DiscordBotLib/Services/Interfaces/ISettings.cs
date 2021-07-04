@@ -30,14 +30,42 @@ namespace DiscordBotLib.Services
 {
     public interface ISettings
     {
+        /// <summary>
+        /// The invite line to send when invite command is invoked
+        /// </summary>
         string InviteLink { get; }
+
         Type DbConnectionType { get; }
+
+        /// <summary>
+        /// Turn API intergration on or off
+        /// </summary>
         bool UseDiscordBotApi { get; set; }
+
+        /// <summary>
+        /// Base address of the API
+        /// </summary>
         string ApiBaseAddress { get; set; }
+
+        /// <summary>
+        /// Username for the API
+        /// </summary>
         string ApiUserName { get; set; }
+
+        /// <summary>
+        /// Password for the API
+        /// </summary>
         string ApiPassword { get; set; }
 
+        /// <summary>
+        /// Maximum number of notes each user can have
+        /// </summary>
         public int MaxUserNotes { get; set; }
+
+        /// <summary>
+        /// Maximum number of welcome/part messages each server can have
+        /// </summary>
+        public int MaxWelcomeMessages { get; set; }
 
         /// <summary>
         /// Development Guild

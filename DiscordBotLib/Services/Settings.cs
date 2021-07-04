@@ -99,6 +99,8 @@ namespace DiscordBotLib.Services
 
         public int MaxUserNotes { get; set; }
 
+        public int MaxWelcomeMessages { get; set; }
+
         /// <summary>
         /// True to intergrate with DiscordBotApi, fale to not intergrate
         /// </summary>
@@ -197,6 +199,16 @@ namespace DiscordBotLib.Services
             {
                 MaxUserNotes = 1;
                 _logger.LogWarning("Unable to parse MaxUserNotes, using: {MaxUserNotes}", MaxUserNotes);
+            }
+
+            if (!int.TryParse(_configuration.GetSection("MaxWelcomeMessages").Value, out int max))
+            {
+                MaxWelcomeMessages = 10;
+                _logger.LogWarning("Unable to parse MaxWelcomeMessages, using {value}", MaxWelcomeMessages);
+            }
+            else
+            {
+                MaxWelcomeMessages = max;
             }
         }
     }
