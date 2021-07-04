@@ -67,6 +67,14 @@ namespace DiscordBotLib.DataAccess.Repositories
             return queryResult.ToList();
         }
 
+        public async Task<PartMessage> GetPartMessagesById(ulong serverId, ulong messageId)
+        {
+            var queryResult = await QueryAsync<PartMessage>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId AND Id = @MessageId;", 
+                new { ServerId = serverId, MessageId = messageId });
+
+            return queryResult.SingleOrDefault();
+        }
+
         public async override Task AddAsync(PartMessage entity)
         {
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (ServerId, Message) " +
@@ -85,8 +93,8 @@ namespace DiscordBotLib.DataAccess.Repositories
         {
             var server = await GetServerOrThrow(serverId);
 
-            await ExecuteAsync($"DELETE FROM {TableName} WHERE ServerId = @ServerId AND MessageId = @MessageId;",
-                new { ServerId = server.Id, MessageId = messageId });
+            await ExecuteAsync($"DELETE FROM {TableName} WHERE ServerId = @ServerId AND Id = @Id;",
+                new { ServerId = serverId, Id = messageId });
         }
 
         public async override Task EditAsync(PartMessage entity)

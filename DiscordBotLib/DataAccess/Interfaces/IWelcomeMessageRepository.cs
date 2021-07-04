@@ -33,8 +33,9 @@ namespace DiscordBotLib.DataAccess
     {
         Task AddAsync(WelcomeMessage entity);
         Task DeleteAsync(WelcomeMessage entity);
-        Task DeletePartMessage(ulong serverId, ulong messageId);
+        Task DeleteWelcomeMessage(ulong serverId, ulong messageId);
         Task EditAsync(WelcomeMessage entity);
         Task<List<WelcomeMessage>> GetWelcomeMessagesByServerId(ulong serverId);
+        Task<PartMessage> GetWelcomeMessagesById(ulong serverId, ulong messageId);
     }
 }

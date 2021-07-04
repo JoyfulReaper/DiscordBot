@@ -67,6 +67,14 @@ namespace DiscordBotLib.DataAccess.Repositories
             return queryResult.ToList();
         }
 
+        public async Task<PartMessage> GetWelcomeMessagesById(ulong serverId, ulong messageId)
+        {
+            var queryResult = await QueryAsync<PartMessage>($"SELECT * FROM {TableName} WHERE ServerId = @ServerId AND Id = @MessageId;",
+                new { ServerId = serverId, MessageId = messageId });
+
+            return queryResult.SingleOrDefault();
+        }
+
         public async override Task AddAsync(WelcomeMessage entity)
         {
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (ServerId, Message) " +
@@ -81,12 +89,10 @@ namespace DiscordBotLib.DataAccess.Repositories
             await ExecuteAsync($"DELETE FROM {TableName} WHERE ID = @Id;", new { Id = entity.Id });
         }
 
-        public async Task DeletePartMessage(ulong serverId, ulong messageId)
+        public async Task DeleteWelcomeMessage(ulong serverId, ulong messageId)
         {
-            var server = await GetServerOrThrow(serverId);
-
-            await ExecuteAsync($"DELETE FROM {TableName} WHERE ServerId = @ServerId AND MessageId = @MessageId;",
-                new { ServerId = server.Id, MessageId = messageId });
+            await ExecuteAsync($"DELETE FROM {TableName} WHERE ServerId = @ServerId AND Id = @Id;",
+                new { ServerId = serverId, Id = messageId });
         }
 
         public async override Task EditAsync(WelcomeMessage entity)

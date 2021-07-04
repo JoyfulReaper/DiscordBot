@@ -63,6 +63,50 @@ namespace DiscordBot.Commands.Moderation
             _settings = settings;
         }
 
+        [Command("removepart")]
+        [Alias("rpart")]
+        [Summary("Remove part messages")]
+        public async Task RemoveWelcomeMessages([Summary("The id of the message to delete")]ulong id)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked welcome removepart in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, Context.Channel.Name, Context.Guild.Name);
+
+            var message = await _partMessageRepository.GetPartMessagesById(Context.Guild.Id, id);
+            if (message == null)
+            {
+                await ReplyAsync("Message does not exist!");
+                return;
+            }
+
+            await _partMessageRepository.DeletePartMessage(Context.Guild.Id, id);
+            await _servers.SendLogsAsync(Context.Guild, "Part Message Deleted", $"{Context.User.Mention} deleted part message: `{message.Message}`");
+            await ReplyAsync("Part message delete!");
+        }
+
+        [Command("removejoin")]
+        [Alias("rjoin")]
+        [Summary("Remove join message")]
+        public async Task RemovePartMessage([Summary("The id of the message to delete")] ulong id)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked welcome removejoin in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, Context.Channel.Name, Context.Guild.Name);
+
+            var message = await _welcomeMessageRepository.GetWelcomeMessagesById(Context.Guild.Id, id);
+            if (message == null)
+            {
+                await ReplyAsync("Message does not exist!");
+                return;
+            }
+
+            await _welcomeMessageRepository.DeleteWelcomeMessage(Context.Guild.Id, id);
+            await _servers.SendLogsAsync(Context.Guild, "Welcome Message Deleted", $"{Context.User.Mention} deleted part message: `{message.Message}`");
+            await ReplyAsync("Welcome message delete!");
+        }
+
         [Command("show")]
         [Summary("Show join and part messages")]
         public async Task ShowMessages()
@@ -79,7 +123,7 @@ namespace DiscordBot.Commands.Moderation
             output.AppendLine("`Welcome messages:`");
             for (int i = 0; i < welcomeMessages.Count; i++)
             {
-                output.AppendLine($"{i + 1}: {welcomeMessages[i].Message}");
+                output.AppendLine($"{i + 1}: {welcomeMessages[i].Message} (Id: {welcomeMessages[i].Id})");
             }
 
             if (welcomeMessages.Count > 0)
@@ -95,7 +139,7 @@ namespace DiscordBot.Commands.Moderation
             output.AppendLine("`Part messages:`");
             for (int i = 0; i < partMessages.Count; i++)
             {
-                output.AppendLine($"{i + 1}: {partMessages[i].Message}");
+                output.AppendLine($"{i + 1}: {partMessages[i].Message} (Id: {partMessages[i].Id})");
             }
 
             if (partMessages.Count > 0)

@@ -36,5 +36,6 @@ namespace DiscordBotLib.DataAccess
         Task DeletePartMessage(ulong serverId, ulong messageId);
         Task EditAsync(PartMessage entity);
         Task<List<PartMessage>> GetPartMessagesByServerId(ulong serverId);
+        Task<PartMessage> GetPartMessagesById(ulong serverId, ulong messageId);
     }
 }
