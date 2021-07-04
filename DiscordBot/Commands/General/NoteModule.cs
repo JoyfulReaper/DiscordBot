@@ -60,6 +60,7 @@ namespace DiscordBot.Commands
 
         [Command("create")]
         [Summary("Create a note")]
+        [Alias("add")]
         public async Task NoteCreate([Summary("Note name")]string name = null, [Summary("Note Text")][Remainder] string text = null)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -96,6 +97,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("list")]
+        [Alias("show")]
         [Summary("list user notes")]
         public async Task NoteList()
         {
@@ -123,6 +125,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("delete")]
+        [Alias("remove")]
         [Summary("delete user notes")]
         public async Task NoteDelete([Summary("The name of the note to delete")]string name)
         {
@@ -146,6 +149,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("show")]
+        [Alias("read")]
         [Summary("show user note")]
         public async Task NoteShow([Summary("The name of the note to show")][Remainder] string name)
         {
