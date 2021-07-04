@@ -82,6 +82,7 @@ namespace DiscordBotLib.DataAccess.Repositories
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} (Text, Name, UserId) " +
                 $"VALUES (@Text, @Name, @UserId); select last_insert_rowid();",
                 entity);
+
             entity.Id = queryResult;
         }
 

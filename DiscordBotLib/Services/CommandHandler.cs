@@ -46,7 +46,10 @@ namespace DiscordBotLib.Services
         private readonly IServerService _servers;
         private readonly BannerImageService _bannerImageService;
         private readonly IAutoRoleService _autoRoleService;
+        private readonly IProfanityRepository _profanityRepository;
         private readonly IApiService _apiService;
+        private readonly IWelcomeMessageRepository _welcomeMessageRepository;
+        private readonly IPartMessageRepository _partMessageRepository;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
@@ -57,7 +60,9 @@ namespace DiscordBotLib.Services
             BannerImageService bannerImageService,
             IAutoRoleService autoRoleService,
             IProfanityRepository profanityRepository,
-            IApiService apiService)
+            IApiService apiService,
+            IWelcomeMessageRepository welcomeMessageRepository,
+            IPartMessageRepository partMessageRepository)
         {
             _client = client;
             _commands = commands;
@@ -67,7 +72,10 @@ namespace DiscordBotLib.Services
             _servers = servers;
             _bannerImageService = bannerImageService;
             _autoRoleService = autoRoleService;
+            _profanityRepository = profanityRepository;
             _apiService = apiService;
+            _welcomeMessageRepository = welcomeMessageRepository;
+            _partMessageRepository = partMessageRepository;
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
             _client.ReactionAdded += OnReactionAdded;
@@ -195,7 +203,19 @@ namespace DiscordBotLib.Services
                     return;
                 }
 
-                await channel.SendMessageAsync($"{userJoining.Mention} {_settings.WelcomeMessage}");
+                var welcomeMessages = await _welcomeMessageRepository.GetWelcomeMessagesByServerId(userJoining.Guild.Id);
+                if (welcomeMessages.Count < 1)
+                {
+                    await channel.SendMessageAsync($"{userJoining.Mention} {_settings.WelcomeMessage}");
+                }
+                else
+                {
+                    var message = welcomeMessages.RandomItem().Message;
+                    message = message.Replace("{username}", userJoining.Username);
+                    message = message.Replace("{mention}", userJoining.Mention);
+
+                    await channel.SendMessageAsync(message);
+                }
 
                 var background = await _servers.GetBackground(userJoining.Guild.Id);
                 var memoryStream = await _bannerImageService.CreateImage(userJoining, background);
@@ -224,7 +244,21 @@ namespace DiscordBotLib.Services
                     return;
                 }
 
-                await channel.SendMessageAsync($"{userParting.Username} {_settings.PartingMessage}");
+                var partMessages = await _partMessageRepository.GetPartMessagesByServerId(userParting.Guild.Id);
+                if (partMessages.Count < 1)
+                {
+                    await channel.SendMessageAsync($"{userParting.Username} {_settings.PartingMessage}");
+                }
+                else
+                {
+                    var message = partMessages.RandomItem().Message;
+                    message = message.Replace("{username}", userParting.Username);
+                    message = message.Replace("{mention}", userParting.Username); //You can't mention a used that left!!
+
+                    await channel.SendMessageAsync(message);
+                }
+
+                
             }
         }
 

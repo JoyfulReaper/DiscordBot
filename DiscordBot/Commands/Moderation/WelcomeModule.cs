@@ -29,8 +29,10 @@ using Discord.WebSocket;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Helpers;
 using DiscordBotLib.Models;
+using DiscordBotLib.Models.DatabaseEntities;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Commands.Moderation
@@ -42,15 +44,168 @@ namespace DiscordBot.Commands.Moderation
         private readonly IServerService _servers;
         private readonly ILogger<WelcomeModule> _logger;
         private readonly IServerRepository _serverRepository;
+        private readonly IWelcomeMessageRepository _welcomeMessageRepository;
+        private readonly IPartMessageRepository _partMessageRepository;
+        private readonly ISettings _settings;
 
         public WelcomeModule(IServerService servers,
             ILogger<WelcomeModule> logger,
-            IServerRepository serverRepository)
+            IServerRepository serverRepository,
+            IWelcomeMessageRepository welcomeMessageRepository,
+            IPartMessageRepository partMessageRepository,
+            ISettings settings)
         {
             _servers = servers;
             _logger = logger;
             _serverRepository = serverRepository;
+            _welcomeMessageRepository = welcomeMessageRepository;
+            _partMessageRepository = partMessageRepository;
+            _settings = settings;
         }
+
+        [Command("removepart")]
+        [Alias("rpart")]
+        [Summary("Remove part messages")]
+        public async Task RemoveWelcomeMessages([Summary("The id of the message to delete")]ulong id)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked welcome removepart in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, Context.Channel.Name, Context.Guild.Name);
+
+            var message = await _partMessageRepository.GetPartMessagesById(Context.Guild.Id, id);
+            if (message == null)
+            {
+                await ReplyAsync("Message does not exist!");
+                return;
+            }
+
+            await _partMessageRepository.DeletePartMessage(Context.Guild.Id, id);
+            await _servers.SendLogsAsync(Context.Guild, "Part Message Deleted", $"{Context.User.Mention} deleted part message: `{message.Message}`");
+            await ReplyAsync("Part message delete!");
+        }
+
+        [Command("removejoin")]
+        [Alias("rjoin")]
+        [Summary("Remove join message")]
+        public async Task RemovePartMessage([Summary("The id of the message to delete")] ulong id)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked welcome removejoin in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, Context.Channel.Name, Context.Guild.Name);
+
+            var message = await _welcomeMessageRepository.GetWelcomeMessagesById(Context.Guild.Id, id);
+            if (message == null)
+            {
+                await ReplyAsync("Message does not exist!");
+                return;
+            }
+
+            await _welcomeMessageRepository.DeleteWelcomeMessage(Context.Guild.Id, id);
+            await _servers.SendLogsAsync(Context.Guild, "Welcome Message Deleted", $"{Context.User.Mention} deleted part message: `{message.Message}`");
+            await ReplyAsync("Welcome message delete!");
+        }
+
+        [Command("show")]
+        [Summary("Show join and part messages")]
+        public async Task ShowMessages()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked welcome show in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, Context.Channel.Name, Context.Guild.Name);
+
+            var welcomeMessages = await _welcomeMessageRepository.GetWelcomeMessagesByServerId(Context.Guild.Id);
+            var partMessages = await _partMessageRepository.GetPartMessagesByServerId(Context.Guild.Id);
+
+            StringBuilder output = new StringBuilder();
+            output.AppendLine("`Welcome messages:`");
+            for (int i = 0; i < welcomeMessages.Count; i++)
+            {
+                output.AppendLine($"{i + 1}: {welcomeMessages[i].Message} (Id: {welcomeMessages[i].Id})");
+            }
+
+            if (welcomeMessages.Count > 0)
+            {
+                await ReplyAsync(output.ToString());
+            }
+            else
+            {
+                await ReplyAsync("No Custom Welcome messages have been set!");
+            }
+
+            output = new StringBuilder();
+            output.AppendLine("`Part messages:`");
+            for (int i = 0; i < partMessages.Count; i++)
+            {
+                output.AppendLine($"{i + 1}: {partMessages[i].Message} (Id: {partMessages[i].Id})");
+            }
+
+            if (partMessages.Count > 0)
+            {
+                await ReplyAsync(output.ToString());
+            }
+            else
+            {
+                await ReplyAsync("No Custom Part messages have been set!");
+            }
+        }
+
+        [Command("join")]
+        [Summary("Add a join message")]
+        public async Task JoinMessage([Remainder][Summary("The join message to add")] string message)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked welcome join ({message}) in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, message, Context.Channel.Name, Context.Guild.Name);
+
+            var messages = await _welcomeMessageRepository.GetWelcomeMessagesByServerId(Context.Guild.Id);
+            if(messages.Count >= _settings.MaxWelcomeMessages)
+            {
+                await ReplyAsync("You have reached the maximum allowed number of welcome messages");
+                return;
+            }
+
+            var welcomeMessage = new WelcomeMessage
+            {
+                ServerId = Context.Guild.Id,
+                Message = message
+            };
+
+            await _welcomeMessageRepository.AddAsync(welcomeMessage);
+            await _servers.SendLogsAsync(Context.Guild, "Welcome Message", $"{Context.User.Mention} added welcome message: `{message}`");
+            await ReplyAsync("Welcome message added!");
+        }
+
+        [Command("part")]
+        [Summary("Add a part message")]
+        public async Task PartMessage([Remainder][Summary("The part message to add")] string message)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked welcome part ({message}) in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, message, Context.Channel.Name, Context.Guild.Name);
+
+            var messages = await _partMessageRepository.GetPartMessagesByServerId(Context.Guild.Id);
+            if (messages.Count >= _settings.MaxWelcomeMessages)
+            {
+                await ReplyAsync("You have reached the maximum allowed number of part messages");
+                return;
+            }
+
+            var partMessage = new PartMessage
+            {
+                ServerId = Context.Guild.Id,
+                Message = message
+            };
+
+            await _partMessageRepository.AddAsync(partMessage);
+            await _servers.SendLogsAsync(Context.Guild, "Part Message", $"{Context.User.Mention} added part message: `{message}`");
+            await ReplyAsync("Part message added!");
+        }
+
 
         [Command("setting")]
         [Summary("Enable or disable user welcoming")]
@@ -229,6 +384,13 @@ namespace DiscordBot.Commands.Moderation
             //}
 
             await _servers.ModifyWelcomeChannel(Context.Guild.Id, channel.Id);
+
+            var perms = Context.Guild.CurrentUser.GetPermissions(Context.Guild.GetTextChannel(channel.Id));
+            if (!perms.SendMessages)
+            {
+                await ReplyAsync("`Warning` the bot does not have permisson to send messages to the welcome channel!");
+            }
+
             await ReplyAsync($"Successfully modified the welcome channel to {channel.Mention}");
             await _servers.SendLogsAsync(Context.Guild, "Welcome Channel Modified", $"{Context.User} modified the welcome channel to {channel.Mention}");
 
@@ -261,6 +423,11 @@ namespace DiscordBot.Commands.Moderation
             }
             else
             {
+                var perms = Context.Guild.CurrentUser.GetPermissions(Context.Guild.GetTextChannel(welcomeChannelId));
+                if (!perms.SendMessages)
+                {
+                    await ReplyAsync("`Warning` the bot does not have permisson to send messages to the welcome channel!");
+                }
                 await ReplyAsync($"The welcome channel is {Context.Guild.GetTextChannel(welcomeChannelId).Mention}");
             }
 
