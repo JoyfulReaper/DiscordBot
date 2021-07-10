@@ -75,7 +75,7 @@ namespace DiscordBot.Commands
             _logger.LogInformation("{username}#{discriminator} executed uptime: on {server}/{channel}",
                 Context.User.Username, Context.User.Discriminator, Context.Guild?.Name ?? "DM", Context.Channel.Name);
 
-            await Context.Channel.SendEmbedAsync("Invite Link", $"Follow the link to invite DiscordBot!\n{_settings.InviteLink}",
+            await Context.Channel.SendEmbedAsync("Invite Link", $"Follow the link to invite {_settings.BotName}!\n{_settings.InviteLink}",
                 ColorHelper.GetColor(await _servers.GetServer(Context.Guild)), ImageLookupUtility.GetImageUrl("INVITE_IMAGES"));
 
             //await ReplyAsync(_settings.InviteLink);
@@ -206,6 +206,7 @@ namespace DiscordBot.Commands
         }
 
         [Command("echo")]
+        [Alias("say")]
         [Summary("Echoes a message")]
         // The remainder attribute parses until the end of a command
         public async Task Echo([Remainder] [Summary("The text to echo")] string message)
