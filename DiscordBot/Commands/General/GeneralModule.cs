@@ -169,7 +169,7 @@ namespace DiscordBot.Commands
 
             var builder = new EmbedBuilder()
                 .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
-                .WithDescription("DiscordBot\nMIT License Copyright(c) 2021 JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot\n\n" +
+                .WithDescription($"{_settings.BotName}\nMIT License Copyright(c) 2021 JoyfulReaper\n{_settings.BotWebsite}\n\n" +
                 $"See `{prefix}invite` for the link to invite DiscordBot to your server!")
                 .WithColor(ColorHelper.GetColor(server))
                 .WithCurrentTimestamp();
@@ -190,7 +190,7 @@ namespace DiscordBot.Commands
             var server = await _servers.GetServer(Context.Guild);
             if(Context.Guild == null)
             {
-                await Context.Channel.SendEmbedAsync("Discord Bot", "DiscordBot was written by JoyfulReaper\nhttps://github.com/JoyfulReaper/DiscordBot", 
+                await Context.Channel.SendEmbedAsync($"{_settings.BotName}", $"DiscordBot was written by JoyfulReaper\n{_settings.BotWebsite}", 
                     ColorHelper.RandomColor(), _client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl());
                 return;
             }

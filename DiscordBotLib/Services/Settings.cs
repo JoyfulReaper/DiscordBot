@@ -27,13 +27,16 @@ using DiscordBotLib.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Data.SqlClient;
 using System.Data.SQLite;
 
 namespace DiscordBotLib.Services
 {
     public class Settings : ISettings
     {
+        public string BotName { get; set; }
+
+        public string BotWebsite { get; set; }
+
         public string InviteLink { get; private set; }
 
         public Type DbConnectionType { get; private set; }
@@ -174,6 +177,8 @@ namespace DiscordBotLib.Services
             ApiUserName = _configuration.GetSection("ApiUserName").Value ?? String.Empty;
             ApiPassword = _configuration.GetSection("ApiPassword").Value ?? String.Empty;
 
+            BotName = _configuration.GetSection("BotName").Value ?? "DiscordBot";
+            BotWebsite = _configuration.GetSection("BotWebsite").Value ?? "https://github.com/JoyfulReaper/DiscordBot";
             WelcomeMessage = _configuration.GetSection("WelcomeMessage").Value ?? "just joined!";
             PartingMessage = _configuration.GetSection("PartingMessage").Value ?? "just bailed!";
             DefaultPrefix = _configuration.GetSection("DefaultPrefix").Value ?? "!";
