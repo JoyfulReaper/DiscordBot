@@ -30,6 +30,10 @@ namespace DiscordBotLib.Services
 {
     public interface ISettings
     {
+        public string BotName { get; set; }
+
+        public string BotWebsite { get; set; }
+
         /// <summary>
         /// The invite line to send when invite command is invoked
         /// </summary>

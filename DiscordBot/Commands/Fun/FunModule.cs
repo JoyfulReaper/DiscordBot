@@ -64,6 +64,34 @@ namespace DiscordBot.Commands
             _config = config;
         }
 
+        [Command("nickname")]
+        [Alias("nick")]
+        [Summary("Change the bot's nickname!")]
+        [RequireUserPermission(GuildPermission.ManageNicknames)]
+        public async Task Nickname([Summary("Bot's new nickname")][Remainder] string nickname)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{username}#{discriminator} executed nickname ({nickname}) on {server}/{channel}",
+                Context.User.Username, Context.User.Discriminator, nickname, Context.Guild?.Name ?? "DM", Context.Channel.Name);
+
+            var server = await _servers.GetServer(Context.Guild);
+            if(server == null)
+            {
+                await ReplyAsync("The server you are in doesn't exist...?");
+                return;
+            }
+
+            if((await ProfanityHelper.GetProfanity(server, nickname)).Count > 0)
+            {
+                await ReplyAsync("Thanks, I hate you!");
+            }
+
+            await Context.Guild.CurrentUser.ModifyAsync(x => x.Nickname = nickname);
+            await ReplyAsync("Nick name changed!");
+            await _servers.SendLogsAsync(Context.Guild, "Nickname Changed", $"{Context.User.Mention} changed my nickname to: `{nickname}`");
+        }
+
         [Command("giphy")]
         [Summary("Search giphy for some gifs!")]
         public async Task Giphy([Summary("What to search giphy for")][Remainder]string search)

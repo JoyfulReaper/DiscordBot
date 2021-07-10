@@ -28,8 +28,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBotApiWrapper;
-using DiscordBotLib.DataAccess;
-using DiscordBotLib.DataAccess.Repositories;
+using DiscordBotLib.Extensions;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -110,35 +109,8 @@ namespace DiscordBot
                     x.UserAgent = "DiscordBot by JoyfulReaper";
                 })
                 .AddSingleton<InteractiveService>()
-                .AddSingleton(config)
-                .AddSingleton<LoggingService>()
-                .AddSingleton(socketClient)
-                .AddSingleton<IChatService, DiscordService>()
-                .AddSingleton(commandService)
-                .AddSingleton<CommandHandler>()
-                .AddSingleton<ISettings, Settings>()
-                .AddSingleton<BannerImageService>()
-                .AddSingleton(apiClient)
-                .AddSingleton<IApiService, ApiService>()
-                .AddSingleton<IServerLogItemApi, ServerLogItemApi>()
-                .AddSingleton<ICommandItemApi, CommandItemApi>()
-                .AddSingleton<IUserService, UserService>()
-                .AddSingleton<IServerRepository, ServerRepository>()
-                .AddSingleton<IRankService, RankService>()
-                .AddSingleton<IAutoRoleService, AutoRoleService>()
-                .AddSingleton<IRankRepository, RankRepository>()
-                .AddSingleton<IAutoRoleRepository, AutoRoleRepository>()
-                .AddSingleton<ISubredditRepository, SubredditRepository>()
-                .AddSingleton<IDiscordBotSettingsRepository, DiscordBotSettingsRepository>()
-                .AddSingleton<IServerService, ServerService>()
-                .AddSingleton<IUserTimeZonesRepository, UserTimeZoneRepository>()
-                .AddSingleton<IProfanityRepository, ProfanityRepository>()
-                .AddSingleton<IUserRepository, UserRepository>()
-                .AddSingleton<INoteRepository, NoteRepository>()
-                .AddSingleton<IWarningRepository, WarningRepository>()
-                .AddSingleton<IWelcomeMessageRepository, WelcomeMessageRepository>()
-                .AddSingleton<IPartMessageRepository, PartMessageRepository>();
-
+                .AddDiscordBotLib(commandService, socketClient, apiClient, config);
+                
 
             switch(database)
             {
