@@ -43,7 +43,7 @@ namespace DiscordBotLib.Helpers
     {
         public static IProfanityRepository ProfanityRepository = null;
 
-        private static string[] GlobalAllowedWords = new[] { "butt", "poop", "bender", "bugger", "bum", "drunk", "dummy", "foobar", "gays", "hardcore", "hookah", "hun", "lesbian", "lesbians",
+        private static readonly string[] _globalAllowedWords = new[] { "butt", "poop", "bender", "bugger", "bum", "drunk", "dummy", "foobar", "gays", "hardcore", "hookah", "hun", "lesbian", "lesbians",
             "piss", "pissed", "porn", "pornography", "potty", "prod", "psycho", "pube", "pubes", "pubic", "queer", "reefer", "sex", "sexual", "stoned", "suck", "sucks",
             "sucking", "sucked", "tampon", "tart", "testical", "testicle", "thrust", "thug", "tit", "toke", "toots", "topless", "trashy", "turd", "ugly", "urine",
             "balls", "barf", "big breasts", "big black", "big tits", "bloody", "boob", "boobs", "bong", "booger", "boong", "booze", "bummer", "cervix", "climax", 
@@ -54,7 +54,7 @@ namespace DiscordBotLib.Helpers
 
         // I'm not sure why, but words with symbols (*, !) don't seem to work
         // TODO: Look into another filtering library, writing my own filter, or improving the existing solution some how
-        private static string[] GlobalBannedWords = new[] { "fck", "shat", "sh!t", "sht" }; 
+        private static readonly string[] _globalBannedWords = new[] { "fck", "shat", "sh!t", "sht" }; 
 
         internal static async Task<bool> ContainsProfanity(Server server, string sentence)
         {
@@ -116,8 +116,8 @@ namespace DiscordBotLib.Helpers
             }
 
             ProfanityFilter.ProfanityFilter filter = new ProfanityFilter.ProfanityFilter();
-            filter.RemoveProfanity(GlobalAllowedWords);
-            filter.AddProfanity(GlobalBannedWords);
+            filter.RemoveProfanity(_globalAllowedWords);
+            filter.AddProfanity(_globalBannedWords);
 
             var allowedWords = await ProfanityRepository.GetAllowedProfanity(server.GuildId);
             var blockedWord = await ProfanityRepository.GetBlockedProfanity(server.GuildId);
