@@ -50,6 +50,8 @@ namespace DiscordBotLib.Services
         private readonly IApiService _apiService;
         private readonly IWelcomeMessageRepository _welcomeMessageRepository;
         private readonly IPartMessageRepository _partMessageRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IInviteRepository _inviteRepository;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
@@ -62,7 +64,9 @@ namespace DiscordBotLib.Services
             IProfanityRepository profanityRepository,
             IApiService apiService,
             IWelcomeMessageRepository welcomeMessageRepository,
-            IPartMessageRepository partMessageRepository)
+            IPartMessageRepository partMessageRepository,
+            IUserRepository userRepository,
+            IInviteRepository inviteRepository)
         {
             _client = client;
             _commands = commands;
@@ -76,6 +80,9 @@ namespace DiscordBotLib.Services
             _apiService = apiService;
             _welcomeMessageRepository = welcomeMessageRepository;
             _partMessageRepository = partMessageRepository;
+            _userRepository = userRepository;
+            _inviteRepository = inviteRepository;
+
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
             _client.ReactionAdded += OnReactionAdded;
@@ -180,6 +187,29 @@ namespace DiscordBotLib.Services
         {
             await AutoRoleHelper.AssignAutoRoles(_autoRoleService, userJoining);
             Task.Run(async () => await ShowWelcomeMessage(userJoining));
+            Task.Run(async () => await CheckInvites(userJoining));
+        }
+
+        private async Task CheckInvites(SocketGuildUser user)
+        {
+            // For now, Bot will crash with this uncomment
+            //var guild = _client.GetGuild(user.Guild.Id);
+            //var invites = await guild.GetInvitesAsync();
+            //var server = await _servers.GetServer(guild);
+           
+            //foreach (var invite in invites)
+            //{
+            //    if(user.Username == invite.TargetUser.Username)
+            //    {
+            //        if (server.WelcomeChannel != 0)
+            //        {
+            //            var welcomeChannel = guild.GetTextChannel(server.WelcomeChannel);
+            //            await welcomeChannel.SendMessageAsync($"{invite.Inviter.Mention} successfully invited {user.Mention}!");
+
+            //            var dbInvite = UserHelper.GetOrAddInvite(invite.TargetUser as SocketUser, _userRepository, _inviteRepository);
+            //        }
+            //    }
+            //}
         }
 
         // Show the welcome message
