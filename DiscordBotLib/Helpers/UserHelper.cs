@@ -59,11 +59,13 @@ namespace DiscordBotLib.Helpers
                 invite = new Invite
                 {
                     UserId = dbUser.Id,
-                    Count = 0;
-                }
+                    Count = 0
+                };
 
             await inviteRepository.EditAsync(invite);
             }
+
+            return invite;
         }
     }
 }
