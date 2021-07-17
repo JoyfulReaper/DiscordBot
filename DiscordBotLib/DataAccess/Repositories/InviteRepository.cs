@@ -46,7 +46,7 @@ namespace DiscordBotLib.DataAccess.Repositories
         public async Task<Invite> GetInviteByUser(ulong user)
         {
             var queryResult = await QuerySingleOrDefaultAsync<Invite>($"SELECT * FROM {TableName} " +
-                $"WHERE Id = @Id;");
+                $"WHERE UserId = @UserId;", new { UserId = user });
 
             return queryResult;
         }
@@ -70,7 +70,7 @@ namespace DiscordBotLib.DataAccess.Repositories
         {
             await ExecuteAsync($"UPDATE {TableName} " +
                 $"SET UserId = @UserId, Count = @Count " +
-                $"WHERE Id = @Id");
+                $"WHERE Id = @Id", entity);
         }
     }
 }

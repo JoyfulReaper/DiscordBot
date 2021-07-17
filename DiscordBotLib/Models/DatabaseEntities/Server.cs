@@ -30,6 +30,8 @@ namespace DiscordBotLib.Models
 {
     public class Server : DatabaseEntity
     {
+        public bool TrackInvites { get; set; }
+
         /// <summary>
         /// Id of the Discord server/Guild
         /// </summary>

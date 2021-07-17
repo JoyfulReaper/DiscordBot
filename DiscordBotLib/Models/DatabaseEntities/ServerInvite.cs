@@ -8,7 +8,7 @@ namespace DiscordBotLib.Models.DatabaseEntities
 {
     public class ServerInvite : DatabaseEntity
     {
-        public ulong Uses { get; set; }
+        public int Uses { get; set; }
         public ulong ServerId { get; set; }
         public string Code { get; set; }
     }

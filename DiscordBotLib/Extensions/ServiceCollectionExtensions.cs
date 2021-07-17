@@ -68,6 +68,7 @@ namespace DiscordBotLib.Extensions
                 .AddSingleton<IWelcomeMessageRepository, WelcomeMessageRepository>()
                 .AddSingleton<IPartMessageRepository, PartMessageRepository>()
                 .AddSingleton<IInviteRepository, InviteRepository>()
+                .AddSingleton<IServerInviteRepository, ServerInviteRepository>()
                 // End Repos
                 .AddSingleton<CommandHandler>()
                 .AddSingleton(commandService)

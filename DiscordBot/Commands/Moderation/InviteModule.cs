@@ -57,7 +57,7 @@ namespace DiscordBot.Commands.Moderation
         [Command("count")]
         [Summary("Get the number of users successfully invited by a given user")]
         public async Task InviteCount(
-        [Summary("The user to ban")] SocketGuildUser user)
+        [Summary("The user to ban")] SocketGuildUser user = null)
         {
             await Context.Channel.TriggerTypingAsync();
 
@@ -68,13 +68,22 @@ namespace DiscordBot.Commands.Moderation
 
             if (user == null)
             {
-                await ReplyAsync("Please provide a user to lookup!");
+                //await ReplyAsync("Please provide a user to lookup!");
+                user = Context.User as SocketGuildUser;
             }
 
             _logger.LogInformation("{user}#{discriminator} invoked invite {user} in {channel} on {server}",
                 Context.User.Username, Context.User.Discriminator, user.Username, Context.Channel.Name, Context.Guild?.Name ?? "DM");
 
+            var dbuser = await UserHelper.GetOrAddUser(user, _userRepository);
+            var invite = await _inviteRepository.GetInviteByUser(dbuser.Id);
+            if(invite == null)
+            {
+                await ReplyAsync($"{user.Username} has not invited anyone");
+                return;
+            }
 
+            await ReplyAsync($"{user.Username} has invited {invite.Count} users");
         }
     }
 }

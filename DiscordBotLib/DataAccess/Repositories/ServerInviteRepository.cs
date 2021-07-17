@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLib.DataAccess.Repositories
 {
-    public class ServerInviteRepository : Repository<ServerInvite>
+    public class ServerInviteRepository : Repository<ServerInvite>, IServerInviteRepository
     {
         private readonly ISettings _settings;
         private readonly ILogger<ServerInviteRepository> _logger;
 
-        public ServerInviteRepository(ISettings settings, ILogger<ServerInviteRepository> logger) : base (settings, logger)
+        public ServerInviteRepository(ISettings settings, ILogger<ServerInviteRepository> logger) : base(settings, logger)
         {
             _settings = settings;
             _logger = logger;
@@ -31,7 +31,7 @@ namespace DiscordBotLib.DataAccess.Repositories
         public override async Task AddAsync(ServerInvite entity)
         {
             var queryResult = await QuerySingleOrDefaultAsync<ulong>($"INSERT INTO {TableName} " +
-                $"(ServerId, Uses, Code) VALUES (@ServerId, Uses, Code); " +
+                $"(ServerId, Uses, Code) VALUES (@ServerId, @Uses, @Code); " +
                 $"select last_insert_rowid();", entity);
 
             entity.Id = queryResult;

@@ -33,6 +33,8 @@ using DiscordBotLib.Helpers;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Enums;
 using DiscordBotApiWrapper.Dtos;
+using System.Linq;
+using DiscordBotLib.Models.DatabaseEntities;
 
 namespace DiscordBotLib.Services
 {
@@ -52,6 +54,8 @@ namespace DiscordBotLib.Services
         private readonly IPartMessageRepository _partMessageRepository;
         private readonly IUserRepository _userRepository;
         private readonly IInviteRepository _inviteRepository;
+        private readonly IServerInviteRepository _serverInviteRepository;
+        private readonly IServerRepository _serverRepository;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commands,
@@ -66,7 +70,9 @@ namespace DiscordBotLib.Services
             IWelcomeMessageRepository welcomeMessageRepository,
             IPartMessageRepository partMessageRepository,
             IUserRepository userRepository,
-            IInviteRepository inviteRepository)
+            IInviteRepository inviteRepository,
+            IServerInviteRepository serverInviteRepository,
+            IServerRepository serverRepository)
         {
             _client = client;
             _commands = commands;
@@ -82,12 +88,17 @@ namespace DiscordBotLib.Services
             _partMessageRepository = partMessageRepository;
             _userRepository = userRepository;
             _inviteRepository = inviteRepository;
+            _serverInviteRepository = serverInviteRepository;
+            _serverRepository = serverRepository;
 
             _client.MessageReceived += OnMessageReceived;
             _client.UserJoined += OnUserJoined;
             _client.ReactionAdded += OnReactionAdded;
             _client.MessageUpdated += OnMessageUpated;
             _client.UserLeft += OnUserLeft;
+            _client.JoinedGuild += OnJoinedGuild;
+            _client.Ready += OnReady;
+            _client.InviteCreated += OnInviteCreated;
 
             _commands.CommandExecuted += OnCommandExecuted;
 
@@ -95,6 +106,53 @@ namespace DiscordBotLib.Services
 
             Task.Run(async () => await MuteHandler.MuteWorker(client));
             Task.Run(async () => await PomodoroHandler.PomodoroWorker(client));
+        }
+
+        private async Task OnInviteCreated(SocketInvite arg)
+        {
+            Task.Run(async () => await UpdateInvites());
+        }
+
+        private async Task OnReady()
+        {
+            Task.Run(async () => await UpdateInvites());
+        }
+
+        private async Task UpdateInvites()
+        {
+            foreach (var s in _client.Guilds)
+            {
+                var server = await ServerHelper.GetOrAddServer(s.Id, _serverRepository);
+
+                if (server.TrackInvites)
+                {
+                    var dbinvites = await _serverInviteRepository.GetServerInvites(server.Id);
+                    var invites = await s.GetInvitesAsync();
+
+                    var newinvites =
+                        from newi in invites
+                        where !(
+                            from oldi in dbinvites
+                            select newi.Code
+                            ).Contains(newi.Code)
+                        select newi;
+
+                    foreach (var inv in newinvites)
+                    {
+                        await _serverInviteRepository.AddAsync(new ServerInvite
+                        {
+                            Code = inv.Code,
+                            ServerId = server.Id,
+                            Uses = inv?.Uses ?? 0
+                        });
+                    }
+                }
+            }
+        }
+
+        private async Task OnJoinedGuild(SocketGuild arg)
+        {
+            await UpdateInvites();
         }
 
         private async Task OnUserLeft(SocketGuildUser user)
@@ -149,6 +207,10 @@ namespace DiscordBotLib.Services
             if (channel != null) // Not a DM
             {
                 prefix = await _servers.GetGuildPrefix(channel.Guild.Id);
+                if(prefix == null)
+                {
+                    prefix = _settings.DefaultPrefix;
+                }
                 var server = await _servers.GetServer(channel.Guild);
                 await ServerHelper.CheckForServerInvites(message, server);
                 
@@ -187,29 +249,69 @@ namespace DiscordBotLib.Services
         {
             await AutoRoleHelper.AssignAutoRoles(_autoRoleService, userJoining);
             Task.Run(async () => await ShowWelcomeMessage(userJoining));
-            Task.Run(async () => await CheckInvites(userJoining));
-        }
 
-        private async Task CheckInvites(SocketGuildUser user)
-        {
-            // For now, Bot will crash with this uncomment
-            //var guild = _client.GetGuild(user.Guild.Id);
-            //var invites = await guild.GetInvitesAsync();
-            //var server = await _servers.GetServer(guild);
-           
-            //foreach (var invite in invites)
-            //{
-            //    if(user.Username == invite.TargetUser.Username)
-            //    {
-            //        if (server.WelcomeChannel != 0)
-            //        {
-            //            var welcomeChannel = guild.GetTextChannel(server.WelcomeChannel);
-            //            await welcomeChannel.SendMessageAsync($"{invite.Inviter.Mention} successfully invited {user.Mention}!");
+            var guild = userJoining.Guild;
+            var server = await ServerHelper.GetOrAddServer(guild.Id, _serverRepository);
+            var dbinvites = await _serverInviteRepository.GetServerInvites(server.Id);
+            var invites = await guild.GetInvitesAsync();
 
-            //            var dbInvite = UserHelper.GetOrAddInvite(invite.TargetUser as SocketUser, _userRepository, _inviteRepository);
-            //        }
-            //    }
-            //}
+            if (server.TrackInvites)
+            {
+                var inviteUsed =
+                    from ginvite in invites
+                    join invite in dbinvites
+                    on ginvite.Code equals invite.Code
+                    where invite.Uses < ginvite.Uses
+                    select ginvite;
+
+                if (inviteUsed.Count() > 1)
+                {
+                    _logger.LogWarning("More than one invite matches!");
+                    return;
+                }
+                if (inviteUsed.Count() < 1)
+                {
+                    _logger.LogWarning("No invite matches!");
+                    return;
+                }
+
+                var invused = inviteUsed.FirstOrDefault();
+
+                var inviter = await _userRepository.GetByUserId(invused.Inviter.Id);
+                var userInvite = await _inviteRepository.GetInviteByUser(inviter.Id);
+
+                if(userInvite == null)
+                {
+                    userInvite = new Invite
+                    {
+                        Count = 1,
+                        UserId = inviter.Id
+                    };
+                    await _inviteRepository.AddAsync(userInvite);
+                }
+
+                userInvite.Count++;
+                await _inviteRepository.EditAsync(userInvite);
+
+                var updateInv = dbinvites.Where(x => x.Code == invused.Code).FirstOrDefault();
+                updateInv.Uses = invused?.Uses ?? 0;
+                await _serverInviteRepository.EditAsync(updateInv);
+
+                //ServerInvite inviteUsed = null;
+                //var guildInvites = invites.ToList();
+                //for(int i = 0; i < dbinvites.Count; i++)
+                //{
+                //    for(int j = 0; j < invites.Count; j++)
+                //    {
+                //        if(dbinvites[i].Code == guildInvites[j].Code && dbinvites[i].Uses < guildInvites[j].Uses)
+                //        {
+                //            inviteUsed = dbinvites[i];
+                //        }
+                //    }
+                //}
+
+                await UpdateInvites();
+            }
         }
 
         // Show the welcome message
