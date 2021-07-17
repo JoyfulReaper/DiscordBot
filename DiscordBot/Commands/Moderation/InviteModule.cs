@@ -47,18 +47,21 @@ namespace DiscordBot.Commands.Moderation
         private readonly IUserRepository _userRepository;
         private readonly IServerRepository _serverRepository;
         private readonly IServerService _serverService;
+        private readonly CommandHandler _commandHandler;
 
         public InviteModule(IInviteRepository inviteRepository,
             ILogger<InviteModule> logger,
             IUserRepository userRepository,
             IServerRepository serverRepository,
-            IServerService serverService)
+            IServerService serverService,
+            CommandHandler commandHandler)
         {
             _inviteRepository = inviteRepository;
             _logger = logger;
             _userRepository = userRepository;
             _serverRepository = serverRepository;
             _serverService = serverService;
+            _commandHandler = commandHandler;
         }
 
         [Command("status")]
@@ -101,6 +104,7 @@ namespace DiscordBot.Commands.Moderation
             server.TrackInvites = true;
             await _serverRepository.EditAsync(server);
 
+            await _commandHandler.RequestInviteUpdate();
 
             await ReplyAsync("Invite tracking enabled");
             await _serverService.SendLogsAsync(Context.Guild, "Invite Tracking Enabled", $"{Context.User.Mention} Enabled invite tracking!");

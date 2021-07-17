@@ -34,6 +34,12 @@ namespace DiscordBotLib.DataAccess
         Task AddAsync(User entity);
         Task DeleteAsync(User entity);
         Task EditAsync(User entity);
+
+        /// <summary>
+        /// Get a user based on their Discord User Id
+        /// </summary>
+        /// <param name="userId">Discord User Id</param>
+        /// <returns></returns>
         Task<User> GetByUserId(ulong userId);
     }
 }

@@ -118,6 +118,11 @@ namespace DiscordBotLib.Services
             Task.Run(async () => await UpdateInvites());
         }
 
+        public async Task RequestInviteUpdate()
+        {
+            await UpdateInvites();
+        }
+
         private async Task UpdateInvites()
         {
             foreach (var s in _client.Guilds)
@@ -250,6 +255,7 @@ namespace DiscordBotLib.Services
             await AutoRoleHelper.AssignAutoRoles(_autoRoleService, userJoining);
             Task.Run(async () => await ShowWelcomeMessage(userJoining));
 
+            // TODO Make into own method
             var guild = userJoining.Guild;
             var server = await ServerHelper.GetOrAddServer(guild.Id, _serverRepository);
             var dbinvites = await _serverInviteRepository.GetServerInvites(server.Id);
@@ -267,21 +273,31 @@ namespace DiscordBotLib.Services
                 if (inviteUsed.Count() > 1)
                 {
                     _logger.LogWarning("More than one invite matches!");
-                    await _servers.SendLogsAsync(userJoining.Guild, "Invite Error!", "More than one invite matched!");
+                    await _servers.SendLogsAsync(userJoining.Guild, "Invite Error!", $"More than one invite matched for user {userJoining.Username}!");
                     return;
                 }
                 if (inviteUsed.Count() < 1)
                 {
                     _logger.LogWarning("No invite matches!");
-                    await _servers.SendLogsAsync(userJoining.Guild, "Invite Error!", "Could not find matching invite!");
+                    await _servers.SendLogsAsync(userJoining.Guild, "Invite Error!", $"Could not find matching invite for user {userJoining.Username}!");
                     return;
                 }
 
                 var invused = inviteUsed.FirstOrDefault();
 
                 var inviter = await _userRepository.GetByUserId(invused.Inviter.Id);
-                var userInvite = await _inviteRepository.GetInviteByUser(inviter.Id);
+                if(inviter == null)
+                {
+                    inviter = new Models.User
+                    {
+                        UserId = invused.Inviter.Id,
+                        UserName = invused.Inviter.Username
+                    };
 
+                    await _userRepository.AddAsync(inviter);
+                }
+
+                var userInvite = await _inviteRepository.GetInviteByUser(inviter.Id);
                 if(userInvite == null)
                 {
                     userInvite = new Invite
@@ -299,20 +315,13 @@ namespace DiscordBotLib.Services
                 updateInv.Uses = invused?.Uses ?? 0;
                 await _serverInviteRepository.EditAsync(updateInv);
 
-                //ServerInvite inviteUsed = null;
-                //var guildInvites = invites.ToList();
-                //for(int i = 0; i < dbinvites.Count; i++)
-                //{
-                //    for(int j = 0; j < invites.Count; j++)
-                //    {
-                //        if(dbinvites[i].Code == guildInvites[j].Code && dbinvites[i].Uses < guildInvites[j].Uses)
-                //        {
-                //            inviteUsed = dbinvites[i];
-                //        }
-                //    }
-                //}
-
                 await UpdateInvites();
+
+                if(server.LoggingChannel != 0)
+                {
+                    var user = _userRepository.GetByUserId(userJoining.Id);
+                    await _servers.SendLogsAsync(guild, "User invited", $"{inviter.UserName} invited {userJoining.Username} with invite link {invused.Url}.");
+                }
             }
         }
 

@@ -56,7 +56,7 @@ namespace DiscordBotLib.DataAccess.Repositories
 
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} " +
                 $"(GuildId, Prefix, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor, AllowInvites, ProfanityFilterMode, " +
-                $"WelcomeUsers) " +
+                $"WelcomeUsers, TrackInvites) " +
                 "VALUES (@GuildId, @Prefix, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor, @AllowInvites, @ProfanityFilterMode, " +
                 "@WelcomeUsers, @TrackInvites); " +
                 "SELECT last_insert_rowid();",
