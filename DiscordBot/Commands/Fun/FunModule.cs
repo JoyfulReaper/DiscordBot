@@ -113,7 +113,7 @@ namespace DiscordBot.Commands
 
             var response = await HttpClientHelper.HttpClient.GetFromJsonAsync<GiphyRoot>(uri);
             await Context.Channel.SendFileAsync(Directory.GetCurrentDirectory() + @$"{Path.DirectorySeparatorChar}images{Path.DirectorySeparatorChar}Poweredby_100px-Black_VertLogo.png");
-            await ReplyAsync(response.data.RandomItem().embed_url);
+            await ReplyAsync(response.data.RandomItem(10).embed_url);
         }
 
         [Command("rockpaperscissors")]

@@ -38,9 +38,18 @@ namespace DiscordBotLib.Helpers
         /// <typeparam name="T"></typeparam>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static T RandomItem<T>(this List<T> list)
+        public static T RandomItem<T>(this List<T> list, int max = 0)
         {
-            return list[_random.Next(list.Count)];
+            if(max == 0)
+            {
+                max = list.Count - 1;
+            }
+            if(max >= list.Count)
+            {
+                max = list.Count;
+            }
+
+            return list[_random.Next(0, max + 1)];
         }
     }
 }
