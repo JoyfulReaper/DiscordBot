@@ -155,8 +155,9 @@ namespace DiscordBot.Commands.Moderation
             _logger.LogInformation("{user}#{discriminator} invoked invite {user} in {channel} on {server}",
                 Context.User.Username, Context.User.Discriminator, user.Username, Context.Channel.Name, Context.Guild?.Name ?? "DM");
 
+            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
             var dbuser = await UserHelper.GetOrAddUser(user, _userRepository);
-            var invite = await _inviteRepository.GetInviteByUser(dbuser.Id);
+            var invite = await _inviteRepository.GetInviteByUser(dbuser.Id, server.Id);
             if(invite == null)
             {
                 await ReplyAsync($"{user.Username} has not invited anyone");

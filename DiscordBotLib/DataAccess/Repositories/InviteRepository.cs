@@ -43,10 +43,10 @@ namespace DiscordBotLib.DataAccess.Repositories
             _logger = logger;
         }
 
-        public async Task<Invite> GetInviteByUser(ulong user)
+        public async Task<Invite> GetInviteByUser(ulong user, ulong serverId)
         {
             var queryResult = await QuerySingleOrDefaultAsync<Invite>($"SELECT * FROM {TableName} " +
-                $"WHERE UserId = @UserId;", new { UserId = user });
+                $"WHERE UserId = @UserId AND ServerId = @ServerId;", new { UserId = user, ServerId = serverId });
 
             return queryResult;
         }
@@ -54,7 +54,7 @@ namespace DiscordBotLib.DataAccess.Repositories
         public override async Task AddAsync(Invite entity)
         {
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} " +
-                $"(UserId, Count) VALUES (@UserId, @Count); select last_insert_rowid();",
+                $"(UserId, Count, ServerId) VALUES (@UserId, @Count, @ServerId); select last_insert_rowid();",
                 entity);
 
             entity.Id = queryResult;
@@ -69,7 +69,7 @@ namespace DiscordBotLib.DataAccess.Repositories
         public override async Task EditAsync(Invite entity)
         {
             await ExecuteAsync($"UPDATE {TableName} " +
-                $"SET UserId = @UserId, Count = @Count " +
+                $"SET UserId = @UserId, Count = @Count, ServerId = @ServerId " +
                 $"WHERE Id = @Id", entity);
         }
     }

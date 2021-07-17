@@ -25,6 +25,7 @@ SOFTWARE.
 
 using Discord.WebSocket;
 using DiscordBotLib.DataAccess;
+using DiscordBotLib.Models;
 using DiscordBotLib.Models.DatabaseEntities;
 using System.Threading.Tasks;
 
@@ -49,10 +50,10 @@ namespace DiscordBotLib.Helpers
             return userDb;
         }
 
-        public static async Task<Invite> GetOrAddInvite(SocketUser user, IUserRepository userRepository, IInviteRepository inviteRepository)
+        public static async Task<Invite> GetOrAddInvite(SocketUser user, Server server, IUserRepository userRepository, IInviteRepository inviteRepository)
         {
             var dbUser = await GetOrAddUser(user, userRepository);
-            var invite = await inviteRepository.GetInviteByUser(dbUser.Id);
+            var invite = await inviteRepository.GetInviteByUser(dbUser.Id, server.Id);
 
             if(invite == null)
             {

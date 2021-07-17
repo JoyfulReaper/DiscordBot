@@ -33,6 +33,6 @@ namespace DiscordBotLib.DataAccess
         Task AddAsync(Invite entity);
         Task DeleteAsync(Invite entity);
         Task EditAsync(Invite entity);
-        Task<Invite> GetInviteByUser(ulong user);
+        Task<Invite> GetInviteByUser(ulong user, ulong serverId);
     }
 }

@@ -29,6 +29,7 @@ namespace DiscordBotLib.Models.DatabaseEntities
     public class Invite : DatabaseEntity
     {
         public ulong UserId { get; set; }
+        public ulong ServerId { get; set; }
         public int Count { get; set; }
     }
 }

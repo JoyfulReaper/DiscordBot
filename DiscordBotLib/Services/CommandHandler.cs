@@ -297,13 +297,14 @@ namespace DiscordBotLib.Services
                     await _userRepository.AddAsync(inviter);
                 }
 
-                var userInvite = await _inviteRepository.GetInviteByUser(inviter.Id);
+                var userInvite = await _inviteRepository.GetInviteByUser(inviter.Id, server.Id);
                 if(userInvite == null)
                 {
                     userInvite = new Invite
                     {
                         Count = 0,
-                        UserId = inviter.Id
+                        UserId = inviter.Id,
+                        ServerId = server.Id
                     };
                     await _inviteRepository.AddAsync(userInvite);
                 }
