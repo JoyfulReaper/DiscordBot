@@ -28,6 +28,7 @@ using Discord.WebSocket;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Helpers;
 using DiscordBotLib.Models.DatabaseEntities;
+using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -44,14 +45,89 @@ namespace DiscordBot.Commands.Moderation
         private readonly IInviteRepository _inviteRepository;
         private readonly ILogger<InviteModule> _logger;
         private readonly IUserRepository _userRepository;
+        private readonly IServerRepository _serverRepository;
+        private readonly IServerService _serverService;
 
         public InviteModule(IInviteRepository inviteRepository,
             ILogger<InviteModule> logger,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IServerRepository serverRepository,
+            IServerService serverService)
         {
             _inviteRepository = inviteRepository;
             _logger = logger;
             _userRepository = userRepository;
+            _serverRepository = serverRepository;
+            _serverService = serverService;
+        }
+
+        [Command("status")]
+        [Summary("invite tracking status")]
+        [RequireUserPermission(Discord.GuildPermission.Administrator)]
+        public async Task Status()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
+            _logger.LogInformation("{user}#{discriminator} invoked invite status in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, Context.Channel.Name, Context.Guild?.Name ?? "DM");
+
+            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
+
+            await ReplyAsync($"Invite tracking is `{(server.TrackInvites ? "Enabled" : "Disabled")}`");
+        }
+
+        [Command("enable")]
+        [Summary("Enable invite tracking")]
+        [RequireUserPermission(Discord.GuildPermission.Administrator)]
+        public async Task Enable()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
+            _logger.LogInformation("{user}#{discriminator} invoked invite enable in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, Context.Channel.Name, Context.Guild?.Name ?? "DM");
+
+            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
+
+            server.TrackInvites = true;
+            await _serverRepository.EditAsync(server);
+
+
+            await ReplyAsync("Invite tracking enabled");
+            await _serverService.SendLogsAsync(Context.Guild, "Invite Tracking Enabled", $"{Context.User.Mention} Enabled invite tracking!");
+        }
+
+        [Command("disable")]
+        [Summary("disable invite tracking")]
+        public async Task Disable()
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            if (await ServerHelper.CheckIfContextIsDM(Context))
+            {
+                return;
+            }
+
+            _logger.LogInformation("{user}#{discriminator} invoked invite disable in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, Context.Channel.Name, Context.Guild?.Name ?? "DM");
+
+            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
+
+            server.TrackInvites = false;
+            await _serverRepository.EditAsync(server);
+
+
+            await ReplyAsync("Invite tracking disabled");
+            await _serverService.SendLogsAsync(Context.Guild, "Invite Tracking Disabled", $"{Context.User.Mention} Disabled invite tracking!");
         }
 
         [Command("count")]
