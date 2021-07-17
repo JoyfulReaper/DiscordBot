@@ -286,7 +286,7 @@ namespace DiscordBotLib.Services
                 {
                     userInvite = new Invite
                     {
-                        Count = 1,
+                        Count = 0,
                         UserId = inviter.Id
                     };
                     await _inviteRepository.AddAsync(userInvite);
