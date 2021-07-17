@@ -267,11 +267,13 @@ namespace DiscordBotLib.Services
                 if (inviteUsed.Count() > 1)
                 {
                     _logger.LogWarning("More than one invite matches!");
+                    await _servers.SendLogsAsync(userJoining.Guild, "Invite Error!", "More than one invite matched!");
                     return;
                 }
                 if (inviteUsed.Count() < 1)
                 {
                     _logger.LogWarning("No invite matches!");
+                    await _servers.SendLogsAsync(userJoining.Guild, "Invite Error!", "Could not find matching invite!");
                     return;
                 }
 
