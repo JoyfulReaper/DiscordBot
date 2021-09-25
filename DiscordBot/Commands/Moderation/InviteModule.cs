@@ -27,13 +27,8 @@ using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBotLib.DataAccess;
 using DiscordBotLib.Helpers;
-using DiscordBotLib.Models.DatabaseEntities;
 using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Commands.Moderation
@@ -81,7 +76,7 @@ namespace DiscordBot.Commands.Moderation
 
             var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
 
-            await ReplyAsync($"Invite tracking is `{(server.TrackInvites ? "Enabled" : "Disabled")}`");
+            await ReplyAsync($"This feature is experamental and may have issues.\nInvite tracking is `{(server.TrackInvites ? "Enabled" : "Disabled")}`");
         }
 
         [Command("enable")]
@@ -106,7 +101,7 @@ namespace DiscordBot.Commands.Moderation
 
             await _commandHandler.RequestInviteUpdate();
 
-            await ReplyAsync("Invite tracking enabled");
+            await ReplyAsync("This feature is experamental and may have issues.\nInvite tracking enabled");
             await _serverService.SendLogsAsync(Context.Guild, "Invite Tracking Enabled", $"{Context.User.Mention} Enabled invite tracking!");
         }
 
@@ -130,7 +125,7 @@ namespace DiscordBot.Commands.Moderation
             await _serverRepository.EditAsync(server);
 
 
-            await ReplyAsync("Invite tracking disabled");
+            await ReplyAsync("This feature is experamental and may have issues.\nInvite tracking disabled");
             await _serverService.SendLogsAsync(Context.Guild, "Invite Tracking Disabled", $"{Context.User.Mention} Disabled invite tracking!");
         }
 
@@ -160,11 +155,11 @@ namespace DiscordBot.Commands.Moderation
             var invite = await _inviteRepository.GetInviteByUser(dbuser.Id, server.Id);
             if(invite == null)
             {
-                await ReplyAsync($"{user.Username} has not invited anyone");
+                await ReplyAsync($"This feature is experamental and may have issues.\n{user.Username} has not invited anyone");
                 return;
             }
 
-            await ReplyAsync($"{user.Username} has invited {invite.Count} users");
+            await ReplyAsync($"This feature is experamental and may have issues.\n{user.Username} has invited {invite.Count} users");
         }
     }
 }
