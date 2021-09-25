@@ -56,9 +56,9 @@ namespace DiscordBotLib.DataAccess.Repositories
 
             var queryResult = await QuerySingleAsync<ulong>($"INSERT INTO {TableName} " +
                 $"(GuildId, Prefix, WelcomeChannel, WelcomeBackground, LoggingChannel, EmbedColor, AllowInvites, ProfanityFilterMode, " +
-                $"WelcomeUsers) " +
+                $"WelcomeUsers, TrackInvites) " +
                 "VALUES (@GuildId, @Prefix, @WelcomeChannel, @WelcomeBackground, @LoggingChannel, @EmbedColor, @AllowInvites, @ProfanityFilterMode, " +
-                "@WelcomeUsers); " +
+                "@WelcomeUsers, @TrackInvites); " +
                 "SELECT last_insert_rowid();",
                 parameters);
 
@@ -80,6 +80,7 @@ namespace DiscordBotLib.DataAccess.Repositories
             parameters.Add("@AllowInvites", entity.AllowInvites);
             parameters.Add("@EmbedColor", color);
             parameters.Add("@ProfanityFilterMode", (int)entity.ProfanityFilterMode);
+            parameters.Add("@TrackInvites", entity.TrackInvites);
 
             return parameters;
         }
@@ -102,7 +103,7 @@ namespace DiscordBotLib.DataAccess.Repositories
             await ExecuteAsync($"UPDATE {TableName} " +
                 $"SET Prefix = @Prefix, GuildId = @GuildId, WelcomeChannel = @WelcomeChannel, WelcomeBackground = @WelcomeBackground, " +
                 $"EmbedColor = @EmbedColor, LoggingChannel = @LoggingChannel, AllowInvites = @AllowInvites, ProfanityFilterMode = @ProfanityFilterMode," +
-                $"WelcomeUsers = @WelcomeUsers " +
+                $"WelcomeUsers = @WelcomeUsers, TrackInvites = @TrackInvites " +
                 $"WHERE Id = @Id;",
                 parameters);
         }

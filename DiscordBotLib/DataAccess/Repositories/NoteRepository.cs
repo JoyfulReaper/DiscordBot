@@ -111,7 +111,7 @@ namespace DiscordBotLib.DataAccess.Repositories
 
         public override async Task DeleteAsync(Note entity)
         {
-            await ExecuteAsync($"DELETE FROM {TableName} WHERE ID = @Id;", entity);
+            await ExecuteAsync($"DELETE FROM {TableName} WHERE Id = @Id;", entity);
         }
 
         public override async Task EditAsync(Note entity)

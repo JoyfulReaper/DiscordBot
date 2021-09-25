@@ -23,33 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
-using System.Collections.Generic;
 
-namespace DiscordBotLib.Helpers
+namespace DiscordBotLib.Models.DatabaseEntities
 {
-    public static class ListExtensions
+    public class Invite : DatabaseEntity
     {
-        private static readonly Random _random = new();
-
-        /// <summary>
-        /// Retreive a random item from a list
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        public static T RandomItem<T>(this List<T> list, int max = 0)
-        {
-            if(max == 0)
-            {
-                max = list.Count - 1;
-            }
-            if(max >= list.Count)
-            {
-                max = list.Count;
-            }
-
-            return list[_random.Next(0, max + 1)];
-        }
+        public ulong UserId { get; set; }
+        public ulong ServerId { get; set; }
+        public int Count { get; set; }
     }
 }
