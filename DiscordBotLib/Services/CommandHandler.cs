@@ -231,6 +231,12 @@ namespace DiscordBotLib.Services
             if (message.HasStringPrefix(prefix, ref position)
                 || message.HasMentionPrefix(_client.CurrentUser, ref position))
             {
+                if(message.Content.StartsWith("!d "))
+                {
+                    // Ignore Disboard bumps
+                    return;
+                }
+
                 _logger.LogInformation("Command received: {command}", message.Content);
 
                 if (message.Author.IsBot)
