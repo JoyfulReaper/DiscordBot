@@ -31,6 +31,8 @@ namespace DiscordBotLib.DataAccess
 {
     public interface IWarningRepository
     {
+        Task<int> ClearUserWarnings(Server server, User user);
+
         Task<IEnumerable<Warning>> GetUsersWarnings(Server server, User user);
         Task AddAsync(Warning entity);
         Task DeleteAsync(Warning entity);

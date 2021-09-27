@@ -64,6 +64,26 @@ namespace DiscordBot.Commands.Moderation
             _servers = servers;
         }
 
+        [Command("clear")]
+        [RequireUserPermission(GuildPermission.BanMembers)]
+        [Summary("Clear a users warnings")]
+        [Alias("clearwarns")]
+        public async Task ClearWarnings(SocketGuildUser user)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            _logger.LogInformation("{user}#{discriminator} invoked clearwarnings ({user}) in {channel} on {server}",
+                Context.User.Username, Context.User.Discriminator, user.Username, user.Username, Context.Channel.Name, Context.Guild?.Name ?? "DM");
+
+            var userDb = await UserHelper.GetOrAddUser(user, _userRepository);
+            var server = await ServerHelper.GetOrAddServer(Context.Guild.Id, _serverRepository);
+            var warnings = await _warningRepository.GetUsersWarnings(server, userDb);
+
+            var cleared = await _warningRepository.ClearUserWarnings(server, userDb);
+
+            await ReplyAsync($"Cleared `{cleared}` warnings for `{user.Username}`");
+        }
+
         [Command("get")]
         [RequireUserPermission(GuildPermission.BanMembers)]
         [Summary("Get a users warnings")]
@@ -99,7 +119,7 @@ namespace DiscordBot.Commands.Moderation
         [RequireUserPermission(GuildPermission.BanMembers)]
         [RequireBotPermission(GuildPermission.BanMembers)]
         [Summary("Warn a user")]
-        public async Task Warn([Summary("The user to warn")] SocketGuildUser user, [Summary("The reason for the warning")][Remainder] string reason)
+        public async Task Warn([Summary("The user to warn")] SocketGuildUser user, [Summary("The reason for the warning")][Remainder] string reason = "No Reason Provided")
         {
             await Context.Channel.TriggerTypingAsync();
 
