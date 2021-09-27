@@ -82,6 +82,7 @@ namespace DiscordBot.Commands.Moderation
             var cleared = await _warningRepository.ClearUserWarnings(server, userDb);
 
             await ReplyAsync($"Cleared `{cleared}` warnings for `{user.Username}`");
+            await _servers.SendLogsAsync(Context.Guild, $"Warnings Cleared", $"{Context.User.Mention} cleared _ALL_ warnings for {user.Username}", ImageLookupUtility.GetImageUrl("LOGGING_IMAGES"));
         }
 
         [Command("get")]
