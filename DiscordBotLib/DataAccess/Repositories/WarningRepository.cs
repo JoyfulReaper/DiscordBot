@@ -28,6 +28,7 @@ using DiscordBotLib.Services;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace DiscordBotLib.DataAccess.Repositories
 {
@@ -41,6 +42,17 @@ namespace DiscordBotLib.DataAccess.Repositories
         {
             _settings = settings;
             _logger = logger;
+        }
+
+        public async Task<int> ClearUserWarnings(Server server, User user)
+        {
+            var count = await QueryAsync<int>("SELECT COUNT(*) from Warning " +
+                "Where UserId = @UserId AND ServerId = @ServerId", new { ServerId = server.Id, UserId = user.Id });
+
+            await ExecuteAsync("DELETE from Warning " +
+                "Where UserId = @UserId AND ServerId = @ServerId", new { ServerId = server.Id, UserId = user.Id });
+
+            return count.FirstOrDefault();
         }
 
         public async Task<IEnumerable<Warning>> GetUsersWarnings(Server server, User user)
