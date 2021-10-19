@@ -66,6 +66,7 @@ namespace DiscordBot.Commands.Moderation
         [Command("removepart")]
         [Alias("rpart")]
         [Summary("Remove part messages")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task RemoveWelcomeMessages([Summary("The id of the message to delete")]ulong id)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -88,6 +89,7 @@ namespace DiscordBot.Commands.Moderation
         [Command("removejoin")]
         [Alias("rjoin")]
         [Summary("Remove join message")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task RemovePartMessage([Summary("The id of the message to delete")] ulong id)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -154,6 +156,7 @@ namespace DiscordBot.Commands.Moderation
 
         [Command("join")]
         [Summary("Add a join message")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task JoinMessage([Remainder][Summary("The join message to add")] string message)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -181,6 +184,7 @@ namespace DiscordBot.Commands.Moderation
 
         [Command("part")]
         [Summary("Add a part message")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task PartMessage([Remainder][Summary("The part message to add")] string message)
         {
             await Context.Channel.TriggerTypingAsync();
@@ -209,6 +213,7 @@ namespace DiscordBot.Commands.Moderation
 
         [Command("setting")]
         [Summary("Enable or disable user welcoming")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Welcoming(string option = null)
         {
             await Context.Channel.TriggerTypingAsync();
