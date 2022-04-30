@@ -49,6 +49,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton(socketClient);
+        services.AddSingleton<IDiscordService, DiscordService>();
 
         return services;
     }
