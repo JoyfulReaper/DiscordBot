@@ -27,7 +27,9 @@ using Discord;
 using Discord.WebSocket;
 using DiscordBotLibrary.Services;
 using DiscordBotLibrary.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace DiscordBotLibrary.Extensions;
 
@@ -35,6 +37,14 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDiscordBot(this IServiceCollection services, DiscordSocketConfig? discordSocketConfig = null)
     {
+        IConfigurationBuilder configBuilder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", false, true)
+            .AddUserSecrets<DiscordService>();
+        IConfiguration config = configBuilder.Build();
+
+        SetupLogging(config);
+        
         if (discordSocketConfig == null)
         {
             discordSocketConfig = new DiscordSocketConfig
@@ -47,10 +57,24 @@ public static class ServiceCollectionExtensions
 
         DiscordSocketClient socketClient = new DiscordSocketClient(discordSocketConfig);
 
+        services.AddSingleton(config);
+        services.AddLogging(loggingBuilder =>
+            loggingBuilder.AddSerilog(dispose: true));
+
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton(socketClient);
         services.AddSingleton<IDiscordService, DiscordService>();
 
         return services;
+    }
+
+    private static void SetupLogging(IConfiguration config)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(config)
+            .Enrich.FromLogContext()
+            .CreateLogger();
+        
+        Log.Logger.Information("DiscordBotLibrary: Logging configured");
     }
 }

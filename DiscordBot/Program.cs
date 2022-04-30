@@ -47,4 +47,8 @@ IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
 ConsoleHelper.ColorWriteLine(ConsoleColor.Red, $"{config["BotInformation:BotName"]}");
 ConsoleHelper.ColorWriteLine(ConsoleColor.Blue, $"MIT License\n\nCopyright(c) 2021 Kyle Givler (JoyfulReaper)\n{config["Botinformation:BotWebsite"]}\n\n");
 
-var LoggingService = serviceProvider.GetRequiredService<ILoggingService>();
+serviceProvider.GetRequiredService<ILoggingService>();
+IDiscordService discordService = serviceProvider.GetRequiredService<IDiscordService>();
+
+await discordService.Start();
+await Task.Delay(-1);

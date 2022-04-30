@@ -24,9 +24,7 @@ SOFTWARE.
 */
 
 using DiscordBotLibrary.Extensions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
 namespace DiscordBot
 {
@@ -34,19 +32,7 @@ namespace DiscordBot
     {
         internal static ServiceProvider Initialize(string[] args)
         {
-            IConfigurationBuilder configBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false, true);
-            IConfiguration config = configBuilder.Build();
-
             IServiceCollection services = new ServiceCollection();
-
-            services.AddLogging(loggingBuilder =>
-            {
-                loggingBuilder.AddSerilog(dispose: true);
-            });
-            
-            services.AddSingleton(config);
             services.AddDiscordBot();
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();
