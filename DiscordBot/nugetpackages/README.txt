@@ -1,1 +1,0 @@
-The offical package is currently broken, so I built it myself
