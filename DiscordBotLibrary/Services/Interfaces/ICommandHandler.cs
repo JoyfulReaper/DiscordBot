@@ -23,40 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
-using Discord.WebSocket;
-using DiscordBotLibrary.Services.Interfaces;
-using Microsoft.Extensions.Configuration;
 
-namespace DiscordBotLibrary.Services;
+namespace DiscordBotLibrary.Services.Interfaces;
 
-public class DiscordService : IDiscordService
+public interface ICommandHandler
 {
-    private readonly DiscordSocketClient _client;
-    private readonly IConfiguration _config;
-    private readonly ICommandHandler _commandHandler;
-
-    public DiscordService(DiscordSocketClient discordSocketClient,
-        IConfiguration _config,
-        ICommandHandler commandHandler)
-    {
-        _client = discordSocketClient;
-        this._config = _config;
-        _commandHandler = commandHandler;
-    }
-
-    public async Task Start()
-    {
-        await _commandHandler.InstallCommandsAsync();
-        
-        // TODO: Store the token in the database
-        await _client.LoginAsync(TokenType.Bot, _config["Token"]);
-        await _client.StartAsync();
-    }
-
-    public async Task Stop()
-    {
-        await _client.LogoutAsync();
-        Environment.Exit(0);
-    }
+    Task InstallCommandsAsync();
 }

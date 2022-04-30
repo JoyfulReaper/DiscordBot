@@ -50,7 +50,7 @@ public class LoggingService : ILoggingService
         if (message.Exception is CommandException commandException)
         {
             _logger.LogError("[Command/{severity}}] {command} failed to execute in {server}:{channel}.",
-                   message.Severity, commandException.Command.Aliases[0], commandException.Context.Guild?.Name ?? "DM", commandException.Context.Channel.Name);
+                   message.Severity, commandException.Command.Aliases.First(), commandException.Context.Guild?.Name ?? "DM", commandException.Context.Channel.Name);
             _logger.LogError(commandException, "Exception");
         }
         else
@@ -78,8 +78,7 @@ public class LoggingService : ILoggingService
                     _logger.LogDebug(logMessage, message.Source, message.Message);
                     break;
                 default:
-                    _logger.LogWarning("Unknown log level {level}", message.Severity);
-                    break;
+                    throw new Exception("Unknown log level.");
             }
         }
         if (message.Exception != null)

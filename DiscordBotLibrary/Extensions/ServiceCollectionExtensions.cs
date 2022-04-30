@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBotLibrary.Services;
 using DiscordBotLibrary.Services.Interfaces;
@@ -35,7 +36,9 @@ namespace DiscordBotLibrary.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDiscordBot(this IServiceCollection services, DiscordSocketConfig? discordSocketConfig = null)
+    public static IServiceCollection AddDiscordBot(this IServiceCollection services,
+        DiscordSocketConfig? discordSocketConfig = null,
+        CommandServiceConfig? commandServiceConfig = null)
     {
         IConfigurationBuilder configBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -44,7 +47,28 @@ public static class ServiceCollectionExtensions
         IConfiguration config = configBuilder.Build();
 
         SetupLogging(config);
-        
+
+        ConfigureDiscordDotNetServices(ref discordSocketConfig, ref commandServiceConfig);
+
+        DiscordSocketClient socketClient = new DiscordSocketClient(discordSocketConfig);
+        CommandService commandService = new CommandService(commandServiceConfig);
+
+        services.AddSingleton(config);
+        services.AddLogging(loggingBuilder =>
+            loggingBuilder.AddSerilog(dispose: true));
+
+        services.AddSingleton<ILoggingService, LoggingService>();
+        services.AddSingleton(socketClient);
+        services.AddSingleton(commandService);
+        services.AddSingleton<IDiscordService, DiscordService>();
+        services.AddSingleton<ICommandHandler, CommandHandler>();
+
+        return services;
+    }
+
+    private static void ConfigureDiscordDotNetServices(ref DiscordSocketConfig? discordSocketConfig,
+        ref CommandServiceConfig? commandServiceConfig)
+    {
         if (discordSocketConfig == null)
         {
             discordSocketConfig = new DiscordSocketConfig
@@ -55,17 +79,15 @@ public static class ServiceCollectionExtensions
             };
         }
 
-        DiscordSocketClient socketClient = new DiscordSocketClient(discordSocketConfig);
-
-        services.AddSingleton(config);
-        services.AddLogging(loggingBuilder =>
-            loggingBuilder.AddSerilog(dispose: true));
-
-        services.AddSingleton<ILoggingService, LoggingService>();
-        services.AddSingleton(socketClient);
-        services.AddSingleton<IDiscordService, DiscordService>();
-
-        return services;
+        if (commandServiceConfig == null)
+        {
+            commandServiceConfig = new CommandServiceConfig
+            {
+                LogLevel = LogSeverity.Verbose,
+                DefaultRunMode = RunMode.Async,
+                CaseSensitiveCommands = false,
+            };
+        }
     }
 
     private static void SetupLogging(IConfiguration config)
