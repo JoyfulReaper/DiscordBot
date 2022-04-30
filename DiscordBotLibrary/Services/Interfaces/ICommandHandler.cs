@@ -28,5 +28,5 @@ namespace DiscordBotLibrary.Services.Interfaces;
 
 public interface ICommandHandler
 {
-    Task InstallCommandsAsync();
+    Task Initialize();
 }

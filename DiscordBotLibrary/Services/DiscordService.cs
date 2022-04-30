@@ -47,7 +47,7 @@ public class DiscordService : IDiscordService
 
     public async Task Start()
     {
-        await _commandHandler.InstallCommandsAsync();
+        await _commandHandler.Initialize();
         
         // TODO: Store the token in the database
         await _client.LoginAsync(TokenType.Bot, _config["Token"]);

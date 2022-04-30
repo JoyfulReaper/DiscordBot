@@ -46,8 +46,6 @@ namespace DiscordBot.Commands.EasterEgg
         {
             await Context.Channel.TriggerTypingAsync();
 
-            LogHelper.LogCommandUse(Context, nameof(Shelly), _logger);
-
             await Context.Channel.SendEmbedAsync("JoyfulReapers's Dog",
                 "A picture of the DiscordBot developer's dog 🐕",
                 imageUrl: "https://kgivler.com/images/Shelly/Shelly.jpg");

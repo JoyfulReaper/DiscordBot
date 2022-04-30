@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBotLibrary.ConfigSections;
@@ -43,24 +44,27 @@ public class CommandHandler : ICommandHandler
     private readonly CommandService _commands;
     private readonly IServiceProvider _services;
     private readonly IConfiguration _config;
+    private readonly ILoggingService _loggingService;
     private readonly BotInformation _botInfo;
 
     public CommandHandler(DiscordSocketClient client,
         CommandService commands,
         IServiceProvider services,
-        IConfiguration config)
+        IConfiguration config,
+        ILoggingService loggingService)
     {
         _client = client;
         _commands = commands;
         _services = services;
         _config = config;
-
-        _botInfo = config.GetRequiredSection("BotInformation") as BotInformation ?? new BotInformation();
+        _loggingService = loggingService;
+        _botInfo = config.GetSection("BotInformation").Get<BotInformation>();
     }
 
-    public async Task InstallCommandsAsync()
+    public async Task Initialize()
     {
         _client.MessageReceived += HandleCommandAsync;
+        _commands.CommandExecuted += CommandExecutedAsync;
 
         await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
             services: _services);
@@ -84,5 +88,22 @@ public class CommandHandler : ICommandHandler
             context: context,
             argPos: argPos,
             services: _services);
+    }
+
+    private async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+    {
+        if (result.IsSuccess)
+        {
+            await _loggingService.Log(new LogMessage(LogSeverity.Info, "CommandHandler",
+                $"{context.User.Username}#{context.User.Discriminator} successfully executed {command.Value.Name} on {context.Guild?.Name ?? "DM"}/{context.Channel.Name}"));
+        }
+
+        if (!string.IsNullOrEmpty(result?.ErrorReason))
+        {
+            await _loggingService.Log(new LogMessage(LogSeverity.Info, "CommandHandler",
+                $"{context.User.Username}#{context.User.Discriminator} failed to executed {command.Value.Name} on {context.Guild?.Name ?? "DM"}/{context.Channel.Name}: {result.ErrorReason}"));
+            
+            await context.Channel.SendMessageAsync(result.ErrorReason);
+        }
     }
 }

@@ -35,13 +35,17 @@ public class LoggingService : ILoggingService
 {
     private readonly ILogger<LoggingService> _logger;
     private readonly DiscordSocketClient _client;
+    private readonly CommandService _command;
 
     public LoggingService(ILogger<LoggingService> logger,
-        DiscordSocketClient client)
+        DiscordSocketClient client,
+        CommandService command)
     {
         _logger = logger;
         _client = client;
+        _command = command;
 
+        _command.Log += Log;
         _client.Log += Log;
     }
 
