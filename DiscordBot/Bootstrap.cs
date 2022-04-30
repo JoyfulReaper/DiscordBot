@@ -21,30 +21,37 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Some elements of this bot were insipred by the Discord.NET Bot Development Series:
-https://www.youtube.com/playlist?list=PLaqoc7lYL3ZDCDT9TcP_5hEKuWQl7zudR
-
-Although most of the code is modified from the orginal 
-(For example here we use Dapper vs EF and SQLite vs MySQL)
-any code used from the series is licensed under MIT as well:
-https://github.com/Directoire/dnbds
 */
 
-
-using DiscordBot;
-using DiscordBotLibrary.Helpers;
-using DiscordBotLibrary.Services.Interfaces;
+using DiscordBotLibrary.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-ILogger _logger = Log.ForContext<Program>();
+namespace DiscordBot
+{
+    internal static class Bootstrap
+    {
+        internal static ServiceProvider Initialize(string[] args)
+        {
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", false, true);
+            IConfiguration config = configBuilder.Build();
 
-IServiceProvider serviceProvider = Bootstrap.Initialize(args);
-IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
+            IServiceCollection services = new ServiceCollection();
 
-ConsoleHelper.ColorWriteLine(ConsoleColor.Red, $"{config["BotInformation:BotName"]}");
-ConsoleHelper.ColorWriteLine(ConsoleColor.Blue, $"MIT License\n\nCopyright(c) 2021 Kyle Givler (JoyfulReaper)\n{config["Botinformation:BotWebsite"]}\n\n");
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddSerilog(dispose: true);
+            });
+            
+            services.AddSingleton(config);
+            services.AddDiscordBot();
 
-var LoggingService = serviceProvider.GetRequiredService<ILoggingService>();
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+
+            return serviceProvider;
+        }
+    }
+}

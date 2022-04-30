@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot", "DiscordBot\DiscordBot.csproj", "{6540D78F-B272-4CD2-A638-B0F89D305DEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot", "DiscordBot\DiscordBot.csproj", "{6540D78F-B272-4CD2-A638-B0F89D305DEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBotLibrary", "DiscordBotLibrary\DiscordBotLibrary.csproj", "{E2DD568D-8B57-4F0D-8186-4735B26FD2A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBotLibrary", "DiscordBotLibrary\DiscordBotLibrary.csproj", "{E2DD568D-8B57-4F0D-8186-4735B26FD2A2}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "DiscordBotDb", "DiscordBotDb\DiscordBotDb.sqlproj", "{F850BC7E-D7D6-49FE-8A7F-04CEF438277D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBotApi", "DiscordBotApi\DiscordBotApi.csproj", "{8E2C57A1-86FF-494E-87AE-F7B521ACDEE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,16 @@ Global
 		{E2DD568D-8B57-4F0D-8186-4735B26FD2A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2DD568D-8B57-4F0D-8186-4735B26FD2A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2DD568D-8B57-4F0D-8186-4735B26FD2A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F850BC7E-D7D6-49FE-8A7F-04CEF438277D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F850BC7E-D7D6-49FE-8A7F-04CEF438277D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F850BC7E-D7D6-49FE-8A7F-04CEF438277D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F850BC7E-D7D6-49FE-8A7F-04CEF438277D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F850BC7E-D7D6-49FE-8A7F-04CEF438277D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F850BC7E-D7D6-49FE-8A7F-04CEF438277D}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8E2C57A1-86FF-494E-87AE-F7B521ACDEE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E2C57A1-86FF-494E-87AE-F7B521ACDEE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E2C57A1-86FF-494E-87AE-F7B521ACDEE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E2C57A1-86FF-494E-87AE-F7B521ACDEE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

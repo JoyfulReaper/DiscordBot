@@ -21,30 +21,35 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Some elements of this bot were insipred by the Discord.NET Bot Development Series:
-https://www.youtube.com/playlist?list=PLaqoc7lYL3ZDCDT9TcP_5hEKuWQl7zudR
-
-Although most of the code is modified from the orginal 
-(For example here we use Dapper vs EF and SQLite vs MySQL)
-any code used from the series is licensed under MIT as well:
-https://github.com/Directoire/dnbds
 */
 
-
-using DiscordBot;
-using DiscordBotLibrary.Helpers;
+using Discord;
+using Discord.WebSocket;
+using DiscordBotLibrary.Services;
 using DiscordBotLibrary.Services.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
-ILogger _logger = Log.ForContext<Program>();
+namespace DiscordBotLibrary.Extensions;
 
-IServiceProvider serviceProvider = Bootstrap.Initialize(args);
-IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddDiscordBot(this IServiceCollection services, DiscordSocketConfig? discordSocketConfig = null)
+    {
+        if (discordSocketConfig == null)
+        {
+            discordSocketConfig = new DiscordSocketConfig
+            {
+                LogLevel = LogSeverity.Verbose,
+                MessageCacheSize = 500,
+                AlwaysDownloadUsers = true,
+            };
+        }
 
-ConsoleHelper.ColorWriteLine(ConsoleColor.Red, $"{config["BotInformation:BotName"]}");
-ConsoleHelper.ColorWriteLine(ConsoleColor.Blue, $"MIT License\n\nCopyright(c) 2021 Kyle Givler (JoyfulReaper)\n{config["Botinformation:BotWebsite"]}\n\n");
+        DiscordSocketClient socketClient = new DiscordSocketClient(discordSocketConfig);
 
-var LoggingService = serviceProvider.GetRequiredService<ILoggingService>();
+        services.AddSingleton<ILoggingService, LoggingService>();
+        services.AddSingleton(socketClient);
+
+        return services;
+    }
+}
