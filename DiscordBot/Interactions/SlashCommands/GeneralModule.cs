@@ -23,11 +23,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
+using Discord.Interactions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace DiscordBotLibrary.Services.Interfaces;
-
-public interface ILoggingService
+namespace DiscordBot.Interactions.SlashCommands
 {
-    Task LogAsync(LogMessage message);
+    public class GeneralModule : InteractionModuleBase
+    {
+        [SlashCommand("echo", "Echo... Echo... Echo...")]
+        public async Task Echo([Summary("description: Echo... Echo... Echo...!")] string input)
+        {
+            await RespondAsync(input);
+        }
+
+    }
 }

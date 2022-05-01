@@ -23,11 +23,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
+using Discord.Interactions;
+using DiscordBotLibrary.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace DiscordBotLibrary.Services.Interfaces;
+namespace DiscordBotLibrary.Services;
 
-public interface ILoggingService
+public class InteractionHandler : IInteractionHandler
 {
-    Task LogAsync(LogMessage message);
+    private readonly InteractionService _interactionService;
+    private readonly ILoggingService _loggingService;
+    private readonly IServiceProvider _services;
+
+    public InteractionHandler(InteractionService interactionService,
+        ILoggingService loggingService,
+        IServiceProvider services)
+    {
+        _interactionService = interactionService;
+        _loggingService = loggingService;
+        _services = services;
+        _interactionService.Log += _loggingService.LogAsync;
+    }
+
+    public async Task Initialize()
+    {
+        await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+    }
 }

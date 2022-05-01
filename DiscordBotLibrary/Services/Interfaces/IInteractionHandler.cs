@@ -23,11 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
 
 namespace DiscordBotLibrary.Services.Interfaces;
 
-public interface ILoggingService
+public interface IInteractionHandler
 {
-    Task LogAsync(LogMessage message);
+    Task Initialize();
 }

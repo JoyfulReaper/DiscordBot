@@ -25,7 +25,6 @@ SOFTWARE.
 
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -34,32 +33,26 @@ namespace DiscordBotLibrary.Services;
 public class LoggingService : ILoggingService
 {
     private readonly ILogger<LoggingService> _logger;
-    private readonly DiscordSocketClient _client;
-    private readonly CommandService _command;
 
-    public LoggingService(ILogger<LoggingService> logger,
-        DiscordSocketClient client,
-        CommandService command)
+
+    public LoggingService(ILogger<LoggingService> logger)
     {
         _logger = logger;
-        _client = client;
-        _command = command;
-
-        _command.Log += Log;
-        _client.Log += Log;
     }
 
-    public Task Log(LogMessage message)
+    public async Task LogAsync(LogMessage message)
     {
         if (message.Exception is CommandException commandException)
         {
-            _logger.LogError("[Command/{severity}}] {command} failed to execute in {server}:{channel}.",
-                   message.Severity, commandException.Command.Aliases.First(), commandException.Context.Guild?.Name ?? "DM", commandException.Context.Channel.Name);
+            _logger.LogError("[Command] {command} failed to execute in {server}:{channel}.",
+                   commandException.Command.Aliases.First(), commandException.Context.Guild?.Name ?? "DM", commandException.Context.Channel.Name);
             _logger.LogError(commandException, "Exception");
+
+            await commandException.Context.Channel.SendMessageAsync("Ooops... The bot just blew up! Command failed :(");
         }
         else
         {
-            var logMessage = "[{source}/" + message.Severity + "] {message}";
+            var logMessage = "[{source}] {message}";
 
             switch (message.Severity)
             {
@@ -89,7 +82,5 @@ public class LoggingService : ILoggingService
         {
             _logger.LogDebug(message.Exception, "Exception:");
         }
-
-        return Task.CompletedTask;
     }
 }

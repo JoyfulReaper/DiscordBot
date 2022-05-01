@@ -35,14 +35,19 @@ public class DiscordService : IDiscordService
     private readonly DiscordSocketClient _client;
     private readonly IConfiguration _config;
     private readonly ICommandHandler _commandHandler;
+    private readonly ILoggingService _loggingService;
 
     public DiscordService(DiscordSocketClient discordSocketClient,
-        IConfiguration _config,
-        ICommandHandler commandHandler)
+        IConfiguration config,
+        ICommandHandler commandHandler,
+        ILoggingService loggingService)
     {
         _client = discordSocketClient;
-        this._config = _config;
+        _config = config;
         _commandHandler = commandHandler;
+        _loggingService = loggingService;
+
+        _client.Log += loggingService.LogAsync;
     }
 
     public async Task Start()

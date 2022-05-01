@@ -25,6 +25,7 @@ SOFTWARE.
 
 using Discord;
 using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordBotLibrary.Services;
 using DiscordBotLibrary.Services.Interfaces;
@@ -38,6 +39,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDiscordBot(this IServiceCollection services,
         DiscordSocketConfig? discordSocketConfig = null,
+        InteractionServiceConfig? interactionServiceConfig = null,
         CommandServiceConfig? commandServiceConfig = null)
     {
         IConfigurationBuilder configBuilder = new ConfigurationBuilder()
@@ -48,10 +50,13 @@ public static class ServiceCollectionExtensions
 
         SetupLogging(config);
 
-        ConfigureDiscordDotNetServices(ref discordSocketConfig, ref commandServiceConfig);
+        ConfigureDiscordDotNetServices(ref discordSocketConfig, 
+            ref commandServiceConfig, 
+            ref interactionServiceConfig);
 
         DiscordSocketClient socketClient = new DiscordSocketClient(discordSocketConfig);
         CommandService commandService = new CommandService(commandServiceConfig);
+        InteractionService interactionService = new InteractionService(socketClient, interactionServiceConfig);
 
         services.AddSingleton(config);
         services.AddLogging(loggingBuilder =>
@@ -60,15 +65,27 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton(socketClient);
         services.AddSingleton(commandService);
+        services.AddSingleton(interactionService);
         services.AddSingleton<IDiscordService, DiscordService>();
         services.AddSingleton<ICommandHandler, CommandHandler>();
+        services.AddSingleton<IInteractionHandler, InteractionHandler>();
 
         return services;
     }
 
     private static void ConfigureDiscordDotNetServices(ref DiscordSocketConfig? discordSocketConfig,
-        ref CommandServiceConfig? commandServiceConfig)
+        ref CommandServiceConfig? commandServiceConfig,
+        ref InteractionServiceConfig interactionServiceConfig)
     {
+        if(interactionServiceConfig == null)
+        {
+            interactionServiceConfig = new InteractionServiceConfig
+            {
+                DefaultRunMode = Discord.Interactions.RunMode.Async,
+                LogLevel = LogSeverity.Verbose,
+            };
+        }
+
         if (discordSocketConfig == null)
         {
             discordSocketConfig = new DiscordSocketConfig
@@ -76,6 +93,7 @@ public static class ServiceCollectionExtensions
                 LogLevel = LogSeverity.Verbose,
                 MessageCacheSize = 500,
                 AlwaysDownloadUsers = true,
+                GatewayIntents = GatewayIntents.AllUnprivileged,
             };
         }
 
@@ -84,7 +102,7 @@ public static class ServiceCollectionExtensions
             commandServiceConfig = new CommandServiceConfig
             {
                 LogLevel = LogSeverity.Verbose,
-                DefaultRunMode = RunMode.Async,
+                DefaultRunMode = Discord.Commands.RunMode.Async,
                 CaseSensitiveCommands = false,
             };
         }

@@ -29,45 +29,43 @@ using Discord.WebSocket;
 using DiscordBotLibrary.ConfigSections;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBotLibrary.Services;
 
 public class CommandHandler : ICommandHandler
 {
     private readonly DiscordSocketClient _client;
-    private readonly CommandService _commands;
+    private readonly CommandService _commandService;
     private readonly IServiceProvider _services;
     private readonly IConfiguration _config;
     private readonly ILoggingService _loggingService;
     private readonly BotInformation _botInfo;
 
     public CommandHandler(DiscordSocketClient client,
-        CommandService commands,
+        CommandService commandService,
         IServiceProvider services,
         IConfiguration config,
         ILoggingService loggingService)
     {
         _client = client;
-        _commands = commands;
+        _commandService = commandService;
         _services = services;
         _config = config;
         _loggingService = loggingService;
-        _botInfo = config.GetSection("BotInformation").Get<BotInformation>();
+        
+        _botInfo = _config.GetSection("BotInformation").Get<BotInformation>();
+
+        _commandService.Log += _loggingService.LogAsync;
     }
 
     public async Task Initialize()
     {
         _client.MessageReceived += HandleCommandAsync;
-        _commands.CommandExecuted += CommandExecutedAsync;
+        _commandService.CommandExecuted += CommandExecutedAsync;
 
-        await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
-            services: _services);
+        await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(),
+             _services);
     }
 
     private async Task HandleCommandAsync(SocketMessage messageParam)
@@ -84,23 +82,23 @@ public class CommandHandler : ICommandHandler
 
         var context = new SocketCommandContext(_client, message);
 
-        await _commands.ExecuteAsync(
+        await _commandService.ExecuteAsync(
             context: context,
             argPos: argPos,
             services: _services);
     }
 
-    private async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+    private async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, Discord.Commands.IResult result)
     {
         if (result.IsSuccess)
         {
-            await _loggingService.Log(new LogMessage(LogSeverity.Info, "CommandHandler",
+            await _loggingService.LogAsync(new LogMessage(LogSeverity.Info, "CommandHandler",
                 $"{context.User.Username}#{context.User.Discriminator} successfully executed {command.Value.Name} on {context.Guild?.Name ?? "DM"}/{context.Channel.Name}"));
         }
 
         if (!string.IsNullOrEmpty(result?.ErrorReason))
         {
-            await _loggingService.Log(new LogMessage(LogSeverity.Info, "CommandHandler",
+            await _loggingService.LogAsync(new LogMessage(LogSeverity.Info, "CommandHandler",
                 $"{context.User.Username}#{context.User.Discriminator} failed to executed {command.Value.Name} on {context.Guild?.Name ?? "DM"}/{context.Channel.Name}: {result.ErrorReason}"));
             
             await context.Channel.SendMessageAsync(result.ErrorReason);

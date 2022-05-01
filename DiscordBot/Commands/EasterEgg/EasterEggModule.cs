@@ -25,30 +25,21 @@ SOFTWARE.
 
 using Discord.Commands;
 using DiscordBotLibrary.Helpers;
-using Microsoft.Extensions.Logging;
 
-namespace DiscordBot.Commands.EasterEgg
+namespace DiscordBot.Commands.EasterEgg;
+
+[Name("EasterEggsHidden")]
+public class EasterEggModule : ModuleBase<SocketCommandContext>
 {
-    [Name("EasterEggsHidden")]
-    public class EasterEggModule : ModuleBase<SocketCommandContext>
+    [Command("shelly")]
+    [Summary("A picture of the bot programmer's dog")]
+    [Alias("dog")]
+    public async Task Shelly()
     {
-        private readonly ILogger<EasterEggModule> _logger;
+        await Context.Channel.TriggerTypingAsync();
 
-        public EasterEggModule(ILogger<EasterEggModule> logger)
-        {
-            _logger = logger;
-        }
-
-        [Command("shelly")]
-        [Summary("A picture of the bot programmer's dog")]
-        [Alias("dog")]
-        public async Task Shelly()
-        {
-            await Context.Channel.TriggerTypingAsync();
-
-            await Context.Channel.SendEmbedAsync("JoyfulReapers's Dog",
-                "A picture of the DiscordBot developer's dog 🐕",
-                imageUrl: "https://kgivler.com/images/Shelly/Shelly.jpg");
-        }
+        await Context.Channel.SendEmbedAsync("JoyfulReapers's Dog",
+            "A picture of the DiscordBot developer's dog 🐕",
+            imageUrl: "https://kgivler.com/images/Shelly/Shelly.jpg");
     }
 }
