@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using DiscordBotLibrary.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -39,19 +41,43 @@ public class InteractionHandler : IInteractionHandler
     private readonly InteractionService _interactionService;
     private readonly ILoggingService _loggingService;
     private readonly IServiceProvider _services;
+    private readonly DiscordSocketClient _client;
 
     public InteractionHandler(InteractionService interactionService,
         ILoggingService loggingService,
-        IServiceProvider services)
+        IServiceProvider services,
+        DiscordSocketClient client)
     {
         _interactionService = interactionService;
         _loggingService = loggingService;
         _services = services;
-        _interactionService.Log += _loggingService.LogAsync;
+        _client = client;
     }
+
 
     public async Task Initialize()
     {
+        _client.InteractionCreated += HandleInteractionAsync;
+        _interactionService.Log += _loggingService.LogAsync;
         await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+    }
+    
+    private async Task HandleInteractionAsync(SocketInteraction interactionParam)
+    {
+        try
+        {
+            var ctx = new SocketInteractionContext(_client, interactionParam);
+            await _interactionService.ExecuteCommandAsync(ctx, _services);
+        }
+        catch (Exception ex)
+        {
+            await _loggingService.LogAsync(new LogMessage(Discord.LogSeverity.Warning, "InteractionHandler", $"Error handling interaction: {ex.Message}", ex));
+
+            if (interactionParam.Type == InteractionType.ApplicationCommand)
+            {
+                await interactionParam.GetOriginalResponseAsync()
+                    .ContinueWith(async (msg) => await msg.Result.DeleteAsync());
+            }
+        }
     }
 }

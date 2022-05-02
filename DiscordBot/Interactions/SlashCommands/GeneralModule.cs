@@ -35,7 +35,7 @@ namespace DiscordBot.Interactions.SlashCommands
     public class GeneralModule : InteractionModuleBase
     {
         [SlashCommand("echo", "Echo... Echo... Echo...")]
-        public async Task Echo([Summary("description: Echo... Echo... Echo...!")] string input)
+        public async Task Echo([Summary("Echo", "Echo... Echo... Echo...!")] string input)
         {
             await RespondAsync(input);
         }
