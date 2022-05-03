@@ -24,67 +24,54 @@ SOFTWARE.
 */
 
 using Discord;
-
+using Discord.WebSocket;
 
 namespace DiscordBotLibrary.Helpers;
 
-public class EmbedHelper
+public static class ISocketMessageChannelExtensions
 {
-    public static Embed GetEmbed(string title,
+    public static async Task<IMessage> SendEmbedAsync(this ISocketMessageChannel channel, 
+        string title, 
         string description,
         Color? color = null,
         string? thumbImage = null,
         string? imageUrl = null)
     {
-        var embedBuilder = new EmbedBuilder()
+        var embed = new EmbedBuilder()
             .WithTitle(title)
             .WithDescription(description)
             .WithCurrentTimestamp();
 
-        if (imageUrl != null)
+        if(imageUrl != null)
         {
-            embedBuilder.WithImageUrl(imageUrl);
+            embed.WithImageUrl(imageUrl);
         }
 
-        if (color != null)
+        if(color != null)
         {
-            embedBuilder.WithColor(color.Value);
-        }
-
-        if (thumbImage != null)
-        {
-            embedBuilder.WithThumbnailUrl(thumbImage);
-        }
-
-        return embedBuilder.Build();
-    }
-
-    public static Embed[] GetEmbedAsArray(string title,
-        string description,
-        Color? color = null,
-        string? thumbImage = null,
-        string? imageUrl = null)
-    {
-        var embedBuilder = new EmbedBuilder()
-            .WithTitle(title)
-            .WithDescription(description)
-            .WithCurrentTimestamp();
-
-        if (imageUrl != null)
-        {
-            embedBuilder.WithImageUrl(imageUrl);
-        }
-
-        if (color != null)
-        {
-            embedBuilder.WithColor(color.Value);
+            embed.WithColor(color.Value);
         }
 
         if (thumbImage != null)
         {
-            embedBuilder.WithThumbnailUrl(thumbImage);
+            embed.WithThumbnailUrl(thumbImage);
         }
 
-        return new Embed[] { embedBuilder.Build() };
+        var message = await channel.SendMessageAsync(embed: embed.Build());
+        return message;
     }
+
+    //public static async Task<IMessage> SendEmbedAsync(this ISocketMessageChannel channel, 
+    //    string title, 
+    //    string description, 
+    //    Server server,
+    //    string thumbImage = null)
+    //{
+    //    if (server == null)
+    //    {
+    //        return await SendEmbedAsync(channel, title, description, ColorHelper.RandomColor(), thumbImage);
+    //    }
+
+    //    return await SendEmbedAsync(channel, title, description, server.EmbedColor.RawValue == 0 ? ColorHelper.RandomColor() : server.EmbedColor, thumbImage);
+    //}
 }

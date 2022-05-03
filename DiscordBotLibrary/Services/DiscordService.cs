@@ -34,13 +34,13 @@ public class DiscordService : IDiscordService
 {
     private readonly DiscordSocketClient _client;
     private readonly IConfiguration _config;
-    private readonly ICommandHandler _commandHandler;
+    private readonly ITextCommandHandler _commandHandler;
     private readonly IInteractionHandler _interactionHandler;
     private readonly ILoggingService _loggingService;
 
     public DiscordService(DiscordSocketClient discordSocketClient,
         IConfiguration config,
-        ICommandHandler commandHandler,
+        ITextCommandHandler commandHandler,
         IInteractionHandler interactionHandler,
         ILoggingService loggingService)
     {

@@ -67,7 +67,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(commandService);
         services.AddSingleton(interactionService);
         services.AddSingleton<IDiscordService, DiscordService>();
-        services.AddSingleton<ICommandHandler, CommandHandler>();
+        services.AddSingleton<ITextCommandHandler, TextCommandHandler>();
         services.AddSingleton<IInteractionHandler, InteractionHandler>();
 
         return services;

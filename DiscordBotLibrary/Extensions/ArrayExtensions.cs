@@ -1,7 +1,7 @@
 ﻿/*
 MIT License
 
-Copyright(c) 2022 Kyle Givler
+Copyright(c) 2021 Kyle Givler
 https://github.com/JoyfulReaper
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,9 +24,14 @@ SOFTWARE.
 */
 
 
-namespace DiscordBotLibrary.Services.Interfaces;
+namespace DiscordBotLibrary.Extensions;
 
-public interface ICommandHandler
+public static class ArrayExtensions
 {
-    Task InitializeAsync();
+    private static readonly Random _random = new();
+
+    public static T RandomItem<T>(this T[] array)
+    {
+        return array[_random.Next(array.Length)];
+    }
 }
