@@ -27,12 +27,9 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordBotLibrary.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace DiscordBotLibrary.Services;
 
@@ -42,23 +39,31 @@ public class InteractionHandler : IInteractionHandler
     private readonly ILoggingService _loggingService;
     private readonly IServiceProvider _services;
     private readonly DiscordSocketClient _client;
+    private readonly ILogger<InteractionService> _logger;
 
     public InteractionHandler(InteractionService interactionService,
         ILoggingService loggingService,
         IServiceProvider services,
-        DiscordSocketClient client)
+        DiscordSocketClient client,
+        ILogger<InteractionService> logger)
     {
         _interactionService = interactionService;
         _loggingService = loggingService;
         _services = services;
         _client = client;
+        _logger = logger;
     }
 
 
-    public async Task Initialize()
+    public async Task InitializeAsync()
     {
         _client.InteractionCreated += HandleInteractionAsync;
+        _interactionService.SlashCommandExecuted += SlashCommandExcuted;
+        //_interactionService.ContextCommandExecuted += ContextCommandExcuted;
+        //_interactionService.ComponentCommandExecuted += ComponentCommentExecuted;
         _interactionService.Log += _loggingService.LogAsync;
+        
+
         await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
     }
     
@@ -79,5 +84,38 @@ public class InteractionHandler : IInteractionHandler
                     .ContinueWith(async (msg) => await msg.Result.DeleteAsync());
             }
         }
+    }
+
+    private Task SlashCommandExcuted(SlashCommandInfo slashInfo,
+        IInteractionContext ctx,
+        IResult result)
+    {
+        if(!result.IsSuccess)
+        {
+            // TODO Addtional logging/handling
+            _logger.LogError("Slash commands was not successful. TODO: Add error handling");
+            switch (result.Error)
+            {
+                case InteractionCommandError.UnmetPrecondition:
+                    // implement
+                    break;
+                case InteractionCommandError.UnknownCommand:
+                    // implement
+                    break;
+                case InteractionCommandError.BadArgs:
+                    // implement
+                    break;
+                case InteractionCommandError.Exception:
+                    // implement
+                    break;
+                case InteractionCommandError.Unsuccessful:
+                    // implement
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return Task.CompletedTask;
     }
 }

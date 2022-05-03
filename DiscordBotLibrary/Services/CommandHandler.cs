@@ -57,7 +57,7 @@ public class CommandHandler : ICommandHandler
         _botInfo = _config.GetSection("BotInformation").Get<BotInformation>();
     }
 
-    public async Task Initialize()
+    public async Task InitializeAsync()
     {
         _commandService.Log += _loggingService.LogAsync;
         _client.MessageReceived += HandleCommandAsync;

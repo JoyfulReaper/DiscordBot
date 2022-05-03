@@ -28,5 +28,5 @@ namespace DiscordBotLibrary.Services.Interfaces;
 
 public interface IInteractionHandler
 {
-    Task Initialize();
+    Task InitializeAsync();
 }
