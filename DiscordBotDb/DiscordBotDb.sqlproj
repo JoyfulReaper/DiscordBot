@@ -64,5 +64,6 @@
     <Build Include="dbo\Tables\Guild.sql" />
     <Build Include="dbo\Tables\BotSettings.sql" />
     <Build Include="dbo\Tables\User.sql" />
+    <Build Include="dbo\Stored Procedures\spGuild_Upsert.sql" />
   </ItemGroup>
 </Project>
