@@ -28,6 +28,8 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordBotLibrary.DataAccess;
+using DiscordBotLibrary.Repositories;
+using DiscordBotLibrary.Repositories.Interfaces;
 using DiscordBotLibrary.Services;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -71,7 +73,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITextCommandHandler, TextCommandHandler>();
         services.AddSingleton<IInteractionHandler, InteractionHandler>();
 
-        services.AddTransient<IDataAccess, SqlServerDataAccess>();
+        services.AddScoped<IGuildRepository, GuildRepository>();
+        services.AddScoped<IGuildService, GuildService>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
 
         return services;
     }

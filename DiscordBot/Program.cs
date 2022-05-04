@@ -47,10 +47,11 @@ IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
 
 
 //var guildr = new GuildRepository(config);
-//await guildr.UpsertGuild(new DiscordBotLibrary.Models.Guild { GuildId = 123, LoggingChannel = 321 });
+//await guildr.UpsertGuild(new DiscordBotLibrary.Models.Guild { GuildId = 154623, LoggingChannel = 334521 });
+
 
 ConsoleHelper.ColorWriteLine(ConsoleColor.Red, $"{config["BotInformation:BotName"]}");
-ConsoleHelper.ColorWriteLine(ConsoleColor.Blue, $"MIT License\n\nCopyright(c) 2021 Kyle Givler (JoyfulReaper)\n{config["Botinformation:BotWebsite"]}\n\n");
+ConsoleHelper.ColorWriteLine(ConsoleColor.Blue, $"MIT License\n\nCopyright(c) 2022 Kyle Givler (JoyfulReaper)\n{config["Botinformation:BotWebsite"]}\n\n");
 
 serviceProvider.GetRequiredService<ILoggingService>();
 IDiscordService discordService = serviceProvider.GetRequiredService<IDiscordService>();

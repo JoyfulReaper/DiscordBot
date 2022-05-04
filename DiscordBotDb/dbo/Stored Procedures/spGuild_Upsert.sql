@@ -1,31 +1,55 @@
 ﻿CREATE PROCEDURE [dbo].[spGuild_Upsert]
-	@Id BIGINT,
 	@GuildId BIGINT,
-	@LoggingChannel BIGINT
+	@DiscordGuildId BIGINT,
+	@WelcomeUsers BIT,
+	@LoggingChannel BIGINT,
+	@WelcomeChannel BIGINT,
+	@WelcomeBackground VARCHAR(800),
+	@EmbedColor VARCHAR(12),
+	@AllowInvites BIT,
+	@Prefix NVARCHAR(10)
 AS
 BEGIN
 	BEGIN TRANSACTION;
  
 	UPDATE dbo.Guild WITH (UPDLOCK, SERIALIZABLE) 
 		SET 
-			GuildId = @GuildId,
-			LoggingChannel = @LoggingChannel
+			DiscordGuildId = @DiscordGuildId,
+			WelcomeUsers = @WelcomeUsers,
+			LoggingChannel = @LoggingChannel,
+			WelcomeChannel = @WelcomeChannel,
+			WelcomeBackground = @WelcomeBackground,
+			EmbedColor = @EmbedColor,
+			AllowInvites = @AllowInvites,
+			Prefix = @Prefix
 		WHERE 
-			[Id] = @Id;
+			[GuildId] = @GuildId;
  
 	IF @@ROWCOUNT = 0
 	BEGIN
 	  INSERT dbo.Guild
-		(GuildId,
-		LoggingChannel)
+		(DiscordGuildId,
+		WelcomeUsers,
+		LoggingChannel,
+		WelcomeChannel,
+		WelcomeBackground,
+		EmbedColor,
+		AllowInvites,
+		Prefix)
 	  VALUES
-		(@GuildId,
-		@LoggingChannel);
+		(@DiscordGuildId,
+		@WelcomeUsers,
+		@LoggingChannel,
+		@WelcomeChannel,
+		@WelcomeBackground,
+		@EmbedColor,
+		@AllowInvites,
+		@Prefix);
 
-	  SET @Id = SCOPE_IDENTITY();
+	  SET @GuildId = SCOPE_IDENTITY();
 	END
 
 	COMMIT TRANSACTION;
 
-	RETURN @Id;
+	SELECT @GuildId;
 END

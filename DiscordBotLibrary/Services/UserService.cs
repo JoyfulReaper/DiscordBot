@@ -22,20 +22,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using System.ComponentModel.DataAnnotations;
 
+using DiscordBotLibrary.Models;
+using DiscordBotLibrary.Repositories.Interfaces;
+using DiscordBotLibrary.Services.Interfaces;
 
-namespace DiscordBotLibrary.Models
+namespace DiscordBotLibrary.Services;
+
+public class UserService : IUserService
 {
-    public class User
+    private readonly IUserRepository _userRepository;
+
+    public UserService(IUserRepository userRepository)
     {
-        [Key]
-        public long UserId { get; set; }
-
-        public decimal DiscordUserId { get; set; }
-
-        public string UserName { get; set; } = string.Empty;
-
-        public DateTimeOffset DateCreated { get; set; } = new();
+        _userRepository = userRepository;
     }
+
+    public Task<User> GetUser(decimal userId)
+    {
+        return _userRepository.LoadUser(userId);
+    }
+
+    public Task SaveUser(User user)
+    {
+        return _userRepository.SaveUser(user);
+    }
+
 }

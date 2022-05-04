@@ -22,20 +22,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using System.ComponentModel.DataAnnotations;
 
+using Dapper;
+using DiscordBotLibrary.Models;
+using DiscordBotLibrary.Repositories.Interfaces;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 
-namespace DiscordBotLibrary.Models
+namespace DiscordBotLibrary.Repositories;
+public class UserRepository : IUserRepository
 {
-    public class User
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
+
+    public UserRepository(IConfiguration config)
     {
-        [Key]
-        public long UserId { get; set; }
+        _config = config;
+        _connectionString = _config.GetConnectionString("DiscordBot");
+    }
 
-        public decimal DiscordUserId { get; set; }
+    public async Task SaveUser(User user)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        var id = await connection.QuerySingleAsync<int>("spUser_Upsert", user, commandType: CommandType.StoredProcedure);
+        user.UserId = id;
+    }
 
-        public string UserName { get; set; } = string.Empty;
-
-        public DateTimeOffset DateCreated { get; set; } = new();
+    public Task<User> LoadUser(decimal discordUserId)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        return connection.QuerySingleAsync<User>("spUser_Get", new { DiscordUserId = discordUserId }, commandType: CommandType.StoredProcedure);
     }
 }

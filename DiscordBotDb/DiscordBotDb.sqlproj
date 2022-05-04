@@ -65,5 +65,11 @@
     <Build Include="dbo\Tables\BotSettings.sql" />
     <Build Include="dbo\Tables\User.sql" />
     <Build Include="dbo\Stored Procedures\spGuild_Upsert.sql" />
+    <Build Include="dbo\Stored Procedures\spGuild_Load.sql" />
+    <Build Include="dbo\Stored Procedures\spUser_Upsert.sql" />
+    <Build Include="dbo\Stored Procedures\spUser_Load.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="DiscordBotDb.refactorlog" />
   </ItemGroup>
 </Project>
