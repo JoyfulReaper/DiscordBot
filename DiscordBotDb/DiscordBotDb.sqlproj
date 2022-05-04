@@ -56,5 +56,13 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="dbo" />
+    <Folder Include="dbo\Stored Procedures" />
+    <Folder Include="dbo\Tables" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Tables\Guild.sql" />
+    <Build Include="dbo\Tables\BotSettings.sql" />
+    <Build Include="dbo\Tables\User.sql" />
   </ItemGroup>
 </Project>

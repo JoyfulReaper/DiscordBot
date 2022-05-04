@@ -27,6 +27,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DiscordBotLibrary.DataAccess;
 using DiscordBotLibrary.Services;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -69,6 +70,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IDiscordService, DiscordService>();
         services.AddSingleton<ITextCommandHandler, TextCommandHandler>();
         services.AddSingleton<IInteractionHandler, InteractionHandler>();
+
+        services.AddTransient<IDataAccess, SqlServerDataAccess>();
 
         return services;
     }
