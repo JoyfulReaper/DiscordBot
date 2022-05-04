@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using DiscordBotLibrary.ConfigSections;
 using DiscordBotLibrary.Helpers;
 using Microsoft.Extensions.Configuration;
@@ -36,18 +38,21 @@ namespace DiscordBot.Interactions.SlashCommands.Bot;
 public class BotModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IConfiguration _config;
+    private readonly DiscordSocketClient _client;
     private readonly BotInformation _botInfo;
 
-    public BotModule(IConfiguration configuration)
+    public BotModule(IConfiguration configuration,
+        DiscordSocketClient client)
     {
         _config = configuration;
+        _client = client;
         _botInfo = _config.GetSection("BotInformation").Get<BotInformation>();
     }
 
     [SlashCommand("invite", "Invite the bot to your server")]
     public async Task Invite()
     {
-        await RespondAsync("test", EmbedHelper.GetEmbedAsArray("Invite", $"Please click on the link to invite me to your server!\n{_botInfo.InviteLink}",
+        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Invite", $"Please click on the link to invite me to your server!\n{_botInfo.InviteLink}",
             thumbImage: ImageLookup.GetImageUrl("INVITE_IMAGES")));
     }
 
@@ -60,5 +65,24 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
         var upTime = DateTime.Now - startTime;
 
         await RespondAsync($"Uptime: `{upTime}`\nMemory Usage: `{memoryMb} MB`");
+    }
+
+    [SlashCommand("servers", "Report the number of servers the bot is in")]
+    public async Task Servers()
+    {
+        await RespondAsync($"I am in `{Context.Client.Guilds.Count}` servers!");
+    }
+
+    [SlashCommand("about", "Information about the bot")]
+    public async Task About()
+    {
+        var builder = new EmbedBuilder()
+            .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
+            .WithDescription($"{_botInfo.BotName}\nMIT License Copyright(c) 2022 JoyfulReaper\n{_botInfo.BotWebsite}\n\n" +
+            $"Use `/bot invite` for the link to invite DiscordBot to your server!")
+            //.WithColor(ColorHelper.GetColor(server))
+            .WithCurrentTimestamp();
+
+        await RespondAsync(null, new Embed[] { builder.Build() });
     }
 }
