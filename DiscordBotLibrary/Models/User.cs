@@ -12,7 +12,7 @@ namespace DiscordBotLibrary.Models
         [Key]
         public long Id { get; set; }
 
-        public UInt64 UserId { get; set; }
+        public decimal UserId { get; set; }
 
         public string UserName { get; set; } = string.Empty;
     }

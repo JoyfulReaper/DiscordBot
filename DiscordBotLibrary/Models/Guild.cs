@@ -11,7 +11,7 @@ namespace DiscordBotLibrary.Models
     {
         [Key]
         public long Id { get; set; }
-        public UInt64 GuildId { get; set; }
-        public UInt64 LoggingChannel { get; set; }
+        public decimal GuildId { get; set; }
+        public decimal LoggingChannel { get; set; }
     }
 }

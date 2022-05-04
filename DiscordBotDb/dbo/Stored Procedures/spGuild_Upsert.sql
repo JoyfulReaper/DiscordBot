@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[spGuild_Upsert]
 	@Id BIGINT,
 	@GuildId BIGINT,
-	@LogginChannel BIGINT
+	@LoggingChannel BIGINT
 AS
 BEGIN
 	BEGIN TRANSACTION;
@@ -9,7 +9,7 @@ BEGIN
 	UPDATE dbo.Guild WITH (UPDLOCK, SERIALIZABLE) 
 		SET 
 			GuildId = @GuildId,
-			LoggingChannel = @LogginChannel
+			LoggingChannel = @LoggingChannel
 		WHERE 
 			[Id] = @Id;
  
@@ -20,7 +20,7 @@ BEGIN
 		LoggingChannel)
 	  VALUES
 		(@GuildId,
-		@LogginChannel);
+		@LoggingChannel);
 
 	  SET @Id = SCOPE_IDENTITY();
 	END

@@ -34,6 +34,7 @@ https://github.com/Directoire/dnbds
 
 using DiscordBot;
 using DiscordBotLibrary.Helpers;
+using DiscordBotLibrary.Repositories;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +44,10 @@ ILogger _logger = Log.ForContext<Program>();
 
 IServiceProvider serviceProvider = Bootstrap.Initialize(args);
 IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
+
+
+//var guildr = new GuildRepository(config);
+//await guildr.UpsertGuild(new DiscordBotLibrary.Models.Guild { GuildId = 123, LoggingChannel = 321 });
 
 ConsoleHelper.ColorWriteLine(ConsoleColor.Red, $"{config["BotInformation:BotName"]}");
 ConsoleHelper.ColorWriteLine(ConsoleColor.Blue, $"MIT License\n\nCopyright(c) 2021 Kyle Givler (JoyfulReaper)\n{config["Botinformation:BotWebsite"]}\n\n");
