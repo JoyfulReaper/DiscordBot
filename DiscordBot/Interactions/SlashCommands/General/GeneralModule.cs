@@ -24,15 +24,11 @@ SOFTWARE.
 */
 
 using Discord.Interactions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace DiscordBot.Interactions.SlashCommands
 {
-    public class GeneralModule : InteractionModuleBase
+    public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
     {
         [SlashCommand("echo", "Echo... Echo... Echo...")]
         public async Task Echo([Summary("Echo", "Echo... Echo... Echo...!")] string input)

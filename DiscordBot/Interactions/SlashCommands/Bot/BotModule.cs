@@ -27,25 +27,38 @@ using Discord.Interactions;
 using DiscordBotLibrary.ConfigSections;
 using DiscordBotLibrary.Helpers;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics;
 
-namespace DiscordBot.Interactions.SlashCommands.Bot
+namespace DiscordBot.Interactions.SlashCommands.Bot;
+
+
+[Group("bot", "Bot related commands")]
+public class BotModule : InteractionModuleBase<SocketInteractionContext>
 {
-    public class BotModule : InteractionModuleBase
+    private readonly IConfiguration _config;
+    private readonly BotInformation _botInfo;
+
+    public BotModule(IConfiguration configuration)
     {
-        private readonly IConfiguration _config;
-        private readonly BotInformation _botInfo;
+        _config = configuration;
+        _botInfo = _config.GetSection("BotInformation").Get<BotInformation>();
+    }
 
-        public BotModule(IConfiguration configuration)
-        {
-            _config = configuration;
-            _botInfo = _config.GetSection("BotInformation").Get<BotInformation>();
-        }
+    [SlashCommand("invite", "Invite the bot to your server")]
+    public async Task Invite()
+    {
+        await RespondAsync("test", EmbedHelper.GetEmbedAsArray("Invite", $"Please click on the link to invite me to your server!\n{_botInfo.InviteLink}",
+            thumbImage: ImageLookup.GetImageUrl("INVITE_IMAGES")));
+    }
 
-        [SlashCommand("invite", "Invite the bot to your server")]
-        public async Task Invite()
-        {
-            await RespondAsync("test",  EmbedHelper.GetEmbedAsArray("Invite", $"Please click on the link to invite me to your server!\n{_botInfo.InviteLink}",
-                thumbImage: ImageLookup.GetImageUrl("INVITE_IMAGES")));
-        }
+    [SlashCommand("uptime", "Get bot uptime and memory usage")]
+    public async Task Uptime()
+    {
+        using var proccess = Process.GetCurrentProcess();
+        var memoryMb = proccess.WorkingSet64 / 1024 / 1024;
+        var startTime = proccess.StartTime;
+        var upTime = DateTime.Now - startTime;
+
+        await RespondAsync($"Uptime: `{upTime}`\nMemory Usage: `{memoryMb} MB`");
     }
 }
