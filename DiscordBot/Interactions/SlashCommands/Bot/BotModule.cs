@@ -50,14 +50,14 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
         _config = configuration;
         _client = client;
         _guildService = guildService;
-        _botInfo = _config.GetSection("BotInformation").Get<BotInformation>();
+        _botInfo = _config.GetRequiredSection("BotInformation").Get<BotInformation>();
     }
 
     [SlashCommand("invite", "Invite the bot to your server")]
     public async Task Invite()
     {
         await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Invite Link", $"Please click on the link to invite {_botInfo.BotName} to your server!\n{_botInfo.InviteLink}",
-            await _guildService.GetEmbedColorAsync(Context.Guild.Id.ToString()),
+            await _guildService.GetEmbedColorAsync(Context),
             thumbImage: ImageLookup.GetImageUrl("INVITE_IMAGES")));
     }
 
@@ -78,7 +78,7 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
     public async Task Servers()
     {
         await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Servers", $"I am currently in {_client.Guilds.Count} {(_client.Guilds.Count == 1 ? "server" : "servers")}!",
-            await _guildService.GetEmbedColorAsync(Context));
+            await _guildService.GetEmbedColorAsync(Context)));
     }
 
     [SlashCommand("about", "Information about the bot")]

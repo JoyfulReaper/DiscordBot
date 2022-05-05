@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -86,22 +87,30 @@ public class InteractionHandler : IInteractionHandler
         }
     }
 
-    private Task SlashCommandExcuted(SlashCommandInfo slashInfo,
-        IInteractionContext ctx,
+    private async Task SlashCommandExcuted(SlashCommandInfo slashInfo,
+        IInteractionContext context,
         IResult result)
     {
         if(!result.IsSuccess)
         {
             // TODO Addtional logging/handling
-            _logger.LogError("Slash commands was not successful. TODO: Add error handling");
             switch (result.Error)
             {
                 case InteractionCommandError.UnmetPrecondition:
                     // implement
                     break;
                 case InteractionCommandError.UnknownCommand:
-                    // implement
-                    break;
+                    _logger.LogInformation("{user}#{discriminator} attempted to use and unknown interaction: {interaction} on {guild}/{channel}",
+                        context.User.Username, context.User.Discriminator, slashInfo.Name, context.Guild?.Name ?? "DM", context.Channel.Name);
+
+                    _ = Task.Run(async () =>
+                    {
+                        var badCommandMessage = await context.Channel.SendMessageAsync(ImageLookup.GetImageUrl("BADCOMMAND_IMAGES"));
+                        await Task.Delay(3500);
+                        await badCommandMessage.DeleteAsync();
+                    });
+
+                    return;
                 case InteractionCommandError.BadArgs:
                     // implement
                     break;
@@ -114,8 +123,11 @@ public class InteractionHandler : IInteractionHandler
                 default:
                     break;
             }
-        }
 
-        return Task.CompletedTask;
+            _logger.LogInformation("{user}#{discriminator} failed to execute an {interaction} on {guild}/{channel}: {reason}",
+                context.User.Username, context.User.Discriminator, slashInfo.Name, context.Guild?.Name ?? "DM", context.Channel.Name, result.ErrorReason);
+
+            await context.Channel.SendMessageAsync(result.ErrorReason);
+        }
     }
 }

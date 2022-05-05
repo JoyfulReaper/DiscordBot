@@ -24,16 +24,25 @@ SOFTWARE.
 */
 
 using Discord.Interactions;
-
+using DiscordBotLibrary.Helpers;
+using DiscordBotLibrary.Services.Interfaces;
 
 namespace DiscordBot.Interactions.SlashCommands
 {
+    [Group("general", "general commands")]
     public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
     {
+        private readonly IGuildService _guildService;
+        
+        public GeneralModule(IGuildService guildService)
+        {
+            _guildService = guildService;
+        }
+        
         [SlashCommand("echo", "Echo... Echo... Echo...")]
         public async Task Echo([Summary("Echo", "Echo... Echo... Echo...!")] string input)
         {
-            await RespondAsync(input);
+            await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Echo...", $"`{input}`"));
         }
 
     }

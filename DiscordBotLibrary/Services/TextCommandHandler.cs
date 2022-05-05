@@ -132,7 +132,7 @@ public class TextCommandHandler : ITextCommandHandler, IDisposable
         if (result.IsSuccess)
         {
              _logger.LogInformation("{user}#{discriminator} successfully executed {command} on {guild}/{channel}",
-                context.User.Username, context.User.Discriminator, command.Value.Name, context.Guild.Name, context.Channel.Name);
+                context.User.Username, context.User.Discriminator, command.Value.Name, context.Guild?.Name ?? "DM", context.Channel.Name);
         }
 
         if (!string.IsNullOrEmpty(result?.ErrorReason))
@@ -140,7 +140,7 @@ public class TextCommandHandler : ITextCommandHandler, IDisposable
             if(result.Error == CommandError.UnknownCommand)
             {
                 _logger.LogInformation("{user}#{discriminator} attempted to use and unknown command: {command} on {guild}/{channel}",
-                   context.User.Username, context.User.Discriminator, context.Message.Content, context.Guild.Name, context.Channel.Name);
+                   context.User.Username, context.User.Discriminator, context.Message.Content, context.Guild?.Name ?? "DM", context.Channel.Name);
 
                 _ = Task.Run(async () => 
                 {
@@ -152,8 +152,8 @@ public class TextCommandHandler : ITextCommandHandler, IDisposable
                 return;
             }
 
-            _logger.LogInformation("{user}#{discriminator} failed to executed {command} on {guild}/{channel}: {reason}",
-                context.User.Username, context.User.Discriminator, command.Value.Name, context.Guild.Name, context.Channel.Name, result.ErrorReason);
+            _logger.LogInformation("{user}#{discriminator} failed to execute {command} on {guild}/{channel}: {reason}",
+                context.User.Username, context.User.Discriminator, command.Value.Name, context.Guild?.Name ?? "DM", context.Channel.Name, result.ErrorReason);
             
             await context.Channel.SendMessageAsync(result.ErrorReason);
         }

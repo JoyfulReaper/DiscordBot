@@ -52,7 +52,8 @@ public class GuildService : IGuildService
 
     public Task<Color> GetEmbedColorAsync(IInteractionContext context)
     {
-        return GetEmbedColorAsync(context.Guild.Id.ToString());
+        var guildId = context.Guild?.Id.ToString();
+        return GetEmbedColorAsync(guildId);
     }
 
     public async Task<Color> GetEmbedColorAsync(string GuildId)
