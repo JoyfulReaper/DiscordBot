@@ -34,7 +34,7 @@ using System.Reflection;
 
 namespace DiscordBotLibrary.Services;
 
-public class InteractionHandler : IInteractionHandler
+public class InteractionHandler : IInteractionHandler, IDisposable
 {
     private readonly InteractionService _interactionService;
     private readonly ILoggingService _loggingService;
@@ -55,13 +55,25 @@ public class InteractionHandler : IInteractionHandler
         _logger = logger;
     }
 
+    public void Dispose()
+    {
+        _client.InteractionCreated -= HandleInteractionAsync;
+        //_client.UserCommandExecuted += UserCommandExcuted;
+        _interactionService.SlashCommandExecuted -= SlashCommandExcuted;
+        //_interactionService.ContextCommandExecuted += ContextCommandExcuted;
+        //_interactionService.ComponentCommandExecuted += ComponentCommentExecuted;
+        //_interactionService.InteractionExecuted += InteractionExcuted;
+        _interactionService.Log -= _loggingService.LogAsync;
+    }
 
     public async Task InitializeAsync()
     {
         _client.InteractionCreated += HandleInteractionAsync;
+        //_client.UserCommandExecuted += UserCommandExcuted;
         _interactionService.SlashCommandExecuted += SlashCommandExcuted;
         //_interactionService.ContextCommandExecuted += ContextCommandExcuted;
         //_interactionService.ComponentCommandExecuted += ComponentCommentExecuted;
+        //_interactionService.InteractionExecuted += InteractionExcuted;
         _interactionService.Log += _loggingService.LogAsync;
         
 
@@ -101,7 +113,7 @@ public class InteractionHandler : IInteractionHandler
                     break;
                 case InteractionCommandError.UnknownCommand:
                     _logger.LogInformation("{user}#{discriminator} attempted to use and unknown interaction: {interaction} on {guild}/{channel}",
-                        context.User.Username, context.User.Discriminator, slashInfo.Name, context.Guild?.Name ?? "DM", context.Channel.Name);
+                        context.User.Username, context.User.Discriminator, slashInfo?.Name ?? "(unknown name)", context.Guild?.Name ?? "DM", context.Channel.Name);
 
                     _ = Task.Run(async () =>
                     {

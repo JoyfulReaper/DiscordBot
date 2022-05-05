@@ -32,6 +32,6 @@ public interface IGuildService
 {
     Task<Guild> LoadGuild(string discordGuildId);
     Task SaveGuild(Guild guild);
-    Task<Color> GetEmbedColorAsync(string GuildId);
+    Task<Color> GetEmbedColorAsync(string? GuildId);
     Task<Color> GetEmbedColorAsync(IInteractionContext context);
 }

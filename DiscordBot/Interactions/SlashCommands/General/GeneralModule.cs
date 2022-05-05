@@ -45,5 +45,11 @@ namespace DiscordBot.Interactions.SlashCommands
             await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Echo...", $"`{input}`"));
         }
 
+        [SlashCommand("ping", "WebSocket server latency")]
+        public async Task Ping()
+        {
+            await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Ping results!", $"Pong! Round-trip latency to Discord WebSocket Server: `{Context.Client.Latency}` ms.",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.PING_IMAGES))));
+        }
     }
 }

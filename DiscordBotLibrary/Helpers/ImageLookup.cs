@@ -88,6 +88,9 @@ public static class ImageLookup
     public static readonly string[] INVITE_IMAGES = new string[] { "https://i.etsystatic.com/5981074/r/il/1ceb12/820186932/il_1140xN.820186932_nv5d.jpg",
         "https://www.partyatlewis.com/Merchant2/graphics/00000001/33080.jpg" };
 
+    public static readonly string[] PING_IMAGES = new string[] { "https://golfweek.usatoday.com/wp-content/uploads/sites/87/2021/01/Ping-G425-SFT-driver.jpg",
+        "https://play-lh.googleusercontent.com/zNAA9jA04zP-zN16EAizKcg20ZLOHpKK2IW0NhiL6kCoNQBwdpjsir_RrFXGnFJbMAmq=s180-rw" };
+    //}
     public static string? GetImageUrl(string key)
     {
         var logger = Log.ForContext(typeof(ImageLookup));

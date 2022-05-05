@@ -56,9 +56,14 @@ public class GuildService : IGuildService
         return GetEmbedColorAsync(guildId);
     }
 
-    public async Task<Color> GetEmbedColorAsync(string GuildId)
+    public async Task<Color> GetEmbedColorAsync(string? guildId)
     {
-        var guild = await LoadGuild(GuildId);
+        if (guildId == null)
+        {
+            return ColorHelper.RandomColor();
+        }
+
+        var guild = await LoadGuild(guildId);
         if(guild == null || guild.EmbedColor == null || guild.EmbedColor.Value.RawValue == 0)
         {
             return ColorHelper.RandomColor();
