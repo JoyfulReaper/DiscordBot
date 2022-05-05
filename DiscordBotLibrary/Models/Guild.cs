@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -36,12 +37,12 @@ namespace DiscordBotLibrary.Models
     {
         [Key]
         public long GuildId { get; set; }
-        public decimal DiscordGuildId { get; set; }
+        public string DiscordGuildId { get; set; } = string.Empty;
         public bool WelcomeUsers { get; set; }
-        public decimal? LoggingChannel { get; set; }
-        public decimal? WelcomeChannel { get; set; }
+        public ulong? LoggingChannel { get; set; }
+        public ulong? WelcomeChannel { get; set; }
         public string? WelcomeBackground { get; set; }
-        public string? EmbedColor { get; set; }
+        public Color? EmbedColor { get; set; }
         public bool AllowInvites { get; set; }
         public string? Prefix { get; set; }
         public DateTimeOffset DateCreated { get; set; }

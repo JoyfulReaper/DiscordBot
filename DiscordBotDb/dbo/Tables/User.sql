@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[User]
 (
 	[UserId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [DiscordUserId] BIGINT NOT NULL, 
+    [DiscordUserId] VARCHAR(20) NOT NULL, 
     [UserName] NVARCHAR(100) NOT NULL, 
     [DateCreated] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 )

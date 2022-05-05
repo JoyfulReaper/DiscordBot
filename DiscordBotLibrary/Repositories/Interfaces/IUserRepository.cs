@@ -29,6 +29,6 @@ namespace DiscordBotLibrary.Repositories.Interfaces;
 
 public interface IUserRepository
 {
-    Task<User> LoadUser(decimal discordUserId);
-    Task SaveUser(User user);
+    Task<User> LoadUserAsync(string discordUserId);
+    Task SaveUseAsync(User user);
 }

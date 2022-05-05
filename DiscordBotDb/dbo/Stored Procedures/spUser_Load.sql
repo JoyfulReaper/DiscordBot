@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[spUser_Load]
 	@UserId BIGINT,
-	@DiscordUserId BIGINT,
+	@DiscordUserId VARCHAR(20),
 	@UserName NVARCHAR(100)
 AS
 BEGIN

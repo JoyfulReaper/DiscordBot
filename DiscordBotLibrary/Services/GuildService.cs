@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
+using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Repositories.Interfaces;
 using DiscordBotLibrary.Services.Interfaces;
@@ -38,13 +40,29 @@ public class GuildService : IGuildService
         _guildRepository = guildRepository;
     }
 
-    public Task<Guild> LoadGuild(decimal discordGuildId)
+    public Task<Guild> LoadGuild(string discordGuildId)
     {
-        return _guildRepository.LoadGuild(discordGuildId);
+        return _guildRepository.LoadGuildAsync(discordGuildId);
     }
-
+    
     public Task SaveGuild(Guild guild)
     {
-        return _guildRepository.SaveGuild(guild);
+        return _guildRepository.SaveGuildAsync(guild);
+    }
+
+    public Task<Color> GetEmbedColorAsync(IInteractionContext context)
+    {
+        return GetEmbedColorAsync(context.Guild.Id.ToString());
+    }
+
+    public async Task<Color> GetEmbedColorAsync(string GuildId)
+    {
+        var guild = await LoadGuild(GuildId);
+        if(guild == null || guild.EmbedColor == null || guild.EmbedColor.Value.RawValue == 0)
+        {
+            return ColorHelper.RandomColor();
+        }
+
+        return guild.EmbedColor!.Value;
     }
 }

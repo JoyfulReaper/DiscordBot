@@ -23,12 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using DiscordBotLibrary.Models;
+using Discord.Interactions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace DiscordBotLibrary.Repositories.Interfaces;
-
-public interface IGuildRepository
+namespace DiscordBot.Interactions.SlashCommands.Server;
+public class ServerModule : InteractionModuleBase<SocketInteractionContext>
 {
-    Task<Guild> LoadGuildAsync(string discordGuildId);
-    Task SaveGuildAsync(Guild guild);
+    
 }

@@ -37,15 +37,15 @@ public class UserService : IUserService
     {
         _userRepository = userRepository;
     }
-
-    public Task<User> GetUser(decimal userId)
+    
+    public Task<User> GetUser(string userId)
     {
-        return _userRepository.LoadUser(userId);
+        return _userRepository.LoadUserAsync(userId);
     }
 
     public Task SaveUser(User user)
     {
-        return _userRepository.SaveUser(user);
+        return _userRepository.SaveUseAsync(user);
     }
 
 }

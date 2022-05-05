@@ -1,10 +1,10 @@
 ﻿CREATE TABLE [dbo].[Guild]
 (
 	[GuildId] BIGINT NOT NULL PRIMARY KEY IDENTITY, 
-    [DiscordGuildId] BIGINT NOT NULL, 
+    [DiscordGuildId] VARCHAR(20) NOT NULL, 
 	[WelcomeUsers] BIT NOT NULL DEFAULT 0,
-    [LoggingChannel] BIGINT NULL,
-	[WelcomeChannel] BIGINT NULL,
+    [LoggingChannel] VARCHAR(20) NULL,
+	[WelcomeChannel] VARCHAR(20) NULL,
 	[WelcomeBackground] VARCHAR(800) NULL,
 	[EmbedColor] VARCHAR(12) NULL,
 	[AllowInvites] BIT NOT NULL DEFAULT 0,

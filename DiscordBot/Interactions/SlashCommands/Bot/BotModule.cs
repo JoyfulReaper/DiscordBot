@@ -28,6 +28,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordBotLibrary.ConfigSections;
 using DiscordBotLibrary.Helpers;
+using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 
@@ -39,20 +40,24 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IConfiguration _config;
     private readonly DiscordSocketClient _client;
+    private readonly IGuildService _guildService;
     private readonly BotInformation _botInfo;
 
     public BotModule(IConfiguration configuration,
-        DiscordSocketClient client)
+        DiscordSocketClient client,
+        IGuildService guildService)
     {
         _config = configuration;
         _client = client;
+        _guildService = guildService;
         _botInfo = _config.GetSection("BotInformation").Get<BotInformation>();
     }
 
     [SlashCommand("invite", "Invite the bot to your server")]
     public async Task Invite()
     {
-        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Invite", $"Please click on the link to invite me to your server!\n{_botInfo.InviteLink}",
+        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Invite Link", $"Please click on the link to invite {_botInfo.BotName} to your server!\n{_botInfo.InviteLink}",
+            await _guildService.GetEmbedColorAsync(Context.Guild.Id.ToString()),
             thumbImage: ImageLookup.GetImageUrl("INVITE_IMAGES")));
     }
 
@@ -64,13 +69,16 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
         var startTime = proccess.StartTime;
         var upTime = DateTime.Now - startTime;
 
-        await RespondAsync($"Uptime: `{upTime}`\nMemory Usage: `{memoryMb} MB`");
+        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Uptime", $"Uptime: `{upTime}`\nMemory Usage: `{memoryMb} MB`",
+            await _guildService.GetEmbedColorAsync(Context)));
+
     }
 
     [SlashCommand("servers", "Report the number of servers the bot is in")]
     public async Task Servers()
     {
-        await RespondAsync($"I am in `{Context.Client.Guilds.Count}` servers!");
+        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Servers", $"I am currently in {_client.Guilds.Count} {(_client.Guilds.Count == 1 ? "server" : "servers")}!",
+            await _guildService.GetEmbedColorAsync(Context));
     }
 
     [SlashCommand("about", "Information about the bot")]
@@ -80,7 +88,7 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
             .WithThumbnailUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
             .WithDescription($"{_botInfo.BotName}\nMIT License Copyright(c) 2022 JoyfulReaper\n{_botInfo.BotWebsite}\n\n" +
             $"Use `/bot invite` for the link to invite DiscordBot to your server!")
-            //.WithColor(ColorHelper.GetColor(server))
+            .WithColor(await _guildService.GetEmbedColorAsync(Context))
             .WithCurrentTimestamp();
 
         await RespondAsync(null, new Embed[] { builder.Build() });

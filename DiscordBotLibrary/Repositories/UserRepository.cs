@@ -41,17 +41,17 @@ public class UserRepository : IUserRepository
         _config = config;
         _connectionString = _config.GetConnectionString("DiscordBot");
     }
-
-    public async Task SaveUser(User user)
+    
+    public async Task SaveUseAsync(User user)
     {
         using var connection = new SqlConnection(_connectionString);
-        var id = await connection.QuerySingleAsync<int>("spUser_Upsert", user, commandType: CommandType.StoredProcedure);
+        var id = await connection.QuerySingleAsync<long>("spUser_Upsert", user, commandType: CommandType.StoredProcedure);
         user.UserId = id;
     }
-
-    public Task<User> LoadUser(decimal discordUserId)
+    
+    public async Task<User> LoadUserAsync(string discordUserId)
     {
         using var connection = new SqlConnection(_connectionString);
-        return connection.QuerySingleAsync<User>("spUser_Get", new { DiscordUserId = discordUserId }, commandType: CommandType.StoredProcedure);
+        return await connection.QuerySingleOrDefaultAsync<User>("spUser_Get", new { DiscordUserId = discordUserId }, commandType: CommandType.StoredProcedure);
     }
 }

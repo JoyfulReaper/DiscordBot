@@ -1,2 +1,5 @@
 Discord Usernames:
 Length constraints: Between 2 and 32 characters
+
+Modules Re-Written:
+Currently working on GeneralModule

@@ -29,6 +29,6 @@ namespace DiscordBotLibrary.Services.Interfaces;
 
 public interface IUserService
 {
-    Task<User> GetUser(decimal userId);
+    Task<User> GetUser(string userId);
     Task SaveUser(User user);
 }

@@ -44,17 +44,17 @@ public class GuildRepository : IGuildRepository
         _config = config;
         _connectionString = _config.GetConnectionString("DiscordBot");
     }
-
-    public async Task SaveGuild(Guild guild)
+    
+    public async Task SaveGuildAsync(Guild guild)
     {
         using var connection = new SqlConnection(_connectionString);
-        var id = await connection.QuerySingleAsync<int>("spGuild_Upsert", guild, commandType: CommandType.StoredProcedure);
+        var id = await connection.QuerySingleAsync<long>("spGuild_Upsert", guild, commandType: CommandType.StoredProcedure);
         guild.GuildId = id;
     }
 
-    public Task<Guild> LoadGuild(decimal discordGuildId)
+    public async Task<Guild> LoadGuildAsync(string discordGuildId)
     {
         using var connection = new SqlConnection(_connectionString);
-        return connection.QuerySingleOrDefaultAsync<Guild>("spGuild_Load", new { DiscordGuildId = discordGuildId }, commandType: CommandType.StoredProcedure);
+        return await connection.QuerySingleOrDefaultAsync<Guild>("spGuild_Load", new { DiscordGuildId = discordGuildId }, commandType: CommandType.StoredProcedure);
     }
 }
