@@ -60,7 +60,7 @@ public class UserModule : InteractionModuleBase<SocketInteractionContext>
         var builder = new EmbedBuilder()
             .WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl())
             .WithDescription("User information:")
-            .WithColor(await _guildService.GetEmbedColorAsync(Context.Guild?.Id.ToString()))
+            .WithColor(await _guildService.GetEmbedColorAsync(Context.Guild?.Id))
             .AddField("User ID", user.Id, true)
             .AddField("Discriminator", user.Discriminator, true)
             .AddField("Created at", user.CreatedAt.ToString("MM/dd/yyyy"), true)

@@ -32,10 +32,10 @@ namespace DiscordBotLibrary.Models
         [Key]
         public long UserId { get; set; }
 
-        public string DiscordUserId { get; set; } = string.Empty;
+        public decimal DiscordUserId { get; set; }
 
         public string UserName { get; set; } = string.Empty;
 
-        public DateTimeOffset DateCreated { get; set; } = new();
+        public DateTimeOffset? DateCreated { get; set; }
     }
 }

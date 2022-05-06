@@ -30,8 +30,8 @@ namespace DiscordBotLibrary.Services.Interfaces;
 
 public interface IGuildService
 {
-    Task<Guild> LoadGuild(string discordGuildId);
+    Task<Guild> LoadGuild(ulong GuildId);
     Task SaveGuild(Guild guild);
-    Task<Color> GetEmbedColorAsync(string? GuildId);
+    Task<Color> GetEmbedColorAsync(ulong? GuildId);
     Task<Color> GetEmbedColorAsync(IInteractionContext context);
 }

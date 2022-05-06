@@ -48,13 +48,24 @@ public class GuildRepository : IGuildRepository
     public async Task SaveGuildAsync(Guild guild)
     {
         using var connection = new SqlConnection(_connectionString);
-        var id = await connection.QuerySingleAsync<long>("spGuild_Upsert", guild, commandType: CommandType.StoredProcedure);
+        var id = await connection.QuerySingleAsync<long>("spGuild_Upsert", new
+        {
+            GuildId = guild.GuildId,
+            DiscordGuildId = (decimal)guild.DiscordGuildId,
+            WelcomeUsers = guild.WelcomeUsers,
+            WelcomeChannel = (decimal?)guild.WelcomeChannel,
+            LoggingChannel = (decimal?)guild.LoggingChannel,
+            WelcomeBackground = guild.WelcomeBackground,
+            EmbedColor = (long?)guild.EmbedColor,
+            AllowInvites = guild.AllowInvites,
+            Prefix = guild.Prefix,
+        }, commandType: CommandType.StoredProcedure);
         guild.GuildId = id;
     }
 
-    public async Task<Guild> LoadGuildAsync(string discordGuildId)
+    public async Task<Guild> LoadGuildAsync(ulong discordGuildId)
     {
         using var connection = new SqlConnection(_connectionString);
-        return await connection.QuerySingleOrDefaultAsync<Guild>("spGuild_Load", new { DiscordGuildId = discordGuildId }, commandType: CommandType.StoredProcedure);
+        return await connection.QuerySingleOrDefaultAsync<Guild>("spGuild_Load", new { DiscordGuildId = (decimal)discordGuildId }, commandType: CommandType.StoredProcedure);
     }
 }

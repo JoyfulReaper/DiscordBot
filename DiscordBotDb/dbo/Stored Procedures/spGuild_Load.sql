@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[spGuild_Load]
-	@DiscordGuildId VARCHAR(20)
+	@DiscordGuildId DECIMAL(20,0)
 AS
 BEGIN
 	SET NOCOUNT ON;

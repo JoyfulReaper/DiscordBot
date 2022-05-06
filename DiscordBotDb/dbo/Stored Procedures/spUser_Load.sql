@@ -1,33 +1,16 @@
 ﻿CREATE PROCEDURE [dbo].[spUser_Load]
-	@UserId BIGINT,
-	@DiscordUserId VARCHAR(20),
-	@UserName NVARCHAR(100)
+	@DiscordUserId DECIMAL(20,0)
 AS
 BEGIN
-	BEGIN TRANSACTION;
- 
-	INSERT dbo.[User]
-		(
-			DiscordUserId,
-			UserName
-		) 
-	VALUES
-		(
-			@DiscordUserId,
-			@UserName
-		)
+	SET NOCOUNT ON;
 
- 
-	IF @@ROWCOUNT = 0
-	BEGIN
-	  UPDATE dbo.[User]
-		SET 
-			UserName = @UserName
-	END
-	ELSE
-		SET @UserId = SCOPE_IDENTITY();
- 
-	COMMIT TRANSACTION;
-
-	SELECT @UserId;
+	SELECT
+		[UserId],
+		[DiscordUserId],
+		[UserName],
+		[DateCreated]
+	FROM
+		[dbo].[User]
+	WHERE
+		DiscordUserId = @DiscordUserId;
 END

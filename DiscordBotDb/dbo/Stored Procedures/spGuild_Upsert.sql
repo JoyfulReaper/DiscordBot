@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[spGuild_Upsert]
 	@GuildId BIGINT,
-	@DiscordGuildId VARCHAR(20),
+	@DiscordGuildId DECIMAL(20,0),
 	@WelcomeUsers BIT,
-	@LoggingChannel VARCHAR(20),
-	@WelcomeChannel VARCHAR(20),
+	@LoggingChannel DECIMAL(20,0),
+	@WelcomeChannel DECIMAL(20,0),
 	@WelcomeBackground VARCHAR(800),
-	@EmbedColor VARCHAR(12),
+	@EmbedColor BIGINT,
 	@AllowInvites BIT,
 	@Prefix NVARCHAR(10)
 AS

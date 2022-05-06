@@ -38,14 +38,14 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
     
-    public Task<User> GetUser(string userId)
+    public Task<User> GetUser(ulong userId)
     {
         return _userRepository.LoadUserAsync(userId);
     }
-
+    
     public Task SaveUser(User user)
     {
-        return _userRepository.SaveUseAsync(user);
+        return _userRepository.SaveUserAsync(user);
     }
 
 }

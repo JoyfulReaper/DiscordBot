@@ -40,9 +40,9 @@ public class GuildService : IGuildService
         _guildRepository = guildRepository;
     }
 
-    public Task<Guild> LoadGuild(string discordGuildId)
+    public Task<Guild> LoadGuild(ulong guildId)
     {
-        return _guildRepository.LoadGuildAsync(discordGuildId);
+        return _guildRepository.LoadGuildAsync(guildId);
     }
     
     public Task SaveGuild(Guild guild)
@@ -52,23 +52,23 @@ public class GuildService : IGuildService
 
     public Task<Color> GetEmbedColorAsync(IInteractionContext context)
     {
-        var guildId = context.Guild?.Id.ToString();
+        var guildId = context.Guild?.Id;
         return GetEmbedColorAsync(guildId);
     }
 
-    public async Task<Color> GetEmbedColorAsync(string? guildId)
+    public async Task<Color> GetEmbedColorAsync(ulong? guildId)
     {
         if (guildId == null)
         {
             return ColorHelper.RandomColor();
         }
 
-        var guild = await LoadGuild(guildId);
-        if(guild == null || guild.EmbedColor == null || guild.EmbedColor.Value.RawValue == 0)
+        var guild = await LoadGuild(guildId.Value);
+        if(guild == null || guild.EmbedColor == null || guild.EmbedColor == 0)
         {
             return ColorHelper.RandomColor();
         }
 
-        return guild.EmbedColor!.Value;
+        return new Color(guild.EmbedColor.Value);
     }
 }

@@ -83,7 +83,7 @@ public static class ServiceCollectionExtensions
 
     private static void ConfigureDiscordDotNetServices(ref DiscordSocketConfig? discordSocketConfig,
         ref CommandServiceConfig? commandServiceConfig,
-        ref InteractionServiceConfig interactionServiceConfig)
+        ref InteractionServiceConfig? interactionServiceConfig)
     {
         if(interactionServiceConfig == null)
         {

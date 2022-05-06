@@ -37,12 +37,12 @@ namespace DiscordBotLibrary.Models
     {
         [Key]
         public long GuildId { get; set; }
-        public string DiscordGuildId { get; set; } = string.Empty;
+        public ulong DiscordGuildId { get; set; }
         public bool WelcomeUsers { get; set; }
         public ulong? LoggingChannel { get; set; }
         public ulong? WelcomeChannel { get; set; }
         public string? WelcomeBackground { get; set; }
-        public Color? EmbedColor { get; set; }
+        public uint? EmbedColor { get; set; }
         public bool AllowInvites { get; set; }
         public string? Prefix { get; set; }
         public DateTimeOffset DateCreated { get; set; }

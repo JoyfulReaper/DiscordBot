@@ -45,9 +45,14 @@ ILogger _logger = Log.ForContext<Program>();
 IServiceProvider serviceProvider = Bootstrap.Initialize(args);
 IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
 
-
+// This is what we call testing in production, lol
 //var guildr = new GuildRepository(config);
-//await guildr.UpsertGuild(new DiscordBotLibrary.Models.Guild { GuildId = 154623, LoggingChannel = 334521 });
+//await guildr.SaveGuildAsync(new DiscordBotLibrary.Models.Guild { DiscordGuildId = 821113360711155729, LoggingChannel = 821113360711155720 });
+//var test = await guildr.LoadGuildAsync(821113360711155729);
+
+//var user = new UserRepository(config);
+//await user.SaveUserAsync(new DiscordBotLibrary.Models.User { DiscordUserId = 821113360711155729, UserName = "test" });
+//var tuser = await user.LoadUserAsync(821113360711155729);
 
 
 ConsoleHelper.ColorWriteLine(ConsoleColor.Red, $"{config["BotInformation:BotName"]}");
