@@ -27,29 +27,28 @@ using Discord.Interactions;
 using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Services.Interfaces;
 
-namespace DiscordBot.Interactions.SlashCommands
-{
-    [Group("general", "general commands")]
-    public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
-    {
-        private readonly IGuildService _guildService;
-        
-        public GeneralModule(IGuildService guildService)
-        {
-            _guildService = guildService;
-        }
-        
-        [SlashCommand("echo", "Echo... Echo... Echo...")]
-        public async Task Echo([Summary("Echo", "Echo... Echo... Echo...!")] string input)
-        {
-            await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Echo...", $"`{input}`"));
-        }
+namespace DiscordBot.Interactions.SlashCommands;
 
-        [SlashCommand("ping", "WebSocket server latency")]
-        public async Task Ping()
-        {
-            await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Ping results!", $"Pong! Round-trip latency to Discord WebSocket Server: `{Context.Client.Latency}` ms.",
-                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.PING_IMAGES))));
-        }
+[Group("general", "general commands")]
+public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
+{
+    private readonly IGuildService _guildService;
+    
+    public GeneralModule(IGuildService guildService)
+    {
+        _guildService = guildService;
+    }
+    
+    [SlashCommand("echo", "Echo... Echo... Echo...")]
+    public async Task Echo([Summary("Echo", "Echo...")] string input)
+    {
+        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Echo...", $"`{input}`"));
+    }
+
+    [SlashCommand("ping", "WebSocket server latency")]
+    public async Task Ping()
+    {
+        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Ping results!", $"Pong! Round-trip latency to Discord WebSocket Server: `{Context.Client.Latency}` ms.",
+            await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.PING_IMAGES))));
     }
 }

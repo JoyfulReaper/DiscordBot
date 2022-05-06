@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using DiscordBotLibrary.ConfigSections;
 using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Services.Interfaces;
@@ -55,10 +57,10 @@ public class ServerModule : InteractionModuleBase<SocketInteractionContext>
         _botInfo = _config.GetRequiredSection("BotInformation").Get<BotInformation>();
     }
 
-    [SlashCommand("owner", "Retreive the server owner")]   
+    [SlashCommand("owner", "Retreive the server owner")]
     public async Task Owner()
     {
-        if(Context.Guild == null)
+        if (Context.Guild == null)
         {
             await RespondAsync(null,
                 EmbedHelper.GetEmbedAsArray(_botInfo.BotName, $"DiscordBot was written by JoyfulReaper. Copyright 2022. MIT Licensed.\n{_botInfo.BotWebsite}",
@@ -66,7 +68,7 @@ public class ServerModule : InteractionModuleBase<SocketInteractionContext>
                 Context.Client.CurrentUser.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl()));
         }
 
-        if(Context.Guild == null)
+        if (Context.Guild == null)
         {
             _logger.LogError("Context.Guild was unexpectly null!");
             await RespondAsync("Something went wrong :(");
@@ -76,5 +78,30 @@ public class ServerModule : InteractionModuleBase<SocketInteractionContext>
         await RespondAsync(null,
             EmbedHelper.GetEmbedAsArray(Context.Guild.Name, $"{Context.Guild.Owner.DisplayName} is the owner of {Context.Guild.Name}",
                 await _guildService.GetEmbedColorAsync(Context), Context.Guild.Owner.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl()));
+    }
+
+    [RequireContext(ContextType.Guild)]
+    [SlashCommand("info", "Reterive basic information about the server")]
+    public async Task Server()
+    {
+        var builder = new EmbedBuilder()
+                .WithThumbnailUrl(Context.Guild.IconUrl)
+                .WithDescription("Server information:")
+                .WithTitle($"{Context.Guild.Name} Information")
+                .WithColor(await _guildService.GetEmbedColorAsync(Context))
+                .AddField("Owner", Context.Guild.Owner.DisplayName)
+                .AddField("Name", Context.Guild.Name, true)
+                .AddField("Description", Context.Guild.Description ?? "(No Description)")
+                .AddField("Created at", Context.Guild.CreatedAt.ToString("MM/dd/yyyy") ?? "(Unkown time)", true)
+                .AddField("Member count", Context.Guild.MemberCount + " members", true)
+                .AddField("Online users", Context.Guild.Users.Where(u => u.Status == UserStatus.Online).Count(), true)
+                .AddField("Text channels", Context.Guild.TextChannels.Count() + " channels", true)
+                .AddField("Voice channels", Context.Guild.VoiceChannels.Count() + " channels", true)
+                .AddField("Roles", Context.Guild.Roles.Count() + " roles", true)
+                .AddField("Server verification level", Context.Guild.VerificationLevel.ToString(), true)
+                .WithCurrentTimestamp();
+
+        var embed = builder.Build();
+        await RespondAsync(null, new Embed[] { embed });
     }
 }

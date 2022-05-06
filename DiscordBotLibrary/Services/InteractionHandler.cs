@@ -112,7 +112,7 @@ public class InteractionHandler : IInteractionHandler, IDisposable
                     // implement
                     break;
                 case InteractionCommandError.UnknownCommand:
-                    _logger.LogInformation("{user}#{discriminator} attempted to use and unknown interaction: {interaction} on {guild}/{channel}",
+                    _logger.LogInformation("{user}#{discriminator} attempted to use an unknown interaction: {slashCommand} on {guild}/{channel}",
                         context.User.Username, context.User.Discriminator, slashInfo?.Name ?? "(unknown name)", context.Guild?.Name ?? "DM", context.Channel.Name);
 
                     _ = Task.Run(async () =>
@@ -127,8 +127,11 @@ public class InteractionHandler : IInteractionHandler, IDisposable
                     // implement
                     break;
                 case InteractionCommandError.Exception:
-                    // implement
-                    break;
+                    _logger.LogInformation("An exception occured in {slashCommand} for {user}#{discriminator}  on {guild}/{channel}",
+                        slashInfo?.Name ?? "(unknown name)", context.User.Username, context.User.Discriminator, context.Guild?.Name ?? "DM", context.Channel.Name);
+
+                    await context.Channel.SendMessageAsync($"The slash command throw an exception :(\nError: {result.ErrorReason}");
+                    return;
                 case InteractionCommandError.Unsuccessful:
                     // implement
                     break;
@@ -139,7 +142,7 @@ public class InteractionHandler : IInteractionHandler, IDisposable
             _logger.LogInformation("{user}#{discriminator} failed to execute an {interaction} on {guild}/{channel}: {reason}",
                 context.User.Username, context.User.Discriminator, slashInfo.Name, context.Guild?.Name ?? "DM", context.Channel.Name, result.ErrorReason);
 
-            await context.Channel.SendMessageAsync(result.ErrorReason);
+            await context.Channel.SendMessageAsync($"Something went wrong :(\nError: {result.ErrorReason}");
         }
     }
 }

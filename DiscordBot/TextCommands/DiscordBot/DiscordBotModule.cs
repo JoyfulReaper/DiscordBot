@@ -25,8 +25,10 @@ SOFTWARE.
 
 using Discord.Commands;
 using Discord.Interactions;
+using DiscordBot.Interactions.SlashCommands;
 using DiscordBotLibrary.ConfigSections;
 using Microsoft.Extensions.Configuration;
+using System.Reflection;
 using RequireOwnerAttribute = Discord.Commands.RequireOwnerAttribute;
 using SummaryAttribute = Discord.Commands.SummaryAttribute;
 
@@ -52,7 +54,7 @@ public class DiscordBotModule : ModuleBase<SocketCommandContext>
     [Alias("rsg")]
     public async Task RegisterSlashCommandsGlobal()
     {
-        await _interactionService.RegisterCommandsGloballyAsync();
+        await _interactionService.RegisterCommandsGloballyAsync(true);
         await ReplyAsync("Registered slash commands globally!");
     }
 
@@ -62,7 +64,26 @@ public class DiscordBotModule : ModuleBase<SocketCommandContext>
     [Alias("rsd")]
     public async Task RegisterSlashCommandsDev()
     {
-        await _interactionService.RegisterCommandsToGuildAsync(_ownerInformation.DevGuild);
+        await _interactionService.RegisterCommandsToGuildAsync(_ownerInformation.DevGuild, true);
         await ReplyAsync("Registered slash commands to development guild!");
+    }
+
+    [Command("unregisterSlashDev")]
+    [Summary("Un-registers slash commands to developmnent guild")]
+    [RequireOwner]
+    [Alias("usd")]
+    public async Task UnRegisterSlashCommandsDev()
+    {
+        var interactionModules = from type in Assembly.GetEntryAssembly().GetTypes()
+                      where typeof(InteractionModuleBase<SocketInteractionContext>).IsAssignableFrom(type)
+                      select type;
+        
+        foreach(var type in interactionModules)
+        {
+            await _interactionService.RemoveModuleAsync(type);
+        }
+
+        await _interactionService.RegisterCommandsToGuildAsync(_ownerInformation.DevGuild, true);
+        await ReplyAsync("un-Registered slash commands to development guild!");
     }
 }
