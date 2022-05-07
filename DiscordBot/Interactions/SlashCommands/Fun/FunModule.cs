@@ -23,8 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DiscordBotLibrary.Extensions;
+using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Services.Interfaces;
 
 namespace DiscordBot.Interactions.SlashCommands.Fun;
@@ -34,6 +37,14 @@ public class FunModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IGuildService _guildService;
     private readonly IBannerImageService _bannerImageService;
+
+    private static readonly List<string> _eightBallResponses = new List<string>
+        {
+            "It is Certian.", "It is decidedly so.", "Without a doubt.", "Yes definitely.", "You may rely on it.",
+            "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.",
+            "Reply hazy, try again.", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.",
+            "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful."
+        };
 
     public FunModule(IGuildService guildService, 
         IBannerImageService bannerImageService)
@@ -50,5 +61,20 @@ public class FunModule : InteractionModuleBase<SocketInteractionContext>
         using var memoryStream = await _bannerImageService.CreateImage(user, background);
         memoryStream.Seek(0, SeekOrigin.Begin);
         await RespondWithFileAsync(memoryStream, $"{user.DisplayName}.png");
+    }
+
+    [SlashCommand("8ball", "Ask the 8ball a question!")]
+    public async Task EightBall([Summary("question")]string question)
+    {
+        var builder = new EmbedBuilder();
+        builder
+            .WithTitle("Magic 8ball")
+            .WithThumbnailUrl(ImageLookup.GetImageUrl(nameof(ImageLookup.EIGHTBALL_IMAGES)))
+            .WithDescription($"{Context.User.Username} asked ***{question}***")
+            .AddField("Response", _eightBallResponses.RandomItem())
+            .WithColor(await _guildService.GetEmbedColorAsync(Context))
+            .WithCurrentTimestamp();
+
+        await RespondAsync(embed: builder.Build());
     }
 }

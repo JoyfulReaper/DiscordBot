@@ -93,4 +93,15 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
 
         await RespondAsync(null, new Embed[] { builder.Build() });
     }
+
+    [SlashCommand("nickname", "Change the bot's nickname")]
+    [RequireUserPermission(GuildPermission.ChangeNickname)]
+    [RequireContext(ContextType.Guild)]
+    public async Task NickName([Summary("nickname")]string nickname)
+    {
+        await Context.Guild.CurrentUser.ModifyAsync(x => x.Nickname = nickname);
+        await RespondAsync("Nickname changed!");
+
+        // TODO: Log the change to the logging channel
+    }
 }
