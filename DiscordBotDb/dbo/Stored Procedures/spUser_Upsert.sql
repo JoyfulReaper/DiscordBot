@@ -7,15 +7,18 @@ BEGIN
 	BEGIN TRANSACTION;
  
 	INSERT dbo.[User]
-		(
-			DiscordUserId,
-			UserName
-		) 
-	VALUES
-		(
-			@DiscordUserId,
-			@UserName
-		)
+	(
+		[DiscordUserId],
+		[UserName]
+	) 
+	SELECT
+		@DiscordUserId,
+		@UserName
+	WHERE NOT EXISTS
+	(
+		SELECT 1 FROM [dbo].[User] WITH (UPDLOCK, SERIALIZABLE)
+		WHERE [UserId] = @UserId
+	)
 
  
 	IF @@ROWCOUNT = 0

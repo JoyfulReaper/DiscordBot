@@ -68,6 +68,10 @@
     <Build Include="dbo\Stored Procedures\spGuild_Load.sql" />
     <Build Include="dbo\Stored Procedures\spUser_Upsert.sql" />
     <Build Include="dbo\Stored Procedures\spUser_Load.sql" />
+    <Build Include="dbo\Tables\Note.sql" />
+    <Build Include="dbo\Stored Procedures\spNote_Upsert.sql" />
+    <Build Include="dbo\Stored Procedures\spNote_LoadAll.sql" />
+    <Build Include="dbo\Stored Procedures\spNote_Delete.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="DiscordBotDb.refactorlog" />

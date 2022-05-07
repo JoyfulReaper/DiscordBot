@@ -27,7 +27,6 @@ using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
-using DiscordBotLibrary.DataAccess;
 using DiscordBotLibrary.Repositories;
 using DiscordBotLibrary.Repositories.Interfaces;
 using DiscordBotLibrary.Services;
@@ -79,6 +78,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGuildService, GuildService>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<INoteRepository, NoteRepository>();
 
         services.AddTransient<IBannerImageService, BannerImageService>();
 
