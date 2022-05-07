@@ -37,4 +37,8 @@ public interface IGuildService
     Task<Color> GetEmbedColorAsync(IInteractionContext context);
 
     Task<string?> GetBannerImageAsync(ulong guildId);
+
+    Task SendLogsAsync(IGuild guild, string title, string description, string? thumbnailUrl = null);
+    Task ClearLoggingChannel(ulong guildId);
+    Task<ulong?> GetLoggingChannel(ulong guildId);
 }

@@ -28,16 +28,20 @@ using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Repositories.Interfaces;
 using DiscordBotLibrary.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace DiscordBotLibrary.Services;
 
 public class GuildService : IGuildService
 {
     private readonly IGuildRepository _guildRepository;
+    private readonly ILogger _logger;
 
-    public GuildService(IGuildRepository guildRepository)
+    public GuildService(IGuildRepository guildRepository,
+        ILogger logger)
     {
         _guildRepository = guildRepository;
+        _logger = logger;
     }
 
     public Task<Guild> LoadGuildAsync(ulong guildId)
@@ -76,5 +80,69 @@ public class GuildService : IGuildService
     {
         var guild = await _guildRepository.LoadGuildAsync(guildId);
         return guild?.WelcomeBackground;
+    }
+
+    public async Task SendLogsAsync(IGuild guild, string title, string description, string? thumbnailUrl = null)
+    {
+        if (guild == null)
+        {
+            return;
+        }
+
+        var channelId = await GetLoggingChannel(guild.Id);
+        if (channelId == null)
+        {
+            return;
+        }
+
+        if (thumbnailUrl == null)
+        {
+            thumbnailUrl = ImageLookup.GetImageUrl(nameof(ImageLookup.LOGGING_IMAGES));
+        }
+
+        var channel = await guild.GetTextChannelAsync(channelId.Value);
+        if (channel == null)
+        {
+            await ClearLoggingChannel(guild.Id);
+            return;
+        }
+
+        var embed = new EmbedBuilder()
+                .WithTitle(title)
+                .WithDescription(description)
+                .WithColor(await GetEmbedColorAsync(guild.Id))
+                .WithCurrentTimestamp();
+        if (thumbnailUrl != null)
+        {
+            embed.WithThumbnailUrl(thumbnailUrl);
+        }
+
+        await channel.SendMessageAsync(embed: embed.Build());
+    }
+
+    public async Task ClearLoggingChannel(ulong guildId)
+    {
+        var guild = await _guildRepository.LoadGuildAsync(guildId);
+        if (guild == null)
+        {
+            _logger.LogDebug("Attempted to clear logging channel for guild {guildId}, but guild was not found", guildId);
+            return;
+        }
+
+        guild.LoggingChannel = null;
+        await _guildRepository.SaveGuildAsync(guild);
+    }
+
+    public async Task<ulong?> GetLoggingChannel(ulong guildId)
+    {
+        var guild = await _guildRepository.LoadGuildAsync(guildId);
+        
+        if (guild == null)
+        {
+            await _guildRepository.SaveGuildAsync(new Guild { DiscordGuildId = guildId });
+            return null;
+        }
+
+        return guild.LoggingChannel;
     }
 }

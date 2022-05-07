@@ -102,6 +102,7 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
         await Context.Guild.CurrentUser.ModifyAsync(x => x.Nickname = nickname);
         await RespondAsync("Nickname changed!");
 
-        // TODO: Log the change to the logging channel
+        await _guildService.SendLogsAsync(Context.Guild, "Nickname Changed",
+            $"{((SocketGuildUser)Context.User).DisplayName} changed my nickname to: `{nickname}`");
     }
 }
