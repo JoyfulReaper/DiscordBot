@@ -1,8 +1,7 @@
 ﻿/*
 MIT License
 
-Copyright(c) 2022 Kyle Givler
-https://github.com/JoyfulReaper
+Copyright (c) 2020 Hendrik Demir(Directoire)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord;
-using DiscordBotLibrary.Models;
+using Discord.WebSocket;
 
 namespace DiscordBotLibrary.Services.Interfaces;
 
-public interface IGuildService
+public interface IBannerImageService
 {
-    Task<Guild> LoadGuildAsync(ulong GuildId);
-    Task SaveGuildAsync(Guild guild);
-
-    Task<Color> GetEmbedColorAsync(ulong? GuildId);
-    Task<Color> GetEmbedColorAsync(IInteractionContext context);
-
-    Task<string?> GetBannerImageAsync(ulong guildId);
+    Task<MemoryStream> CreateImage(SocketGuildUser user, string? bannerUrl = null);
 }

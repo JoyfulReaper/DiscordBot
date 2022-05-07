@@ -40,12 +40,12 @@ public class GuildService : IGuildService
         _guildRepository = guildRepository;
     }
 
-    public Task<Guild> LoadGuild(ulong guildId)
+    public Task<Guild> LoadGuildAsync(ulong guildId)
     {
         return _guildRepository.LoadGuildAsync(guildId);
     }
     
-    public Task SaveGuild(Guild guild)
+    public Task SaveGuildAsync(Guild guild)
     {
         return _guildRepository.SaveGuildAsync(guild);
     }
@@ -63,12 +63,18 @@ public class GuildService : IGuildService
             return ColorHelper.RandomColor();
         }
 
-        var guild = await LoadGuild(guildId.Value);
+        var guild = await LoadGuildAsync(guildId.Value);
         if(guild == null || guild.EmbedColor == null || guild.EmbedColor == 0)
         {
             return ColorHelper.RandomColor();
         }
 
         return new Color(guild.EmbedColor.Value);
+    }
+
+    public async Task<string?> GetBannerImageAsync(ulong guildId)
+    {
+        var guild = await _guildRepository.LoadGuildAsync(guildId);
+        return guild?.WelcomeBackground;
     }
 }

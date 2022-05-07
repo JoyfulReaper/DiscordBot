@@ -34,6 +34,7 @@ namespace DiscordBot
         {
             IServiceCollection services = new ServiceCollection();
             services.AddDiscordBot();
+            services.AddHttpClient();
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();
 

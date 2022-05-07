@@ -23,20 +23,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord.Interactions;
+using Discord.WebSocket;
+using DiscordBotLibrary.Services.Interfaces;
 
-namespace DiscordBotLibrary.ConfigSections;
-
-public class BotInformation
+namespace DiscordBot.Interactions.SlashCommands.Fun;
+[Group("fun", "fun commands")]
+[RequireContext(ContextType.Guild)]
+public class FunModule : InteractionModuleBase<SocketInteractionContext>
 {
-    public string BotName { get; set; } = "DiscordBot";
-    public string BotWebsite { get; set; } = "https://github.com/JoyfulReaper/DiscordBot";
-    public string DefaultPrefix { get; set; } = "!";
-    public int PrefixMaxLength { get; set; } = 8;
-    public string WelcomeMessage { get; set; } = "just spawned in!";
-    public string PartMessage { get; set; } = "disappeared forever :(";
-    public bool ShowBotJoinMessages { get; set; } = false;
-    public int MaxUserNotes { get; set; } = 10;
-    public int MaxWelcomeMessages { get; set; } = 10;
-    public string InviteLink { get; set; } = "https://discord.com/api/oauth2/authorize?client_id=832404891379957810&permissions=268443670&scope=bot";
-    public string DefaultBannerImage { get; set; } = "https://images.unsplash.com/photo-1500829243541-74b677fecc30?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2555&q=80";
+    private readonly IGuildService _guildService;
+    private readonly IBannerImageService _bannerImageService;
+
+    public FunModule(IGuildService guildService, 
+        IBannerImageService bannerImageService)
+    {
+        _guildService = guildService;
+        _bannerImageService = bannerImageService;
+    }
+
+    [SlashCommand("banner", "Show the welcome banner for a given user")]
+    [RequireContext(ContextType.Guild)]
+    public async Task Banner(SocketGuildUser user)
+    {
+        var background = await _guildService.GetBannerImageAsync(Context.Guild.Id);
+        using var memoryStream = await _bannerImageService.CreateImage(user, background);
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        await RespondWithFileAsync(memoryStream, $"{user.DisplayName}.png");
+    }
 }

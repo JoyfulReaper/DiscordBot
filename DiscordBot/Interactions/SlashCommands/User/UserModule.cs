@@ -53,9 +53,14 @@ public class UserModule : InteractionModuleBase<SocketInteractionContext>
         await RespondWithUserInfo(user);
     }
 
-    private async Task RespondWithUserInfo(IUser user)
+    private async Task RespondWithUserInfo(IUser? user)
     {
         await Context.Channel.TriggerTypingAsync();
+
+        if(user == null)
+        {
+            user = Context.Interaction.User;
+        }    
 
         var builder = new EmbedBuilder()
             .WithThumbnailUrl(user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl())

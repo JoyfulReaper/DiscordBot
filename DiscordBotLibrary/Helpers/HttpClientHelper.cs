@@ -24,19 +24,29 @@ SOFTWARE.
 */
 
 
-namespace DiscordBotLibrary.ConfigSections;
+using Serilog;
 
-public class BotInformation
+namespace DiscordBotLibrary.Helpers;
+public static class HttpClientHelper
 {
-    public string BotName { get; set; } = "DiscordBot";
-    public string BotWebsite { get; set; } = "https://github.com/JoyfulReaper/DiscordBot";
-    public string DefaultPrefix { get; set; } = "!";
-    public int PrefixMaxLength { get; set; } = 8;
-    public string WelcomeMessage { get; set; } = "just spawned in!";
-    public string PartMessage { get; set; } = "disappeared forever :(";
-    public bool ShowBotJoinMessages { get; set; } = false;
-    public int MaxUserNotes { get; set; } = 10;
-    public int MaxWelcomeMessages { get; set; } = 10;
-    public string InviteLink { get; set; } = "https://discord.com/api/oauth2/authorize?client_id=832404891379957810&permissions=268443670&scope=bot";
-    public string DefaultBannerImage { get; set; } = "https://images.unsplash.com/photo-1500829243541-74b677fecc30?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2555&q=80";
+    public async static Task<MemoryStream> DownloadImageAsync(HttpClient client, string url)
+    {
+        ILogger _logger = Log.ForContext(typeof(HttpClientHelper));
+
+        var response = await client.GetAsync(url);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.Warning("Failed to download image: {url}", url);
+            throw new Exception("Error downloading image");
+        }
+
+        MemoryStream ms = new();
+        using var imageStream = await response.Content.ReadAsStreamAsync();
+        await imageStream.CopyToAsync(ms);
+
+        _logger.Information("Downloaded image: {url}", url);
+
+        ms.Seek(0, SeekOrigin.Begin);
+        return ms;
+    }
 }

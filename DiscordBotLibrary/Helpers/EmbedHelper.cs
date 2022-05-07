@@ -31,15 +31,19 @@ namespace DiscordBotLibrary.Helpers;
 public class EmbedHelper
 {
     public static Embed GetEmbed(string title,
-        string description,
+        string? description = null,
         Color? color = null,
         string? thumbImage = null,
         string? imageUrl = null)
     {
         var embedBuilder = new EmbedBuilder()
             .WithTitle(title)
-            .WithDescription(description)
             .WithCurrentTimestamp();
+
+        if (description != null)
+        {
+            embedBuilder.WithDescription(description);
+        }
 
         if (imageUrl != null)
         {

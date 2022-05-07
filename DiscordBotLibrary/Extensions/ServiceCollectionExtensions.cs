@@ -65,6 +65,8 @@ public static class ServiceCollectionExtensions
         services.AddLogging(loggingBuilder =>
             loggingBuilder.AddSerilog(dispose: true));
 
+        services.AddHttpClient();
+
         services.AddSingleton<ILoggingService, LoggingService>();
         services.AddSingleton(socketClient);
         services.AddSingleton(commandService);
@@ -77,6 +79,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGuildService, GuildService>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+
+        services.AddTransient<IBannerImageService, BannerImageService>();
 
         return services;
     }
