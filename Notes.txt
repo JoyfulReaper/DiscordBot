@@ -5,3 +5,4 @@ Modules Re-Written:
 Currently working on GeneralModule
 
 TODO: Re-write RPS as interaction of some kind
+TODO: Reddit Module was skipped

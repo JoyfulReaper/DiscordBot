@@ -39,8 +39,8 @@ public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
         _guildService = guildService;
     }
     
-    [SlashCommand("echo", "Echo... Echo... Echo...")]
-    public async Task Echo([Summary("Echo", "Echo...")] string input)
+    [SlashCommand("echo", "Echos a message")]
+    public async Task Echo([Summary("Echo", "Echo")] string input)
     {
         await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Echo...", $"`{input}`"));
     }

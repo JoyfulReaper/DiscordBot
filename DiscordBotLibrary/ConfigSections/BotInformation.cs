@@ -39,4 +39,5 @@ public class BotInformation
     public int MaxWelcomeMessages { get; set; } = 10;
     public string InviteLink { get; set; } = "https://discord.com/api/oauth2/authorize?client_id=832404891379957810&permissions=268443670&scope=bot";
     public string DefaultBannerImage { get; set; } = "https://images.unsplash.com/photo-1500829243541-74b677fecc30?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2555&q=80";
+    public string SupportServer { get; set; } = "https://discord.gg/2bxgHyfN6A";
 }

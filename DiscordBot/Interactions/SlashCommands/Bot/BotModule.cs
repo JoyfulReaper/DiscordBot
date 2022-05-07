@@ -105,4 +105,11 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
         await _guildService.SendLogsAsync(Context.Guild, "Nickname Changed",
             $"{((SocketGuildUser)Context.User).DisplayName} changed my nickname to: `{nickname}`");
     }
+
+    [SlashCommand("support", "Bot support server: Programming Friends")]
+    public async Task Support()
+    {
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Bot Support", $"Please click on the link to join the bot support server!\n{_botInfo.SupportServer}",
+            await _guildService.GetEmbedColorAsync(Context)));
+    }
 }

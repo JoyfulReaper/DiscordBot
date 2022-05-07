@@ -15,7 +15,7 @@ namespace DiscordBot.Interactions.SlashCommands.Math
             {
                 var result = dt.Compute(math, null);
 
-                await RespondAsync("", EmbedHelper.GetEmbedAsArray("Math", $"Math: `{math}`\nResult: `{result}`",
+                await RespondAsync(embed: EmbedHelper.GetEmbed("Math", $"Math: `{math}`\nResult: `{result}`",
                     thumbImage: ImageLookup.GetImageUrl(nameof(ImageLookup.MATH_IMAGES))));
 
             }

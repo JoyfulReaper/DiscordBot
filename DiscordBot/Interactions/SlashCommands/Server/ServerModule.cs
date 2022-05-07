@@ -62,8 +62,7 @@ public class ServerModule : InteractionModuleBase<SocketInteractionContext>
     {
         if (Context.Guild == null)
         {
-            await RespondAsync(null,
-                EmbedHelper.GetEmbedAsArray(_botInfo.BotName, $"DiscordBot was written by JoyfulReaper. Copyright 2022. MIT Licensed.\n{_botInfo.BotWebsite}",
+            await RespondAsync(embed: EmbedHelper.GetEmbed(_botInfo.BotName, $"DiscordBot was written by JoyfulReaper. Copyright 2022. MIT Licensed.\n{_botInfo.BotWebsite}",
                 await _guildService.GetEmbedColorAsync(Context),
                 Context.Client.CurrentUser.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl()));
         }
@@ -75,8 +74,7 @@ public class ServerModule : InteractionModuleBase<SocketInteractionContext>
             return;
         }
 
-        await RespondAsync(null,
-            EmbedHelper.GetEmbedAsArray(Context.Guild.Name, $"{Context.Guild.Owner.DisplayName} is the owner of {Context.Guild.Name}",
+        await RespondAsync(embed: EmbedHelper.GetEmbed(Context.Guild.Name, $"{Context.Guild.Owner.DisplayName} is the owner of {Context.Guild.Name}",
                 await _guildService.GetEmbedColorAsync(Context), Context.Guild.Owner.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl()));
     }
 

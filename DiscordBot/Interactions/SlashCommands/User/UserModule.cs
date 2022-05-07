@@ -83,9 +83,9 @@ public class UserModule : InteractionModuleBase<SocketInteractionContext>
         {
             builder
                 .AddField("Joined at", guildUser.JoinedAt?.ToString("MM/dd/yyyy") ?? "(Unkown)", true)
-                .AddField("Roles", string.Join(" ", guildUser.Roles.Select(r => r.Name)));
+                .AddField("Roles", string.Join(", ", guildUser.Roles.Select(r => r.Name)));
         }
 
-        await RespondAsync(null, new Embed[] { builder.Build() });
+        await RespondAsync(embed: builder.Build());
     }
 }

@@ -194,7 +194,18 @@ public class FunModule : InteractionModuleBase<SocketInteractionContext>
         await Context.Channel.TriggerTypingAsync();
         
         var url = "https://lmgtfy.app/?q=" + HttpUtility.UrlEncode(query);
-        await ReplyAsync(embed: EmbedHelper.GetEmbed("Let me Google that for you!", $"Click here: {url}", 
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Let me Google that for you!", $"Click here: {url}", 
             await _guildService.GetEmbedColorAsync(Context)));
+    }
+
+    [SlashCommand("random", "Provide a comma seperated list of items, receive a random response!")]
+    public async Task RandomItem([Summary("list")]string items)
+    {
+        await Context.Channel.TriggerTypingAsync();
+        var itemArr = items.Split(",", StringSplitOptions.RemoveEmptyEntries);
+
+        var chosenOne = itemArr.RandomItem();
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Random Result", $"The choices were: {items}\nI have chosen: {chosenOne}",
+            await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.DIE_IMAGES))));
     }
 }
