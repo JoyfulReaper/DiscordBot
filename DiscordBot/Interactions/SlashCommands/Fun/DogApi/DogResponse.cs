@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace DiscordBot.Interactions.SlashCommands.Fun;
+namespace DiscordBot.Interactions.SlashCommands.Fun.DogApi;
 
 internal class DogResponse
 {

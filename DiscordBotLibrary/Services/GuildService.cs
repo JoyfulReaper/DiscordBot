@@ -35,10 +35,10 @@ namespace DiscordBotLibrary.Services;
 public class GuildService : IGuildService
 {
     private readonly IGuildRepository _guildRepository;
-    private readonly ILogger _logger;
+    private readonly ILogger<GuildService> _logger;
 
     public GuildService(IGuildRepository guildRepository,
-        ILogger logger)
+        ILogger<GuildService> logger)
     {
         _guildRepository = guildRepository;
         _logger = logger;

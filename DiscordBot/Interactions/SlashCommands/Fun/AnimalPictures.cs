@@ -25,6 +25,7 @@ SOFTWARE.
 
 using Discord;
 using Discord.Interactions;
+using DiscordBot.Interactions.SlashCommands.Fun.DogApi;
 using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Infrastructure;
 using DiscordBotLibrary.Services.Interfaces;

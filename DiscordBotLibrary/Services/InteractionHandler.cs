@@ -40,13 +40,13 @@ public class InteractionHandler : IInteractionHandler, IDisposable
     private readonly ILoggingService _loggingService;
     private readonly IServiceProvider _services;
     private readonly DiscordSocketClient _client;
-    private readonly ILogger<InteractionService> _logger;
+    private readonly ILogger<InteractionHandler> _logger;
 
     public InteractionHandler(InteractionService interactionService,
         ILoggingService loggingService,
         IServiceProvider services,
         DiscordSocketClient client,
-        ILogger<InteractionService> logger)
+        ILogger<InteractionHandler> logger)
     {
         _interactionService = interactionService;
         _loggingService = loggingService;

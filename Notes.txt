@@ -3,3 +3,5 @@ Length constraints: Between 2 and 32 characters
 
 Modules Re-Written:
 Currently working on GeneralModule
+
+TODO: Re-write RPS as interaction of some kind
