@@ -43,15 +43,14 @@ public class AnimalPictures : InteractionModuleBase<SocketInteractionContext>
     }
 
     [SlashCommand("dog", "Dog pictures")]
-    public async Task Dog()
+    public async Task<ExecuteResult> Dog()
     {
         var client = _httpClientFactory.CreateClient();
         var dog = await client.GetFromJsonAsync<DogResponse>("https://dog.ceo/api/breeds/image/random");
 
         if (dog == null ||  dog.Status != "success")
         {
-            await RespondAsync("The api did not return a successful response. :(");
-            return;
+            return ExecuteResult.FromError(InteractionCommandError.Unsuccessful, $"{nameof(Dog)}: The API did not return a successful response");
         }
 
         await RespondAsync(embed: EmbedHelper.GetEmbed("A cute fluffly dog!", color: await _guildService.GetEmbedColorAsync(Context), imageUrl: dog.Message));

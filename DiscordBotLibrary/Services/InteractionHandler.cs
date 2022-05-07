@@ -55,17 +55,6 @@ public class InteractionHandler : IInteractionHandler, IDisposable
         _logger = logger;
     }
 
-    public void Dispose()
-    {
-        _client.InteractionCreated -= HandleInteractionAsync;
-        //_client.UserCommandExecuted += UserCommandExcuted;
-        _interactionService.SlashCommandExecuted -= SlashCommandExcuted;
-        //_interactionService.ContextCommandExecuted += ContextCommandExcuted;
-        //_interactionService.ComponentCommandExecuted += ComponentCommentExecuted;
-        //_interactionService.InteractionExecuted += InteractionExcuted;
-        _interactionService.Log -= _loggingService.LogAsync;
-    }
-
     public async Task InitializeAsync()
     {
         _client.InteractionCreated += HandleInteractionAsync;
@@ -105,15 +94,14 @@ public class InteractionHandler : IInteractionHandler, IDisposable
     {
         if(!result.IsSuccess)
         {
-            // TODO Addtional logging/handling
             switch (result.Error)
             {
                 case InteractionCommandError.UnmetPrecondition:
                     // implement
                     break;
                 case InteractionCommandError.UnknownCommand:
-                    _logger.LogInformation("{user}#{discriminator} attempted to use an unknown interaction: {slashCommand} on {guild}/{channel}",
-                        context.User.Username, context.User.Discriminator, slashInfo?.Name ?? "(unknown name)", context.Guild?.Name ?? "DM", context.Channel.Name);
+                    _logger.LogInformation("{user}#{discriminator} attempted to use an unknown slash command: {slashCommand} on {guild}/{channel}",
+                        context.User.Username, context.User.Discriminator, slashInfo?.Name ?? "(unknown slash command)", context.Guild?.Name ?? "DM", context.Channel.Name);
 
                     _ = Task.Run(async () =>
                     {
@@ -127,14 +115,17 @@ public class InteractionHandler : IInteractionHandler, IDisposable
                     // implement
                     break;
                 case InteractionCommandError.Exception:
-                    _logger.LogInformation("An exception occured in {slashCommand} for {user}#{discriminator}  on {guild}/{channel}",
-                        slashInfo?.Name ?? "(unknown name)", context.User.Username, context.User.Discriminator, context.Guild?.Name ?? "DM", context.Channel.Name);
+                    _logger.LogInformation(((ExecuteResult)result).Exception, "An exception occured in {slashCommand} for {user}#{discriminator}  on {guild}/{channel}",
+                        slashInfo?.Name ?? "(unknown slash command)", context.User.Username, context.User.Discriminator, context.Guild?.Name ?? "DM", context.Channel.Name);
 
-                    await context.Channel.SendMessageAsync($"The slash command throw an exception :(\nError: {result.ErrorReason}");
+                    await context.Channel.SendMessageAsync($"The slash command threw an exception :(\nError: {result.ErrorReason}");
                     return;
                 case InteractionCommandError.Unsuccessful:
-                    // implement
-                    break;
+                    _logger.LogDebug("Slash command {slashcommand} was unsuccessful for {user}#{discriminator} on {guild}/{channel}: {error}",
+                        slashInfo?.Name ?? "(unknown slash command)", context.User.Username, context.User.Discriminator, context.Guild?.Name ?? "DM", context.Channel.Name, result.ErrorReason);
+
+                    await context.Channel.SendMessageAsync($"The slash command {slashInfo?.Name ?? "(unknown slash command)"} was unsuccessful :(\nError: {result.ErrorReason}");
+                    return;
                 default:
                     break;
             }
@@ -144,5 +135,16 @@ public class InteractionHandler : IInteractionHandler, IDisposable
 
             await context.Channel.SendMessageAsync($"Something went wrong :(\nError: {result.ErrorReason}");
         }
+    }
+
+    public void Dispose()
+    {
+        _client.InteractionCreated -= HandleInteractionAsync;
+        //_client.UserCommandExecuted += UserCommandExcuted;
+        _interactionService.SlashCommandExecuted -= SlashCommandExcuted;
+        //_interactionService.ContextCommandExecuted += ContextCommandExcuted;
+        //_interactionService.ComponentCommandExecuted += ComponentCommentExecuted;
+        //_interactionService.InteractionExecuted += InteractionExcuted;
+        _interactionService.Log -= _loggingService.LogAsync;
     }
 }
