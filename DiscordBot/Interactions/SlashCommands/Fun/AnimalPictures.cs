@@ -26,10 +26,12 @@ SOFTWARE.
 using Discord;
 using Discord.Interactions;
 using DiscordBotLibrary.Helpers;
+using DiscordBotLibrary.Infrastructure;
 using DiscordBotLibrary.Services.Interfaces;
 using System.Net.Http.Json;
 
 namespace DiscordBot.Interactions.SlashCommands.Fun;
+[Group("animal", "Cute animals!")]
 public class AnimalPictures : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IHttpClientFactory _httpClientFactory;
@@ -43,21 +45,17 @@ public class AnimalPictures : InteractionModuleBase<SocketInteractionContext>
     }
 
     [SlashCommand("dog", "Dog pictures")]
-    public async Task<ExecuteResult> Dog()
+    public async Task<RuntimeResult> Dog()
     {
         var client = _httpClientFactory.CreateClient();
         var dog = await client.GetFromJsonAsync<DogResponse>("https://dog.ceo/api/breeds/image/random");
 
         if (dog == null ||  dog.Status != "success")
         {
-            return ExecuteResult.FromError(InteractionCommandError.Unsuccessful, $"{nameof(Dog)}: The API did not return a successful response");
+            return InteractionResult.FromError(InteractionCommandError.Unsuccessful, $"{nameof(Dog)}: The API did not return a successful response");
         }
 
         await RespondAsync(embed: EmbedHelper.GetEmbed("A cute fluffly dog!", color: await _guildService.GetEmbedColorAsync(Context), imageUrl: dog.Message));
+        return InteractionResult.FromSuccess();
     }
-    
-    private class DogResponse
-    {
-        public string Message { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-    }}
+}

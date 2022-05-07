@@ -56,7 +56,7 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("invite", "Invite the bot to your server")]
     public async Task Invite()
     {
-        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Invite Link", $"Please click on the link to invite {_botInfo.BotName} to your server!\n{_botInfo.InviteLink}",
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Invite Link", $"Please click on the link to invite {_botInfo.BotName} to your server!\n{_botInfo.InviteLink}",
             await _guildService.GetEmbedColorAsync(Context),
             thumbImage: ImageLookup.GetImageUrl("INVITE_IMAGES")));
     }
@@ -69,7 +69,7 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
         var startTime = proccess.StartTime;
         var upTime = DateTime.Now - startTime;
 
-        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Uptime", $"Uptime: `{upTime}`\nMemory Usage: `{memoryMb} MB`",
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Uptime", $"Uptime: `{upTime}`\nMemory Usage: `{memoryMb} MB`",
             await _guildService.GetEmbedColorAsync(Context)));
 
     }
@@ -77,7 +77,7 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("servers", "Report the number of servers the bot is in")]
     public async Task Servers()
     {
-        await RespondAsync(null, EmbedHelper.GetEmbedAsArray("Servers", $"I am currently in {_client.Guilds.Count} {(_client.Guilds.Count == 1 ? "server" : "servers")}!",
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Servers", $"I am currently in {_client.Guilds.Count} {(_client.Guilds.Count == 1 ? "server" : "servers")}!",
             await _guildService.GetEmbedColorAsync(Context)));
     }
 
