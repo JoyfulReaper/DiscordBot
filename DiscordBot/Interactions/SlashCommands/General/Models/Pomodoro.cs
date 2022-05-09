@@ -1,7 +1,7 @@
 ﻿/*
 MIT License
 
-Copyright(c) 2022 Kyle Givler
+Copyright(c) 2021 Kyle Givler
 https://github.com/JoyfulReaper
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,35 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.WebSocket;
-using DiscordBot.Services;
-using DiscordBotLibrary.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+using System;
 
-namespace DiscordBot
+namespace DiscordBot.Interactions.SlashCommands.General
 {
-    internal static class Bootstrap
+    public class Pomodoro
     {
-        internal static ServiceProvider Initialize(string[] args)
-        {
-            IServiceCollection services = new ServiceCollection();
-            services.AddDiscordBot();
-            services.AddHttpClient();
-
-            services.AddSingleton<PomodoroService>();
-
-            ServiceProvider serviceProvider = services.BuildServiceProvider();
-
-            StartWorkers(serviceProvider);
-
-            return serviceProvider;
-        }
-
-        private static void StartWorkers(ServiceProvider serviceProvider)
-        {
-            PomodoroService pomodoroService = serviceProvider.GetRequiredService<PomodoroService>();
-            DiscordSocketClient client = serviceProvider.GetRequiredService<DiscordSocketClient>();
-            Task.Run(async () => await pomodoroService.PomodoroWorker(client));
-        }
+        public SocketGuild? Guild { get; set; }
+        public SocketUser User { get; set; }
+        public SocketChannel? Channel { get; set; }
+        public DateTime End { get; set; }
+        public string TimerType { get; set; } = string.Empty;
+        public string Task { get; set; } = string.Empty;
     }
 }

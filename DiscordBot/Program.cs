@@ -41,6 +41,8 @@ using Serilog;
 
 ILogger _logger = Log.ForContext<Program>();
 
+_logger.Information("Starting Discord Bot");
+
 IServiceProvider serviceProvider = Bootstrap.Initialize(args);
 IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
 
