@@ -25,6 +25,10 @@ SOFTWARE.
 
 using Discord.Interactions;
 using DiscordBotLibrary.Attributes;
+using DiscordBotLibrary.ConfigSections;
+using DiscordBotLibrary.Models;
+using DiscordBotLibrary.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,9 +40,47 @@ namespace DiscordBot.Interactions.SlashCommands.General;
 [Group("note", "User notes")]
 public class NoteModule : InteractionModuleBase<SocketInteractionContext>
 {
-    [SlashCommand("create", "Create a new note")]
-    public async Task NoteCreate([MaxLength(1)]string name, [MaxLength(300)]string text)
+    private readonly IUserService _userService;
+    private readonly INoteService _noteService;
+    private readonly IConfiguration _config;
+    private readonly BotInformation _botinfo;
+
+    public NoteModule(IUserService userService,
+        INoteService noteService,
+        IConfiguration config)
     {
-        await RespondAsync("test");
+        _userService = userService;
+        _noteService = noteService;
+        _config = config;
+
+        _botinfo = _config.GetSection("BotInformation").Get<BotInformation>();
+    }
+
+    [SlashCommand("create", "Create a new note")]
+    public async Task NoteCreate([MaxLength(30)] string name, [MaxLength(300)] string text)
+    {
+        var user = await _userService.LoadUserAsync(Context.User.Id);
+        var notes = await _noteService.GetNotesAsync(user.UserId);
+
+        if (notes.Count() >= _botinfo.MaxUserNotes)
+        {
+            await RespondAsync($"You have reached the maximum number of notes (`{_botinfo.MaxUserNotes}`). Please delete one first!");
+        }
+
+        if (notes.Any(n => n.Name.ToLowerInvariant() == name.ToLowerInvariant()))
+        {
+            await RespondAsync($"You already have a note named `{name}` please pick a different name.");
+            return;
+        }
+
+        Note note = new Note()
+        {
+            Name = name,
+            Text = text,
+            UserId = user.UserId
+        };
+
+        await _noteService.SaveNoteAsync(note);
+        await RespondAsync($"Note `{name}` created!"); 
     }
 }

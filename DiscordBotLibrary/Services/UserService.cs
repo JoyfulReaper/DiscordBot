@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord.WebSocket;
 using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Repositories.Interfaces;
 using DiscordBotLibrary.Services.Interfaces;
@@ -32,18 +33,39 @@ namespace DiscordBotLibrary.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly DiscordSocketClient _client;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository,
+        DiscordSocketClient client)
     {
         _userRepository = userRepository;
+        _client = client;
     }
     
-    public Task<User> GetUser(ulong userId)
+    public async Task<User?> LoadUserAsync(ulong userId)
     {
-        return _userRepository.LoadUserAsync(userId);
+        var user = await _userRepository.LoadUserAsync(userId);
+
+        if (user == null)
+        {
+            user = new User
+            {
+                DiscordUserId = userId,
+                UserName = (await _client.GetUserAsync(userId)).Username
+            };
+            
+            await _userRepository.SaveUserAsync(user);
+        }
+        
+        if(user.UserName != (await _client.GetUserAsync(userId)).Username)
+        {
+            await _userRepository.SaveUserAsync(user);
+        }
+
+        return user;
     }
     
-    public Task SaveUser(User user)
+    public Task SaveUserAsync(User user)
     {
         return _userRepository.SaveUserAsync(user);
     }

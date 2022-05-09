@@ -56,10 +56,10 @@ public class NoteRepository : INoteRepository
         note.NoteId = id;
     }
 
-    public Task<IEnumerable<Note>> GetNotes(long userId)
+    public async Task<IEnumerable<Note>> GetNotesAsync(long userId)
     {
         using var connection = new SqlConnection(_connectionString);
-        return connection.QueryAsync<Note>("spNote_LoadAll", new { UserId = userId }, commandType: CommandType.StoredProcedure);
+        return await connection.QueryAsync<Note>("spNote_LoadAll", new { UserId = userId }, commandType: CommandType.StoredProcedure);
     }
 
     public Task DeleteNoteAsync(long noteId)

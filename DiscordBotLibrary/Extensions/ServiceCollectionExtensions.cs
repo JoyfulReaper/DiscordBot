@@ -79,6 +79,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<INoteRepository, NoteRepository>();
+        services.AddScoped<INoteService, NoteService>();
 
         services.AddTransient<IBannerImageService, BannerImageService>();
 

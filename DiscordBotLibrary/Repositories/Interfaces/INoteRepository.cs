@@ -30,6 +30,6 @@ namespace DiscordBotLibrary.Repositories.Interfaces;
 public interface INoteRepository
 {
     Task DeleteNoteAsync(long noteId);
-    Task<IEnumerable<Note>> GetNotes(long userId);
+    Task<IEnumerable<Note>> GetNotesAsync(long userId);
     Task SaveNoteAsync(Note note);
 }
