@@ -62,9 +62,9 @@ public class NoteRepository : INoteRepository
         return await connection.QueryAsync<Note>("spNote_LoadAll", new { UserId = userId }, commandType: CommandType.StoredProcedure);
     }
 
-    public Task DeleteNoteAsync(long noteId)
+    public async Task DeleteNoteAsync(long noteId)
     {
         using var connection = new SqlConnection(_connectionString);
-        return connection.ExecuteAsync("spNote_Delete", new { NoteId = noteId }, commandType: CommandType.StoredProcedure);
+        await connection.ExecuteAsync("spNote_Delete", new { NoteId = noteId }, commandType: CommandType.StoredProcedure);
     }
 }

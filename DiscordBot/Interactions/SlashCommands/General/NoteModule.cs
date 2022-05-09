@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord.Interactions;
 using DiscordBotLibrary.Attributes;
 using DiscordBotLibrary.ConfigSections;
+using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -43,16 +44,18 @@ public class NoteModule : InteractionModuleBase<SocketInteractionContext>
     private readonly IUserService _userService;
     private readonly INoteService _noteService;
     private readonly IConfiguration _config;
+    private readonly IGuildService _guildService;
     private readonly BotInformation _botinfo;
 
     public NoteModule(IUserService userService,
         INoteService noteService,
-        IConfiguration config)
+        IConfiguration config,
+        IGuildService guildService)
     {
         _userService = userService;
         _noteService = noteService;
         _config = config;
-
+        _guildService = guildService;
         _botinfo = _config.GetSection("BotInformation").Get<BotInformation>();
     }
 
@@ -82,5 +85,67 @@ public class NoteModule : InteractionModuleBase<SocketInteractionContext>
 
         await _noteService.SaveNoteAsync(note);
         await RespondAsync($"Note `{name}` created!"); 
+    }
+
+    [SlashCommand("list", "list user notes")]
+    public async Task NoteList()
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var user = await _userService.LoadUserAsync(Context.User.Id);
+        var notes = (await _noteService.GetNotesAsync(user.UserId)).ToList();
+
+        if (notes == null || !notes.Any())
+        {
+            await RespondAsync("You haven't created any notes yet!");
+            return;
+        }
+
+        string output = string.Empty;
+        for (int i = 0; i < notes.Count(); i++)
+        {
+            output += i + 1 + ") " + notes[i].Name + "\n";
+        }
+
+        await RespondAsync(output);
+    }
+
+
+    [SlashCommand("delete", "delete a note")]
+    public async Task NoteDelete([Summary("name")] string name)
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var user = await _userService.LoadUserAsync(Context.User.Id);
+        var notes = (await _noteService.GetNotesAsync(user.UserId));
+        var noteToDelete = notes?.Where(x => x.Name.ToLowerInvariant() == name.ToLowerInvariant()).SingleOrDefault();
+
+        if (noteToDelete == null)
+        {
+            await RespondAsync($"Note `{name}` could not be found!");
+            return;
+        }
+
+        await _noteService.DeleteNoteAsync(noteToDelete.NoteId);
+        await RespondAsync($"Deleted `{name}`");
+    }
+
+    [SlashCommand("read", "read note")]
+    public async Task NoteRead(string name)
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var user = await _userService.LoadUserAsync(Context.User.Id);
+        var notes = await _noteService.GetNotesAsync(user.UserId);
+        var noteToShow = notes?.Where(x => x.Name.ToLowerInvariant() == name.ToLowerInvariant()).SingleOrDefault();
+
+        if (noteToShow == null)
+        {
+            await RespondAsync($"Note `{name}` could not be found!");
+            return;
+        }
+
+        await RespondAsync(embed: EmbedHelper.GetEmbed($"{noteToShow.Name}", $"{noteToShow.Text}",
+            await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.NOTE_IMAGES))));
     }
 }
