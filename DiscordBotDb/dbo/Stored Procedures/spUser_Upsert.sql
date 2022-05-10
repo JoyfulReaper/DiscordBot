@@ -26,6 +26,8 @@ BEGIN
 	  UPDATE dbo.[User]
 		SET 
 			UserName = @UserName
+		WHERE
+			[UserId] = @UserId
 	END
 	ELSE
 		SET @UserId = SCOPE_IDENTITY();

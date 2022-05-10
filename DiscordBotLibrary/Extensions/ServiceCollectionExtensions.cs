@@ -80,6 +80,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<INoteRepository, NoteRepository>();
         services.AddScoped<INoteService, NoteService>();
+        services.AddScoped<IUserTimezoneRepository, UserTimezoneRepository>();
+        services.AddScoped<ITimezoneService, TimezoneService>();
 
         services.AddTransient<IBannerImageService, BannerImageService>();
 

@@ -23,52 +23,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Discord.WebSocket;
+using Dapper;
 using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Repositories.Interfaces;
-using DiscordBotLibrary.Services.Interfaces;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
-namespace DiscordBotLibrary.Services;
-
-public class UserService : IUserService
+namespace DiscordBotLibrary.Repositories;
+public class UserTimezoneRepository : IUserTimezoneRepository
 {
-    private readonly IUserRepository _userRepository;
-    private readonly DiscordSocketClient _client;
+    private readonly IConfiguration _config;
 
-    public UserService(IUserRepository userRepository,
-        DiscordSocketClient client)
+    public UserTimezoneRepository(IConfiguration config)
     {
-        _userRepository = userRepository;
-        _client = client;
+        _config = config;
     }
-    
-    public async Task<User> LoadUserAsync(ulong userId)
-    {
-        var user = await _userRepository.LoadUserAsync(userId);
 
-        if (user == null)
-        {
-            user = new User
+    public async Task SaveUserTimezoneAsync(UserTimezone userTimezone)
+    {
+        using var connection = new SqlConnection(_config.GetConnectionString("DiscordBot"));
+        var id = await connection.QuerySingleAsync<long>("spUserTimezone_Upsert",
+            new
             {
-                DiscordUserId = userId,
-                UserName = (await _client.GetUserAsync(userId)).Username
-            };
-            
-            await _userRepository.SaveUserAsync(user);
-        }
-        
-        if(user.UserName != (await _client.GetUserAsync(userId)).Username)
-        {
-            user.UserName = (await _client.GetUserAsync(userId)).Username;
-            await _userRepository.SaveUserAsync(user);
-        }
-
-        return user;
+                UserTimezoneId = userTimezone.UserTimezoneId,
+                UserId = userTimezone.UserId,
+                Timezone = userTimezone.TimeZone,
+            }, commandType: System.Data.CommandType.StoredProcedure);
+        userTimezone.UserTimezoneId = id;
     }
     
-    public Task SaveUserAsync(User user)
+    public async Task<UserTimezone> LoadUserTimeZoneAsync(long userId)
     {
-        return _userRepository.SaveUserAsync(user);
+        using var connection = new SqlConnection(_config.GetConnectionString("DiscordBot"));
+        return await connection.QuerySingleOrDefaultAsync<UserTimezone>("spUserTimezone_Load", new
+        {
+            UserId = userId
+        }, commandType: System.Data.CommandType.StoredProcedure);
     }
-
 }

@@ -25,10 +25,10 @@ SOFTWARE.
 
 using DiscordBotLibrary.Models;
 
-namespace DiscordBotLibrary.Services.Interfaces;
+namespace DiscordBotLibrary.Repositories.Interfaces;
 
-public interface IUserService
+public interface IUserTimezoneRepository
 {
-    Task<User> LoadUserAsync(ulong userId);
-    Task SaveUserAsync(User user);
+    Task<UserTimezone> LoadUserTimeZoneAsync(long userTimezoneId);
+    Task SaveUserTimezoneAsync(UserTimezone userTimezone);
 }
