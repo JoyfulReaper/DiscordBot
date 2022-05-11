@@ -13,9 +13,9 @@ public class TimezoneService : ITimezoneService
         _userTimezoneRepository = userTimezoneRepository;
     }
 
-    public async Task<UserTimezone> LoadUserTimeZoneAsync(long userTimezoneId)
+    public async Task<UserTimezone> LoadUserTimeZoneAsync(long userId)
     {
-        return await _userTimezoneRepository.LoadUserTimeZoneAsync(userTimezoneId);
+        return await _userTimezoneRepository.LoadUserTimeZoneAsync(userId);
     }
 
     public async Task SaveUserTimezoneAsync(UserTimezone userTimezone)

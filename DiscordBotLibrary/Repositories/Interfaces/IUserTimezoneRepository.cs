@@ -29,6 +29,6 @@ namespace DiscordBotLibrary.Repositories.Interfaces;
 
 public interface IUserTimezoneRepository
 {
-    Task<UserTimezone> LoadUserTimeZoneAsync(long userTimezoneId);
+    Task<UserTimezone> LoadUserTimeZoneAsync(long userId);
     Task SaveUserTimezoneAsync(UserTimezone userTimezone);
 }
