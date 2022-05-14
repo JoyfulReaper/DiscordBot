@@ -4,11 +4,6 @@ using Discord.WebSocket;
 using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBot.Interactions.SlashCommands.General;
 [Group("time", "Time commands")]
