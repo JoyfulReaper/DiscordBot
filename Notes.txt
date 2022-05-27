@@ -1,6 +1,10 @@
 Discord Usernames:
 Length constraints: Between 2 and 32 characters
 
+Skipped Commands:
+profanityallow, profanityblock, profanityfilter
+serverinvites (Won't work if the bot can't read messages.....)
+prefix
 
 TODO: Re-write RPS as interaction of some kind
 TODO: Reddit Module was skipped

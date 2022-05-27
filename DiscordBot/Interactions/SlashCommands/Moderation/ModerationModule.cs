@@ -62,11 +62,11 @@ public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
             return;
         }
 
-        await RespondAsync(embed: EmbedHelper.GetEmbed("Ban Hammer", $"{user.Mention} has been banned for *{(reason ?? "no reason")}*",
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Ban Hammer", $"{guildUser.GetDisplayName()} has been banned for *{(reason ?? "no reason")}*",
                 await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.BAN_IMAGES))));
 
-        await _guildService.SendLogsAsync(Context.Guild, "User banned", 
-            $"{Context.User.GetDisplayName()} has banned {user.GetDisplayName()} and deleted the past {pruneDays} day of their messages!");
+        await _guildService.SendLogsAsync(Context.Guild, "User banned",
+            $"{Context.User.Mention} has banned {user.GetDisplayName()} and deleted the past {pruneDays} day of their messages! Banned for *{(reason ?? "no reason")}*");
 
         await guildUser.BanAsync(pruneDays.HasValue ? pruneDays.Value : 0, reason);
     }
@@ -85,7 +85,56 @@ public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
             return;
         }
 
-        await _guildService.SendLogsAsync(Context.Guild, "User banned", $"{Context.User.GetDisplayName()} has banned {user.GetDisplayName()} using the UserCommand!");
+        await _guildService.SendLogsAsync(Context.Guild, "User banned", $"{Context.User.Mention} has banned {user.GetDisplayName()} using the UserCommand!");
         await guildUser.BanAsync();
+    }
+
+    [SlashCommand("kick", "Kick a user")]
+    [RequireUserPermission(GuildPermission.KickMembers)]
+    [RequireBotPermission(GuildPermission.KickMembers)]
+    [RequireContext(ContextType.Guild)]
+    public async Task Kick(IUser user, string? reason)
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var guildUser = user as SocketGuildUser;
+        if (guildUser == null)
+        {
+            await RespondAsync("You can only kick guild users....");
+            _logger.LogWarning("KickUser() tried to Kick an IUser that wasn't an IGuildUser. This should not happen!!!!");
+            return;
+        }
+        await guildUser.KickAsync();
+
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Kicked", $"{guildUser.GetDisplayName()} has been kicked to the curb for *{(reason ?? "no reason")}*",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.KICK_IMAGES))));
+
+        await _guildService.SendLogsAsync(Context.Guild, "User kicked", $"{Context.User.Mention} has kicked {user.GetDisplayName()} for *{(reason ?? "no reason")}*");
+    }
+
+    [SlashCommand("purge", "Purge messages")]
+    [RequireUserPermission(GuildPermission.ManageMessages)]
+    [RequireBotPermission(GuildPermission.ManageMessages)]
+    [RequireContext(ContextType.Guild)]
+    public async Task Purge(int number)
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var messages = await Context.Channel.GetMessagesAsync(number)
+            .FlattenAsync();
+
+        var socketTextChannel = Context.Channel as SocketTextChannel;
+        if (socketTextChannel == null)
+        {
+            await RespondAsync("You can only purge text channels....");
+            _logger.LogWarning("Purge() tried to Purge a non-text channel. This should not happen!!!!");
+            return;
+        }
+        
+        await socketTextChannel.DeleteMessagesAsync(messages);
+        await _guildService.SendLogsAsync(Context.Guild, "Messages Purged", $"{Context.User.Mention} purged {messages.Count()} messages in {Context.Channel}");
+
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Messages Purged", $"{Context.User.Mention} has purged {messages.Count()} messages.",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.PURGE_IMAGES))));
     }
 }
