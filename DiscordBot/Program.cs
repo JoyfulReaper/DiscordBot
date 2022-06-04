@@ -34,6 +34,7 @@ https://github.com/Directoire/dnbds
 
 using DiscordBot;
 using DiscordBotLibrary.Helpers;
+using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,8 +50,29 @@ IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
 ConsoleHelper.ColorWriteLine(ConsoleColor.Red, $"{config["BotInformation:BotName"]}");
 ConsoleHelper.ColorWriteLine(ConsoleColor.Blue, $"MIT License\n\nCopyright(c) 2022 Kyle Givler (JoyfulReaper)\n{config["Botinformation:BotWebsite"]}\n\n");
 
+await CheckForToken(serviceProvider);
+
+
 serviceProvider.GetRequiredService<ILoggingService>();
 IDiscordService discordService = serviceProvider.GetRequiredService<IDiscordService>();
 
 await discordService.Start();
 await Task.Delay(-1);
+
+
+async static Task CheckForToken(IServiceProvider serviceProvider)
+{
+    IBotSettingService botSettingService = serviceProvider.GetRequiredService<IBotSettingService>();
+    BotSetting? botSetting = await botSettingService.GetBotSettingAsync();
+    if (botSetting == null || string.IsNullOrWhiteSpace(botSetting.Token))
+    {
+        if (botSetting == null)
+        {
+            botSetting = new BotSetting();
+        }
+        Console.WriteLine("Please enter the bot's token: ");
+        botSetting.Token = Console.ReadLine() ?? string.Empty;
+
+        await botSettingService.SaveBotSettingAsync(botSetting);
+    }
+}

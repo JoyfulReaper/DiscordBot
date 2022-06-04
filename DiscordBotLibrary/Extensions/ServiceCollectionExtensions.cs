@@ -82,6 +82,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INoteService, NoteService>();
         services.AddScoped<IUserTimezoneRepository, UserTimezoneRepository>();
         services.AddScoped<ITimezoneService, TimezoneService>();
+        services.AddScoped<IBotSettingRepository, BotSettingRepository>();
+        services.AddScoped<IBotSettingService, BotSettingService>();
+
+
 
         services.AddTransient<IBannerImageService, BannerImageService>();
 

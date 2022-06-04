@@ -28,4 +28,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="UserTimeZoneId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2d252d09-1d26-4657-b26f-9ea32bd3cb72" ChangeDateTime="06/04/2022 18:24:33">
+    <Property Name="ElementName" Value="[dbo].[BotSetting].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[BotSetting]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="BotSettingId" />
+  </Operation>
 </Operations>

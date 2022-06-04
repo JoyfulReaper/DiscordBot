@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\Guild.sql" />
-    <Build Include="dbo\Tables\BotSettings.sql" />
+    <Build Include="dbo\Tables\BotSetting.sql" />
     <Build Include="dbo\Tables\User.sql" />
     <Build Include="dbo\Stored Procedures\spGuild_Upsert.sql" />
     <Build Include="dbo\Stored Procedures\spGuild_Load.sql" />
@@ -75,8 +75,13 @@
     <Build Include="dbo\Tables\UserTimezone.sql" />
     <Build Include="dbo\Stored Procedures\spUserTimezone_Upsert.sql" />
     <Build Include="dbo\Stored Procedures\spUserTimezone_Load.sql" />
+    <Build Include="dbo\Stored Procedures\spBotSetting_Load.sql" />
+    <Build Include="dbo\Stored Procedures\spBotSetting_Upsert.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="DiscordBotDb.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DiscordBotDb.publish.xml" />
   </ItemGroup>
 </Project>

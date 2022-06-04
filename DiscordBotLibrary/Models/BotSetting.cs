@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace DiscordBotLibrary.Models
 {
-    public class BotSettings
+    public class BotSetting
     {
         [Key]
-        public long Id { get; set; }
+        public long BotSettingId { get; set; }
 
         public string Token { get; set; } = string.Empty;
 

@@ -37,19 +37,21 @@ public class DiscordService : IDiscordService
     private readonly ITextCommandHandler _commandHandler;
     private readonly IInteractionHandler _interactionHandler;
     private readonly ILoggingService _loggingService;
+    private readonly IBotSettingService _botSettingService;
 
     public DiscordService(DiscordSocketClient discordSocketClient,
         IConfiguration config,
         ITextCommandHandler commandHandler,
         IInteractionHandler interactionHandler,
-        ILoggingService loggingService)
+        ILoggingService loggingService,
+        IBotSettingService botSettingService)
     {
         _client = discordSocketClient;
         _config = config;
         _commandHandler = commandHandler;
         _interactionHandler = interactionHandler;
         _loggingService = loggingService;
-
+        _botSettingService = botSettingService;
         _client.Log += loggingService.LogAsync;
     }
 
@@ -57,9 +59,8 @@ public class DiscordService : IDiscordService
     {
         await _commandHandler.InitializeAsync();
         await _interactionHandler.InitializeAsync();
-        
-        // TODO: Store the token in the database
-        await _client.LoginAsync(TokenType.Bot, _config["Token"]);
+        var botSetting = await _botSettingService.GetBotSettingAsync();
+        await _client.LoginAsync(TokenType.Bot, botSetting!.Token);
         await _client.StartAsync();
     }
 
