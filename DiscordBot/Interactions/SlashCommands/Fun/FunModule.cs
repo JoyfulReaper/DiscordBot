@@ -78,10 +78,10 @@ public class FunModule : InteractionModuleBase<SocketInteractionContext>
     }
 
     [SlashCommand("8ball", "Ask the 8ball a question!")]
-    public async Task EightBall([Summary("question")]string question)
+    public async Task EightBall([Summary("question")] string question)
     {
         await Context.Channel.TriggerTypingAsync();
-        
+
         var builder = new EmbedBuilder();
         builder
             .WithTitle("Magic 8ball")

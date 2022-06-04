@@ -91,7 +91,7 @@ public class BotModule : InteractionModuleBase<SocketInteractionContext>
             .WithColor(await _guildService.GetEmbedColorAsync(Context))
             .WithCurrentTimestamp();
 
-        await RespondAsync(null, new Embed[] { builder.Build() });
+        await RespondAsync(embed: builder.Build() );
     }
 
     [SlashCommand("nickname", "Change the bot's nickname")]
