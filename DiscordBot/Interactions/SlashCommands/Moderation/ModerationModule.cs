@@ -237,4 +237,51 @@ public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
 
         await _guildService.SendLogsAsync(Context.Guild, "Muted", $"{Context.User.Mention} muted {user.Mention}");
     }
+
+    [SlashCommand("unmute", "Remove muted role from a user")]
+    [RequireUserPermission(GuildPermission.KickMembers)]
+    [RequireBotPermission(GuildPermission.ManageRoles)]
+    [RequireContext(ContextType.Guild)]
+    private async Task Unmute([Summary("User")] IUser user)
+    {
+        var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
+        if (role == null)
+        {
+            await RespondAsync(embed: EmbedHelper.GetEmbed("Not Muted", "That user is not muted!",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.ERROR_IMAGES))));
+
+            return;
+        }
+
+        if (role.Position > Context.Guild.CurrentUser.Hierarchy)
+        {
+            await RespondAsync(embed: EmbedHelper.GetEmbed("Invalid permissions", "the muted role has a higher position than the bot!",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.ERROR_IMAGES))));
+            
+            return;
+        }
+
+        var guildUser = user as SocketGuildUser;
+        if (guildUser == null)
+        {
+            await RespondAsync("You can only un-mute guild users....");
+            _logger.LogError("Mute() tried to Mute an IUser that wasn't an IGuildUser. This should not happen!!!!");
+            return;
+        }
+
+        if (!guildUser.Roles.Contains(role))
+        {
+            await RespondAsync(embed: EmbedHelper.GetEmbed(title: "Not muted", "That user is not muted!",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.ERROR_IMAGES))));
+            
+            return;
+        }
+
+        await guildUser.RemoveRoleAsync(role);
+
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Unmuted", $"{guildUser.GetDisplayName()} has been unmuted!",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.UNMUTE_IMAGES))));
+
+        await _guildService.SendLogsAsync(Context.Guild, "Unmuted", $"{Context.User.Mention} unmuted {user.GetDisplayName()}");
+    }    
 }

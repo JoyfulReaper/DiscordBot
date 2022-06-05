@@ -12,7 +12,8 @@ TODO: Reddit Module was skipped
 TODO: add weather command
 TODO: Find cross platform way to do the banner
 TODO: Easier way to lookup images (Maybe just use a const)
-
+TODO: Create base class with SendEmbed that replys with an embed, hopefully easier than the embed helper
+TODO: Create base class with SendLog that sends a log to the logging channel, hopefully easier than current system
 
 
 Other notes:
