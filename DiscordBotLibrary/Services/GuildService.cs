@@ -24,10 +24,12 @@ SOFTWARE.
 */
 
 using Discord;
+using DiscordBotLibrary.ConfigSections;
 using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Repositories.Interfaces;
 using DiscordBotLibrary.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DiscordBotLibrary.Services;
@@ -36,17 +38,35 @@ public class GuildService : IGuildService
 {
     private readonly IGuildRepository _guildRepository;
     private readonly ILogger<GuildService> _logger;
+    private readonly IConfiguration _config;
+    private readonly BotInformation _botInfo;
 
     public GuildService(IGuildRepository guildRepository,
-        ILogger<GuildService> logger)
+        ILogger<GuildService> logger,
+        IConfiguration config)
     {
         _guildRepository = guildRepository;
         _logger = logger;
+        _config = config;
+        _botInfo = _config.GetRequiredSection("BotInformation").Get<BotInformation>();
     }
 
-    public Task<Guild> LoadGuildAsync(ulong guildId)
+    public async Task<Guild> LoadGuildAsync(ulong guildId)
     {
-        return _guildRepository.LoadGuildAsync(guildId);
+        var guild = await _guildRepository.LoadGuildAsync(guildId);
+        
+        if(guild == null)
+        {
+            guild = new Guild
+            {
+                Prefix = _botInfo.DefaultPrefix,
+                DiscordGuildId = guildId,
+            };
+
+            await SaveGuildAsync(guild);
+        }
+
+        return guild;
     }
     
     public Task SaveGuildAsync(Guild guild)
@@ -67,7 +87,7 @@ public class GuildService : IGuildService
             return ColorHelper.RandomColor();
         }
 
-        var guild = await LoadGuildAsync(guildId.Value);
+        Guild guild = await LoadGuildAsync(guildId.Value);
         if(guild == null || guild.EmbedColor == null || guild.EmbedColor == 0)
         {
             return ColorHelper.RandomColor();
@@ -78,7 +98,7 @@ public class GuildService : IGuildService
 
     public async Task<string?> GetBannerImageAsync(ulong guildId)
     {
-        var guild = await _guildRepository.LoadGuildAsync(guildId);
+        Guild guild = await LoadGuildAsync(guildId);
         return guild?.WelcomeBackground;
     }
 
@@ -89,7 +109,7 @@ public class GuildService : IGuildService
             return;
         }
 
-        var channelId = await GetLoggingChannel(guild.Id);
+        var channelId = await GetLoggingChannelAsync(guild.Id);
         if (channelId == null)
         {
             return;
@@ -103,7 +123,7 @@ public class GuildService : IGuildService
         var channel = await guild.GetTextChannelAsync(channelId.Value);
         if (channel == null)
         {
-            await ClearLoggingChannel(guild.Id);
+            await ClearLoggingChannelAsync(guild.Id);
             return;
         }
 
@@ -120,9 +140,9 @@ public class GuildService : IGuildService
         await channel.SendMessageAsync(embed: embed.Build());
     }
 
-    public async Task ClearLoggingChannel(ulong guildId)
+    public async Task ClearLoggingChannelAsync(ulong guildId)
     {
-        var guild = await _guildRepository.LoadGuildAsync(guildId);
+        var guild = await LoadGuildAsync(guildId);
         if (guild == null)
         {
             _logger.LogDebug("Attempted to clear logging channel for guild {guildId}, but guild was not found", guildId);
@@ -130,19 +150,25 @@ public class GuildService : IGuildService
         }
 
         guild.LoggingChannel = null;
-        await _guildRepository.SaveGuildAsync(guild);
+        await SaveGuildAsync(guild);
     }
 
-    public async Task<ulong?> GetLoggingChannel(ulong guildId)
+    public async Task<ulong?> GetLoggingChannelAsync(ulong guildId)
     {
-        var guild = await _guildRepository.LoadGuildAsync(guildId);
-        
-        if (guild == null)
-        {
-            await _guildRepository.SaveGuildAsync(new Guild { DiscordGuildId = guildId });
-            return null;
-        }
-
+        Guild guild = await LoadGuildAsync(guildId);
         return guild.LoggingChannel;
+    }
+
+    public async Task<string> GetGuildPrefixAsync(ulong guildId)
+    {
+        var guild = await LoadGuildAsync(guildId);
+        return guild.Prefix ?? _botInfo.DefaultPrefix;
+    }
+
+    public async Task SetGuildPrefixAsync(ulong guildId, string prefix)
+    {
+        Guild guild = await LoadGuildAsync(guildId);
+        guild.Prefix = prefix;
+        await SaveGuildAsync(guild);
     }
 }

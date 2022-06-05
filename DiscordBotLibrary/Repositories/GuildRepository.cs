@@ -63,7 +63,7 @@ public class GuildRepository : IGuildRepository
         guild.GuildId = id;
     }
 
-    public async Task<Guild> LoadGuildAsync(ulong discordGuildId)
+    public async Task<Guild?> LoadGuildAsync(ulong discordGuildId)
     {
         using var connection = new SqlConnection(_connectionString);
         return await connection.QuerySingleOrDefaultAsync<Guild>("spGuild_Load", new { DiscordGuildId = (decimal)discordGuildId }, commandType: CommandType.StoredProcedure);

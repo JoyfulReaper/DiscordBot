@@ -29,6 +29,6 @@ namespace DiscordBotLibrary.Repositories.Interfaces;
 
 public interface IGuildRepository
 {
-    Task<Guild> LoadGuildAsync(ulong discordGuildId);
+    Task<Guild?> LoadGuildAsync(ulong discordGuildId);
     Task SaveGuildAsync(Guild guild);
 }

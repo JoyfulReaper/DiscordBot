@@ -30,15 +30,53 @@ namespace DiscordBotLibrary.Services.Interfaces;
 
 public interface IGuildService
 {
+    /// <summary>
+    /// Load a guild from the database
+    /// If the guild cannot be found a new record will be inserted
+    /// </summary>
+    /// <param name="guildId">The snowflake id of the guild</param>
+    /// <returns>The guild record from the database, or the newly created record if one did not exist</returns>
     Task<Guild> LoadGuildAsync(ulong GuildId);
+
+    /// <summary>
+    /// Persist changes to a guild
+    /// </summary>
+    /// <param name="guild"></param>
+    /// <returns></returns>
     Task SaveGuildAsync(Guild guild);
 
+    /// <summary>
+    /// Get the color to use for embeds for the given Guild
+    /// </summary>
+    /// <param name="GuildId">The snowflake id of the guild</param>
+    /// <returns>The embed color for the given guild, or a random color if not specified</returns>
     Task<Color> GetEmbedColorAsync(ulong? GuildId);
+
+    /// <summary>
+    /// Get the color to use for embeds for the given Context
+    /// </summary>
+    /// <param name="context">The IInteractionContext to determine the embed color for</param>
+    /// <returns>The embed color for the given IInteractionContext, or a random color if not specified</returns>
     Task<Color> GetEmbedColorAsync(IInteractionContext context);
 
     Task<string?> GetBannerImageAsync(ulong guildId);
 
     Task SendLogsAsync(IGuild guild, string title, string description, string? thumbnailUrl = null);
-    Task ClearLoggingChannel(ulong guildId);
-    Task<ulong?> GetLoggingChannel(ulong guildId);
+    Task ClearLoggingChannelAsync(ulong guildId);
+    Task<ulong?> GetLoggingChannelAsync(ulong guildId);
+
+    /// <summary>
+    /// Get the prefix for the given guild
+    /// </summary>
+    /// <param name="guildId">Snowflake Id of the guild</param>
+    /// <returns>The guilds prefix</returns>
+    Task<string> GetGuildPrefixAsync(ulong guildId);
+
+    /// <summary>
+    /// Set the prefic for the given guild
+    /// </summary>
+    /// <param name="guildId">Snowflake Id of the guild</param>
+    /// <param name="prefix">The new prefix</param>
+    /// <returns></returns>
+    Task SetGuildPrefixAsync(ulong guildId, string prefix);
 }

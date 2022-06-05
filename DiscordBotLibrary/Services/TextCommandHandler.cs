@@ -47,6 +47,7 @@ public class TextCommandHandler : ITextCommandHandler, IDisposable
     private readonly IConfiguration _config;
     private readonly ILoggingService _loggingService;
     private readonly ILogger<TextCommandHandler> _logger;
+    private readonly IGuildService _guildService;
     private readonly BotInformation _botInfo;
 
     public TextCommandHandler(DiscordSocketClient client,
@@ -54,7 +55,8 @@ public class TextCommandHandler : ITextCommandHandler, IDisposable
         IServiceProvider services,
         IConfiguration config,
         ILoggingService loggingService,
-        ILogger<TextCommandHandler> logger)
+        ILogger<TextCommandHandler> logger,
+        IGuildService guildService)
     {
         _client = client;
         _commandService = commandService;
@@ -62,6 +64,7 @@ public class TextCommandHandler : ITextCommandHandler, IDisposable
         _config = config;
         _loggingService = loggingService;
         _logger = logger;
+        _guildService = guildService;
         _botInfo = _config.GetSection("BotInformation").Get<BotInformation>();
     }
 
@@ -95,9 +98,18 @@ public class TextCommandHandler : ITextCommandHandler, IDisposable
             return;
         }
 
-        int argPos = 0;
+        var context = new SocketCommandContext(_client, message);
 
-        if (!(message.HasStringPrefix(_botInfo.DefaultPrefix, ref argPos) ||
+        SocketTextChannel? channel = message.Channel as SocketTextChannel;
+        string prefix = string.Empty;
+
+        if(channel != null)
+        {
+            prefix = await _guildService.GetGuildPrefixAsync(channel.Guild.Id);
+        }
+
+        int argPos = 0;
+        if (!(message.HasStringPrefix(prefix, ref argPos) ||
             message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
         {
             return;
@@ -110,7 +122,6 @@ public class TextCommandHandler : ITextCommandHandler, IDisposable
             return;
         }
 
-        var context = new SocketCommandContext(_client, message);
 
         await _commandService.ExecuteAsync(
             context: context,

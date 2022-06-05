@@ -23,10 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Discord;
 using Discord.Commands;
 using Discord.Interactions;
-using DiscordBot.Interactions.SlashCommands;
 using DiscordBotLibrary.ConfigSections;
+using DiscordBotLibrary.Helpers;
+using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
 using RequireOwnerAttribute = Discord.Commands.RequireOwnerAttribute;
@@ -38,14 +40,50 @@ public class DiscordBotModule : ModuleBase<SocketCommandContext>
 {
     private readonly InteractionService _interactionService;
     private readonly IConfiguration _config;
+    private readonly IGuildService _guildService;
     private readonly OwnerInformation _ownerInformation;
+    private readonly BotInformation _botInformation;
 
     public DiscordBotModule(InteractionService interactionService,
-        IConfiguration config)
+        IConfiguration config,
+        IGuildService guildService)
     {
         _interactionService = interactionService;
         _config = config;
+        _guildService = guildService;
         _ownerInformation = _config.GetSection("OwnerInformation").Get<OwnerInformation>();
+        _botInformation = _config.GetSection("BotInformation").Get<BotInformation>();
+    }
+    
+    [Command("prefix")]
+    [Discord.Commands.RequireUserPermission(GuildPermission.Administrator)]
+    [Summary("Change the prefix")]
+    public async Task Prefix([Summary("The prefix to use to address the bot")] string? prefix = null)
+    {
+        await Context.Channel.TriggerTypingAsync();
+        var myPrefix = await _guildService.GetGuildPrefixAsync(Context.Guild.Id);
+
+        if (prefix == null)
+        {
+            await ReplyAsync(embed: EmbedHelper.GetEmbed("Prefix", $"My Prefix is {myPrefix}",
+                await _guildService.GetEmbedColorAsync(Context.Guild.Id), ImageLookup.GetImageUrl(nameof(ImageLookup.PREFIX_IMAGES))));
+
+            return;
+        }
+
+        if (prefix.Length > _botInformation.PrefixMaxLength)
+        {
+            await ReplyAsync(embed: EmbedHelper.GetEmbed("Invalid Prefix", $"Prefix must be less than {_botInformation.PrefixMaxLength} characters.",
+                await _guildService.GetEmbedColorAsync(Context.Guild.Id), ImageLookup.GetImageUrl(nameof(ImageLookup.PREFIX_IMAGES))));
+
+            return;
+        }
+
+        await _guildService.SetGuildPrefixAsync(Context.Guild.Id, prefix);
+        await ReplyAsync(embed: EmbedHelper.GetEmbed("Prefix Changed", $"My Prefix is now `{prefix}`",
+            await _guildService.GetEmbedColorAsync(Context.Guild.Id), ImageLookup.GetImageUrl(nameof(ImageLookup.PREFIX_IMAGES))));
+
+        await _guildService.SendLogsAsync(Context.Guild, "Prefix adjusted", $"{Context.User.Mention} modifed the prefix to {prefix}");
     }
 
     [Command("registerSlashGlobal")]
