@@ -283,5 +283,29 @@ public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
                 await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.UNMUTE_IMAGES))));
 
         await _guildService.SendLogsAsync(Context.Guild, "Unmuted", $"{Context.User.Mention} unmuted {user.GetDisplayName()}");
-    }    
+    }
+
+    [SlashCommand("slowmode", "Enable SlowMode for current channel")]
+    [RequireUserPermission(GuildPermission.ManageChannels)]
+    [RequireBotPermission(GuildPermission.ManageChannels)]
+    [RequireContext(ContextType.Guild)]
+    public async Task SlowMode([Summary("coolDownSeconds")] int interval = 0)
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var channel = Context.Channel as SocketTextChannel;
+        if(channel == null)
+        {
+            await RespondAsync("This command only works in SocketTextChannels (this is a bug)!");
+            _logger.LogError("SlowMode() tried to change the interval on a channel that is not a SocketTextChannel. This should not happen!!!!");
+            return;
+        }
+
+        await channel.ModifyAsync(x => x.SlowModeInterval = interval);
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Slowmode", $"The SlowMode interval was adjusted to {interval} seconds!",
+            await _guildService.GetEmbedColorAsync(Context)));
+        
+
+        await _guildService.SendLogsAsync(Context.Guild, "Slow Mode", $"{Context.User.Mention} set slowmode interval to {interval} for {Context.Channel.Name}");
+    }
 }
