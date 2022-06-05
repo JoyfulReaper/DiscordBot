@@ -89,6 +89,39 @@ public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
         await guildUser.BanAsync();
     }
 
+    [SlashCommand("unban", "Unban a user")]
+    [RequireBotPermission(GuildPermission.BanMembers)]
+    [RequireUserPermission(GuildPermission.BanMembers)]
+    public async Task Unban([Summary("userSnowFlakeId")] ulong userId)
+    {
+        await Context.Channel.TriggerTypingAsync();
+        
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Un-Banned", $"{Context.Guild.GetUser(userId)?.GetDisplayName() ?? userId.ToString()} has been un-banned!",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.UNBAN_IMAGES))));
+
+        await _guildService.SendLogsAsync(Context.Guild, "Un-Banned", $"{Context.User.Mention} has un-banned {Context.Guild.GetUser(userId)?.GetDisplayName() ?? userId.ToString()}");
+        await Context.Guild.RemoveBanAsync(userId);
+    }
+
+    [UserCommand("kick")]
+    [RequireUserPermission(GuildPermission.KickMembers)]
+    [RequireBotPermission(GuildPermission.KickMembers)]
+    [RequireContext(ContextType.Guild)]
+    public async Task KickUser(IUser user)
+    {
+        var guildUser = user as SocketGuildUser;
+        if (guildUser == null)
+        {
+            await RespondAsync("You can only kick guild users....");
+            _logger.LogWarning("KickUser() tried to Kick an IUser that wasn't an IGuildUser. This should not happen!!!!");
+            return;
+        }
+
+        await _guildService.SendLogsAsync(Context.Guild, "User Kicked", $"{Context.User.Mention} has kicked {user.GetDisplayName()} using the UserCommand!");
+        await guildUser.KickAsync();
+    }
+
+
     [SlashCommand("kick", "Kick a user")]
     [RequireUserPermission(GuildPermission.KickMembers)]
     [RequireBotPermission(GuildPermission.KickMembers)]
