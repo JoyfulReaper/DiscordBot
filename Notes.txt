@@ -18,3 +18,4 @@ TODO: Easier way to lookup images (Maybe just use a const)
 Other notes:
 - At this time will not attempt any invite tracking
 - Try to find free/cheap hosting for the bot (Oracle Cloud?)
+- Need to test mute command more, and possible make a service for it (Like Pomodoro service0

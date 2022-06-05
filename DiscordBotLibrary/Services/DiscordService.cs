@@ -25,6 +25,7 @@ SOFTWARE.
 
 using Discord;
 using Discord.WebSocket;
+using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 
@@ -62,6 +63,8 @@ public class DiscordService : IDiscordService
         var botSetting = await _botSettingService.GetBotSettingAsync();
         await _client.LoginAsync(TokenType.Bot, botSetting!.Token);
         await _client.StartAsync();
+
+        _ = Task.Run(async () => await MuteHelper.MuteWorker(_client));
     }
 
     public async Task Stop()

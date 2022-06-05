@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DiscordBotLib.Models;
 using DiscordBotLibrary.Extensions;
 using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Services.Interfaces;
@@ -169,5 +170,71 @@ public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
 
         await RespondAsync(embed: EmbedHelper.GetEmbed("Messages Purged", $"{Context.User.Mention} has purged {messages.Count()} messages.",
                 await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.PURGE_IMAGES))));
+    }
+    
+    [SlashCommand("mute", "Mute a user")]
+    [RequireUserPermission(GuildPermission.KickMembers)]
+    [RequireBotPermission(GuildPermission.ManageRoles)]
+    [RequireContext(ContextType.Guild)]
+    public async Task Mute([Summary("user")] IUser user,
+            [Summary("minutes")] int minutes = 5,
+            [Summary("reason")]string? reason = null)
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var guildUser = user as SocketGuildUser;
+        if (guildUser == null)
+        {
+            await RespondAsync("You can only mute guild users....");
+            _logger.LogError("Mute() tried to Mute an IUser that wasn't an IGuildUser. This should not happen!!!!");
+            return;
+        }
+
+        if (guildUser.Hierarchy > Context.Guild.CurrentUser.Hierarchy)
+        {
+            await RespondAsync(embed: EmbedHelper.GetEmbed("Invalid User", "That user has a higher position than the bot!",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.ERROR_IMAGES))));
+
+            return;
+        }
+
+        // Check for muted role, attempt to create it if it doesn't exist
+        var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
+        if (role == null)
+        {
+            role = await Context.Guild.CreateRoleAsync("Muted", new GuildPermissions(sendMessages: false), null, false);
+        }
+
+        if (role.Position > Context.Guild.CurrentUser.Hierarchy)
+        {
+            await RespondAsync(embed: EmbedHelper.GetEmbed("Invalid permissions", "The muted role has a higher position than the bot!",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.ERROR_IMAGES))));
+
+            return;
+        }
+
+        if (guildUser.Roles.Contains(role))
+        {
+            await RespondAsync(embed: EmbedHelper.GetEmbed(title: "Already muted", "That user is already muted!",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.ERROR_IMAGES))));
+
+            return;
+        }
+
+        await role.ModifyAsync(x => x.Position = Context.Guild.CurrentUser.Hierarchy);
+        foreach (var channel in Context.Guild.Channels)
+        {
+            if (!channel.GetPermissionOverwrite(role).HasValue || channel.GetPermissionOverwrite(role)?.SendMessages == PermValue.Allow)
+            {
+                await channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny));
+            }
+        }
+        
+        MuteHelper.AddMute(new Mute { Guild = Context.Guild, User = guildUser, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
+        await guildUser.AddRoleAsync(role);
+        await RespondAsync(embed: EmbedHelper.GetEmbed("Muted", $"{guildUser.GetDisplayName()} has been muted for {minutes} minutes.\nReason: {reason ?? "None"}",
+                await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.MUTE_IMAGES))));
+
+        await _guildService.SendLogsAsync(Context.Guild, "Muted", $"{Context.User.Mention} muted {user.Mention}");
     }
 }
