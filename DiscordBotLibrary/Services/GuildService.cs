@@ -159,6 +159,14 @@ public class GuildService : IGuildService
         return guild.LoggingChannel;
     }
 
+    public async Task SetLoggingChannelAsync(ulong guildId, ulong channelId)
+    {
+        var guild = await LoadGuildAsync(guildId);
+
+        guild.LoggingChannel = channelId;
+        await SaveGuildAsync(guild);
+    }
+
     public async Task<string> GetGuildPrefixAsync(ulong guildId)
     {
         var guild = await LoadGuildAsync(guildId);

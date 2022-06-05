@@ -308,4 +308,35 @@ public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
 
         await _guildService.SendLogsAsync(Context.Guild, "Slow Mode", $"{Context.User.Mention} set slowmode interval to {interval} for {Context.Channel.Name}");
     }
+
+    [SlashCommand("logchannel", "Change logging channel")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    [RequireContext(ContextType.Guild)]
+    public async Task SetLogChannel([Summary("LogChannel")] IChannel channel)
+    {
+        SocketTextChannel? textChannel = channel as SocketTextChannel;
+        if (textChannel == null)
+        {
+            await RespondAsync("The logging channel must be a text channel.");
+            return;
+        }
+
+        await _guildService.SetLoggingChannelAsync(Context.Guild.Id, channel.Id);
+        await RespondAsync($"Successfully modified the logging channel to {channel.Name}");
+
+        var perms = Context.Guild.CurrentUser.GetPermissions(textChannel);
+        if (!perms.SendMessages)
+        {
+            await ReplyAsync("`Warning` the bot does not have permisson to send messages to the logging channel!");
+        }
+    }
+
+    [SlashCommand("clearlogchannel", "Clear the logging channel")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    [RequireContext(ContextType.Guild)]
+    public async Task ClearLogChannel()
+    {
+        await _guildService.ClearLoggingChannelAsync(Context.Guild.Id);
+        await RespondAsync("Cleared logging channel");
+    }
 }

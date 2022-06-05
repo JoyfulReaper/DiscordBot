@@ -45,6 +45,8 @@ public interface IGuildService
     /// <returns></returns>
     Task SaveGuildAsync(Guild guild);
 
+
+    
     /// <summary>
     /// Get the color to use for embeds for the given Guild
     /// </summary>
@@ -59,11 +61,42 @@ public interface IGuildService
     /// <returns>The embed color for the given IInteractionContext, or a random color if not specified</returns>
     Task<Color> GetEmbedColorAsync(IInteractionContext context);
 
+    
     Task<string?> GetBannerImageAsync(ulong guildId);
 
+    /// <summary>
+    /// Send a logging message to the logging channel
+    /// </summary>
+    /// <param name="guild">Guild to log for</param>
+    /// <param name="title">Title of the log message</param>
+    /// <param name="description">Content of the log message</param>
+    /// <param name="thumbnailUrl">Image to show in the logging embed</param>
+    /// <returns></returns>
     Task SendLogsAsync(IGuild guild, string title, string description, string? thumbnailUrl = null);
+
+    /// <summary>
+    /// Clears out the logging channel
+    /// </summary>
+    /// <param name="guildId">Snowflake Id of the Guild</param>
+    /// <returns></returns>
     Task ClearLoggingChannelAsync(ulong guildId);
+
+    /// <summary>
+    /// Get the snowflake Id of the logging channel
+    /// </summary>
+    /// <param name="guildId">Snowflake id of the guild</param>
+    /// <returns>Logging channel snowflake id</returns>
     Task<ulong?> GetLoggingChannelAsync(ulong guildId);
+
+    /// <summary>
+    /// Set the logging channel for the given guild
+    /// </summary>
+    /// <param name="guildId">Snowflake id of the server</param>
+    /// <param name="channelId">Snowflake id of the logging channel</param>
+    /// <returns></returns>
+    Task SetLoggingChannelAsync(ulong guildId, ulong channelId);
+
+
 
     /// <summary>
     /// Get the prefix for the given guild
