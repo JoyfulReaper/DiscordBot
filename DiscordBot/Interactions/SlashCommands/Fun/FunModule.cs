@@ -40,6 +40,8 @@ namespace DiscordBot.Interactions.SlashCommands.Fun;
 [RequireContext(ContextType.Guild)]
 public class FunModule : InteractionModuleBase<SocketInteractionContext>
 {
+    // TODO: Re-add RPS command
+
     private readonly IGuildService _guildService;
     private readonly IBannerImageService _bannerImageService;
     private readonly IConfiguration _config;

@@ -59,6 +59,7 @@
     <Folder Include="dbo" />
     <Folder Include="dbo\Stored Procedures" />
     <Folder Include="dbo\Tables" />
+    <Folder Include="dbo\PublishProfiles" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\Guild.sql" />
@@ -82,6 +83,6 @@
     <RefactorLog Include="DiscordBotDb.refactorlog" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DiscordBotDb.publish.xml" />
+    <None Include="dbo\PublishProfiles\DiscordBotDb.publish.xml" />
   </ItemGroup>
 </Project>
