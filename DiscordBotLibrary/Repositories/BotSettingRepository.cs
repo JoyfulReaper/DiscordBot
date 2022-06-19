@@ -53,7 +53,15 @@ public class BotSettingRepository : IBotSettingRepository
     public async Task SaveBotSettingAsync(BotSetting botSetting)
     {
         using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync("spBotSetting_Upsert", new { botSetting.BotSettingId, botSetting.Token, botSetting.Game }, commandType: CommandType.StoredProcedure);
+        var id = await connection.QuerySingleAsync<long>("spBotSetting_Upsert",
+            new
+            {
+                botSetting.BotSettingId,
+                botSetting.Token,
+                botSetting.Game
+            },
+            commandType: CommandType.StoredProcedure);
+        botSetting.BotSettingId = id;
     }
 
     public async Task<BotSetting?> GetBotSettingAsync()

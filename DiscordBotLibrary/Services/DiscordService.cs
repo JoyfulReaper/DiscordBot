@@ -53,19 +53,13 @@ public class DiscordService : IDiscordService
         _interactionHandler = interactionHandler;
         _loggingService = loggingService;
         _botSettingService = botSettingService;
+        
         _client.Log += loggingService.LogAsync;
-        _loggingService.OnBadToken += OnBadToken;
+        _client.Ready += OnReady;
     }
 
-    private void OnBadToken(object? sender, EventArgs e)
+    public async Task StartAsync()
     {
-        var test = "test";
-    }
-
-    public async Task Start()
-    {
-        await _commandHandler.InitializeAsync();
-        await _interactionHandler.InitializeAsync();
         var botSetting = await _botSettingService.GetBotSettingAsync();
         await _client.LoginAsync(TokenType.Bot, botSetting!.Token);
         await _client.StartAsync();
@@ -73,9 +67,15 @@ public class DiscordService : IDiscordService
         _ = Task.Run(async () => await MuteHelper.MuteWorker(_client));
     }
 
-    public async Task Stop()
+    public async Task StopAsync()
     {
         await _client.LogoutAsync();
-        Environment.Exit(0);
+        await _client.StopAsync();
+    }
+
+    private async Task OnReady()
+    {
+        await _commandHandler.InitializeAsync();
+        await _interactionHandler.InitializeAsync();
     }
 }

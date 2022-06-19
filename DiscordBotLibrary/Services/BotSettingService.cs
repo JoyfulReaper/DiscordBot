@@ -27,11 +27,6 @@ SOFTWARE.
 using DiscordBotLibrary.Models;
 using DiscordBotLibrary.Repositories.Interfaces;
 using DiscordBotLibrary.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBotLibrary.Services;
 
@@ -44,9 +39,17 @@ public class BotSettingService : IBotSettingService
         _botSettingRepository = botSettingRepository;
     }
 
-    public Task<BotSetting?> GetBotSettingAsync()
+    public async Task<BotSetting> GetBotSettingAsync()
     {
-        return _botSettingRepository.GetBotSettingAsync();
+        var botSetting = await _botSettingRepository.GetBotSettingAsync();
+
+        if (botSetting == null)
+        {
+            botSetting = new BotSetting();
+            await SaveBotSettingAsync(botSetting);
+        }
+
+        return botSetting;
     }
     public Task SaveBotSettingAsync(BotSetting botSetting)
     {

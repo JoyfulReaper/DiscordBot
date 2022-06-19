@@ -37,7 +37,9 @@ namespace DiscordBot
             IServiceCollection services = new ServiceCollection();
             services.AddDiscordBot();
             services.AddHttpClient();
-
+            services.AddSingleton<DiscordBotApp>();
+            services.AddTransient<TokenChecker>();
+            
             services.AddSingleton<PomodoroService>();
 
             ServiceProvider serviceProvider = services.BuildServiceProvider();

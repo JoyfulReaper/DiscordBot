@@ -33,7 +33,7 @@ namespace DiscordBotLibrary.Services;
 
 public class LoggingService : ILoggingService
 {
-    public event EventHandler OnBadToken;
+    public event EventHandler? OnBadToken;
 
     private readonly ILogger<LoggingService> _logger;
 

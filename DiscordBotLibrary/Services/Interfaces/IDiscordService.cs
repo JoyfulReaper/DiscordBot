@@ -3,6 +3,6 @@ namespace DiscordBotLibrary.Services.Interfaces;
 
 public interface IDiscordService
 {
-    Task Start();
-    Task Stop();
+    Task StartAsync();
+    Task StopAsync();
 }

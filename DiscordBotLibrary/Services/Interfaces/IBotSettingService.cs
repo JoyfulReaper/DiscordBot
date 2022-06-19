@@ -30,6 +30,6 @@ namespace DiscordBotLibrary.Services.Interfaces;
 
 public interface IBotSettingService
 {
-    Task<BotSetting?> GetBotSettingAsync();
+    Task<BotSetting> GetBotSettingAsync();
     Task SaveBotSettingAsync(BotSetting botSetting);
 }
