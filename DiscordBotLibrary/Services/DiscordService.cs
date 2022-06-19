@@ -54,6 +54,12 @@ public class DiscordService : IDiscordService
         _loggingService = loggingService;
         _botSettingService = botSettingService;
         _client.Log += loggingService.LogAsync;
+        _loggingService.OnBadToken += OnBadToken;
+    }
+
+    private void OnBadToken(object? sender, EventArgs e)
+    {
+        var test = "test";
     }
 
     public async Task Start()

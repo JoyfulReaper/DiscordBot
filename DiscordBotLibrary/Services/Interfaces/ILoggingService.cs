@@ -29,5 +29,6 @@ namespace DiscordBotLibrary.Services.Interfaces;
 
 public interface ILoggingService
 {
+    public event EventHandler OnBadToken;
     Task LogAsync(LogMessage message);
 }

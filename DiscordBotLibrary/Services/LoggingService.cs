@@ -25,6 +25,7 @@ SOFTWARE.
 
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -32,6 +33,8 @@ namespace DiscordBotLibrary.Services;
 
 public class LoggingService : ILoggingService
 {
+    public event EventHandler OnBadToken;
+
     private readonly ILogger<LoggingService> _logger;
 
 
@@ -81,6 +84,12 @@ public class LoggingService : ILoggingService
         if (message.Exception != null)
         {
             _logger.LogDebug(message.Exception, "Exception:");
+            if (message.Exception.InnerException != null &&
+                message.Exception.InnerException is WebSocketClosedException
+                && message.Exception.InnerException.Message.Contains("4004"))
+            {
+                OnBadToken?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }
