@@ -43,6 +43,7 @@ internal class DiscordBotApp
     private async void OnBadToken(object? sender, EventArgs e)
     {
         await _discordService.StopAsync();
+        await Task.Delay(250);
         await _tokenChecker.ClearTokenAndReCheckAsync();
         await _discordService.StartAsync();
     }
