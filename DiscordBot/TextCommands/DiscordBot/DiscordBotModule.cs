@@ -26,17 +26,21 @@ SOFTWARE.
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
+using DiscordBot.TextCommands.Infrastructure;
 using DiscordBotLibrary.ConfigSections;
+using DiscordBotLibrary.Extensions;
 using DiscordBotLibrary.Helpers;
 using DiscordBotLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
+using ContextType = Discord.Commands.ContextType;
+using RequireContextAttribute = Discord.Commands.RequireContextAttribute;
 using RequireOwnerAttribute = Discord.Commands.RequireOwnerAttribute;
 using SummaryAttribute = Discord.Commands.SummaryAttribute;
 
 namespace DiscordBot.Commands.DiscordBot;
 
-public class DiscordBotModule : ModuleBase<SocketCommandContext>
+public class DiscordBotModule : DiscordBotModuleBase<SocketCommandContext>
 {
     private readonly InteractionService _interactionService;
     private readonly IConfiguration _config;
@@ -46,7 +50,7 @@ public class DiscordBotModule : ModuleBase<SocketCommandContext>
 
     public DiscordBotModule(InteractionService interactionService,
         IConfiguration config,
-        IGuildService guildService)
+        IGuildService guildService) : base (guildService)
     {
         _interactionService = interactionService;
         _config = config;
@@ -94,16 +98,19 @@ public class DiscordBotModule : ModuleBase<SocketCommandContext>
     {
         await _interactionService.RegisterCommandsGloballyAsync(true);
         await ReplyAsync("Registered slash commands globally!");
+        await SendLogsAsync("Slash commands registered", $"{Context.User.GetDisplayName()} registered slash commands globally!");
     }
 
     [Command("registerSlashDev")]
     [Summary("Registers slash commands to developmnent guild")]
     [RequireOwner]
+    [RequireContext(ContextType.Guild)]
     [Alias("rsd")]
     public async Task RegisterSlashCommandsDev()
     {
         await _interactionService.RegisterCommandsToGuildAsync(_ownerInformation.DevGuild, true);
         await ReplyAsync("Registered slash commands to development guild!");
+        await SendLogsAsync("Slash commands registered", $"{Context.User.GetDisplayName()} registered slash commands in the development guild!");
     }
 
     [Command("unregisterSlashDev")]
@@ -123,5 +130,6 @@ public class DiscordBotModule : ModuleBase<SocketCommandContext>
 
         await _interactionService.RegisterCommandsToGuildAsync(_ownerInformation.DevGuild, true);
         await ReplyAsync("un-Registered slash commands to development guild!");
+        await SendLogsAsync("Slash commands ub-registered", $"{Context.User.GetDisplayName()} un-registered slash commands in the development guild!");
     }
 }

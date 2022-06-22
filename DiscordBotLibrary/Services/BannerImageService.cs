@@ -38,6 +38,7 @@ using Microsoft.Extensions.Logging;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Runtime.Versioning;
 
 namespace DiscordBotLibrary.Services;
 
@@ -53,6 +54,7 @@ public class BannerImageService : IBannerImageService
         _config = config;
     }
 
+    [SupportedOSPlatform("Windows")]
     public async Task<MemoryStream> CreateImage(SocketGuildUser user, string? bannerUrl = null)
     {
         if (bannerUrl == null)
@@ -78,6 +80,7 @@ public class BannerImageService : IBannerImageService
         return await Task.FromResult(memoryStream);
     }
 
+    [SupportedOSPlatform("Windows")]
     private Image DrawTextToImage(Image image, string header, string subheader)
     {
         // TODO deal with the font not existing
@@ -109,6 +112,7 @@ public class BannerImageService : IBannerImageService
         return img;
     }
 
+    [SupportedOSPlatform("Windows")]
     private Image CopyRegionIntoImage(Image source, Image destination)
     {
         using var grD = Graphics.FromImage(destination);
@@ -119,6 +123,7 @@ public class BannerImageService : IBannerImageService
         return destination;
     }
 
+    [SupportedOSPlatform("Windows")]
     private Image ClipImageToCircle(Image image)
     {
         Image destination = new Bitmap(image.Width, image.Height, image.PixelFormat);
@@ -147,6 +152,7 @@ public class BannerImageService : IBannerImageService
         return destination;
     }
 
+    [SupportedOSPlatform("Windows")]
     private async Task<Image> FetchImage(string url)
     {
         var client = new HttpClient();
@@ -165,6 +171,7 @@ public class BannerImageService : IBannerImageService
         return Image.FromStream(stream);
     }
 
+    [SupportedOSPlatform("Windows")]
     private static Bitmap CropToBanner(Image image)
     {
         var originalWidth = image.Width;

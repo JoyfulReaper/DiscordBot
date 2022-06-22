@@ -26,6 +26,7 @@ SOFTWARE.
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DiscordBot.Interactions.Infrastructure;
 using DiscordBotLib.Models;
 using DiscordBotLibrary.Extensions;
 using DiscordBotLibrary.Helpers;
@@ -35,13 +36,13 @@ using Microsoft.Extensions.Logging;
 namespace DiscordBot.Interactions.SlashCommands.Moderation;
 
 [Group("mod", "Moderation commands")]
-public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
+public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
 {
     private readonly IGuildService _guildService;
     private readonly ILogger<ModerationModule> _logger;
 
     public ModerationModule(IGuildService guildService,
-        ILogger<ModerationModule> logger)
+        ILogger<ModerationModule> logger) : base(guildService)
     {
         _guildService = guildService;
         _logger = logger;
@@ -242,7 +243,7 @@ public class ModerationModule : InteractionModuleBase<SocketInteractionContext>
     [RequireUserPermission(GuildPermission.KickMembers)]
     [RequireBotPermission(GuildPermission.ManageRoles)]
     [RequireContext(ContextType.Guild)]
-    private async Task Unmute([Summary("User")] IUser user)
+    public async Task Unmute([Summary("User")] IUser user)
     {
         var role = (Context.Guild as IGuild).Roles.FirstOrDefault(x => x.Name == "Muted");
         if (role == null)

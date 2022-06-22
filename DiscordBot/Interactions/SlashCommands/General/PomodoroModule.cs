@@ -94,8 +94,8 @@ public class PomodoroModule : InteractionModuleBase<SocketInteractionContext>
 
         var pom = new Pomodoro
         {
-            Guild = Context?.Guild as SocketGuild,
-            User = Context?.User as SocketUser,
+            Guild = Context.Guild as SocketGuild,
+            User = Context.User as SocketUser,
             Channel = Context.Channel as SocketChannel,
             TimerType = "long break",
             Task = "your long break",
