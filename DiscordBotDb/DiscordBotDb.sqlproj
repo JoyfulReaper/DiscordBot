@@ -78,11 +78,14 @@
     <Build Include="dbo\Stored Procedures\spUserTimezone_Load.sql" />
     <Build Include="dbo\Stored Procedures\spBotSetting_Load.sql" />
     <Build Include="dbo\Stored Procedures\spBotSetting_Upsert.sql" />
+    <Build Include="dbo\Tables\Warning.sql" />
+    <Build Include="dbo\Tables\WarningAction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="DiscordBotDb.refactorlog" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\PublishProfiles\DiscordBotDb.publish.xml" />
+    <None Include="DiscordBotDb_1.publish.xml" />
   </ItemGroup>
 </Project>

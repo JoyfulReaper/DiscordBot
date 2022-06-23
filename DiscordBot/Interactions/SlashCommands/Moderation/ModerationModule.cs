@@ -97,7 +97,7 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
     public async Task Unban([Summary("userSnowFlakeId")] ulong userId)
     {
         await Context.Channel.TriggerTypingAsync();
-        
+
         await RespondAsync(embed: EmbedHelper.GetEmbed("Un-Banned", $"{Context.Guild.GetUser(userId)?.GetDisplayName() ?? userId.ToString()} has been un-banned!",
                 await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.UNBAN_IMAGES))));
 
@@ -165,21 +165,21 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
             _logger.LogWarning("Purge() tried to Purge a non-text channel. This should not happen!!!!");
             return;
         }
-        
+
         await socketTextChannel.DeleteMessagesAsync(messages);
         await _guildService.SendLogsAsync(Context.Guild, "Messages Purged", $"{Context.User.Mention} purged {messages.Count()} messages in {Context.Channel}");
 
         await RespondAsync(embed: EmbedHelper.GetEmbed("Messages Purged", $"{Context.User.Mention} has purged {messages.Count()} messages.",
                 await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.PURGE_IMAGES))));
     }
-    
+
     [SlashCommand("mute", "Mute a user")]
     [RequireUserPermission(GuildPermission.KickMembers)]
     [RequireBotPermission(GuildPermission.ManageRoles)]
     [RequireContext(ContextType.Guild)]
     public async Task Mute([Summary("user")] IUser user,
             [Summary("minutes")] int minutes = 5,
-            [Summary("reason")]string? reason = null)
+            [Summary("reason")] string? reason = null)
     {
         await Context.Channel.TriggerTypingAsync();
 
@@ -230,7 +230,7 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
                 await channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny));
             }
         }
-        
+
         MuteHelper.AddMute(new Mute { Guild = Context.Guild, User = guildUser, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
         await guildUser.AddRoleAsync(role);
         await RespondAsync(embed: EmbedHelper.GetEmbed("Muted", $"{guildUser.GetDisplayName()} has been muted for {minutes} minutes.\nReason: {reason ?? "None"}",
@@ -258,7 +258,7 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
         {
             await RespondAsync(embed: EmbedHelper.GetEmbed("Invalid permissions", "the muted role has a higher position than the bot!",
                 await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.ERROR_IMAGES))));
-            
+
             return;
         }
 
@@ -274,7 +274,7 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
         {
             await RespondAsync(embed: EmbedHelper.GetEmbed(title: "Not muted", "That user is not muted!",
                 await _guildService.GetEmbedColorAsync(Context), ImageLookup.GetImageUrl(nameof(ImageLookup.ERROR_IMAGES))));
-            
+
             return;
         }
 
@@ -295,7 +295,7 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
         await Context.Channel.TriggerTypingAsync();
 
         var channel = Context.Channel as SocketTextChannel;
-        if(channel == null)
+        if (channel == null)
         {
             await RespondAsync("This command only works in SocketTextChannels (this is a bug)!");
             _logger.LogError("SlowMode() tried to change the interval on a channel that is not a SocketTextChannel. This should not happen!!!!");
@@ -305,7 +305,7 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
         await channel.ModifyAsync(x => x.SlowModeInterval = interval);
         await RespondAsync(embed: EmbedHelper.GetEmbed("Slowmode", $"The SlowMode interval was adjusted to {interval} seconds!",
             await _guildService.GetEmbedColorAsync(Context)));
-        
+
 
         await _guildService.SendLogsAsync(Context.Guild, "Slow Mode", $"{Context.User.Mention} set slowmode interval to {interval} for {Context.Channel.Name}");
     }
@@ -339,5 +339,36 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
     {
         await _guildService.ClearLoggingChannelAsync(Context.Guild.Id);
         await RespondAsync("Cleared logging channel");
+    }
+
+    [SlashCommand("embedcolor", "Change embed color")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    [RequireContext(ContextType.Guild)]
+    public async Task EmbedColor(int r, int g, int b)
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var color = new Color(r, g, b);
+        var guild = await _guildService.LoadGuildAsync(Context.Guild.Id);
+        guild.EmbedColor = color.RawValue;
+        await _guildService.SaveGuildAsync(guild);
+
+        await RespondWithEmbedAsync("Embed Color Set", $"The embed color has been modified to `{color}`");
+        await SendLogsAsync("Embed Color Changed", $"{Context.User.GetDisplayName()} changed the embed color to '{color}'");
+    }
+
+    [SlashCommand("randomembedcolor", "Use a random embed color")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    [RequireContext(ContextType.Guild)]
+    public async Task RandomEmbedColor()
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var guild = await _guildService.LoadGuildAsync(Context.Guild.Id);
+        guild.EmbedColor = null;
+        await _guildService.SaveGuildAsync(guild);
+
+        await RespondWithEmbedAsync("Random Embed Color Set", $"The embed color has been set to a random color");
+        await SendLogsAsync("Random Embed Color Set", $"{Context.User.GetDisplayName()} change the embed color to random");
     }
 }

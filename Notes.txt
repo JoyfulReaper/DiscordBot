@@ -11,8 +11,9 @@ TODO: Reddit Module was skipped
 TODO: add weather command
 TODO: Find cross platform way to do the banner
 TODO: Easier way to lookup images (Maybe just use a const)
-TODO: Reporting system that reports invalid conditions to the development server/channel automaticly
-
+TODO: Reporting system that reports invalid conditions to the development 
+server/channel automaticly
+TODO: Change deleted to DateDeleted in the Note table
 
 Other notes:
 - At this time will not attempt any invite tracking
