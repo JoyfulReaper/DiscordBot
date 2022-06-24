@@ -35,4 +35,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="BotSettingId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6d7a9b28-e52c-4145-a13d-5146aac838af" ChangeDateTime="06/23/2022 02:45:37">
+    <Property Name="ElementName" Value="[dbo].[Warning].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Warning]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="WarningId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b9510011-a42b-474f-a39d-13a753418fc0" ChangeDateTime="06/23/2022 02:47:14">
+    <Property Name="ElementName" Value="[dbo].[Warning].[ServerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Warning]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="GuildId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1431ac99-2074-4bd5-afbc-accf4dbe44c4" ChangeDateTime="06/23/2022 02:50:01">
+    <Property Name="ElementName" Value="[dbo].[WarningAction].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[WarningAction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="WarningActionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c394318d-3ce7-407f-9a3a-2105f68f4431" ChangeDateTime="06/23/2022 02:55:35">
+    <Property Name="ElementName" Value="[dbo].[Warning].[Cleared]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Warning]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="DateCleared" />
+  </Operation>
 </Operations>
