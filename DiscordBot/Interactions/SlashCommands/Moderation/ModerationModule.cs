@@ -344,7 +344,9 @@ public class ModerationModule : DiscordBotModuleBase<SocketInteractionContext>
     [SlashCommand("embedcolor", "Change embed color")]
     [RequireUserPermission(GuildPermission.Administrator)]
     [RequireContext(ContextType.Guild)]
-    public async Task EmbedColor(int r, int g, int b)
+    public async Task EmbedColor([MaxValue(255)][MinValue(0)]int r,
+        [MaxValue(255)][MinValue(0)] int g,
+        [MaxValue(255)][MinValue(0)] int b)
     {
         await Context.Channel.TriggerTypingAsync();
 
