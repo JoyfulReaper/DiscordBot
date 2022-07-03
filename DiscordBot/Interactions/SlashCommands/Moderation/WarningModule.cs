@@ -104,22 +104,27 @@ public class WarningModule : DiscordBotModuleBase<SocketInteractionContext>
     [RequireContext(ContextType.Guild)]
     public async Task Warn(IUser user, string? reason = null)
     {
-        await Context.Channel.TriggerTypingAsync();
-        var message = "";
+        var guildUser = user as SocketGuildUser;
+        if (guildUser == null)
+        {
+            await RespondAsync("Something went wrong....");
+            _logger.LogWarning("Warn() tried to warn an IUser that wasn't an IGuildUser. This should not happen!!!!");
+            return;
+        }
 
-        if (user.Id == _discordClient.CurrentUser.Id)
+        var preMessage = "";
+        var postMessage = "";
+        
+        await Context.Channel.TriggerTypingAsync();
+
+        if (guildUser.Id == _discordClient.CurrentUser.Id)
         {
             await RespondAsync("Nice try, but I am immune from warnings!");
             return;
         }
 
-        if (user.Id == Context.User.Id)
-        {
-            message += "Lol, you are warning yourself!\n";
-        }
-
         var guild = await _guildService.LoadGuildAsync(Context.Guild.Id);
-        var userDb = await _userService.LoadUserAsync(user.Id);
+        var userDb = await _userService.LoadUserAsync(guildUser.Id);
 
         var warning = new Warning
         {
@@ -139,45 +144,44 @@ public class WarningModule : DiscordBotModuleBase<SocketInteractionContext>
                 Action = WarnAction.NoAction,
                 ActionThreshold = 1
             };
-            message += $"{Context.User.Mention}: NOTE! The warning action has not been set!\n";
+            postMessage += $"\n\n{Context.User.Mention}: NOTE! The warning action has not been set!";
         }
 
-        await RespondWithEmbedAsync("You have been warned!", $"{user.Mention} you have been warned for: `{reason}`!\n" +
-            $"This is warning #`{warn.Count()}` of `{wAction.ActionThreshold}`\n" +
-            $"The action is set to: { Enum.GetName(typeof(WarningAction), wAction.Action)}");
-       
-        var guildUser = user as SocketGuildUser;
-
-        if (guildUser == null)
+        if (guildUser.Id == Context.User.Id)
         {
-            await RespondAsync("Something went wrong....");
-            _logger.LogWarning("Warn() tried to warn an IUser that wasn't an IGuildUser. This should not happen!!!!");
-            return;
+            preMessage += "**Lol, you are warning yourself!**\n\n";
         }
 
+        var actionMessage = "";
         if (warn.Count() >= wAction.ActionThreshold)
         {
-            var response = $"The maximum number of warnings has been reached, because of the warn action ";
+            actionMessage += $"The maximum number of warnings has been reached, because of the warn action ";
             switch (wAction.Action)
             {
                 case WarnAction.NoAction:
-                    response += "nothing happens.";
+                    actionMessage += "nothing happens.";
                     break;
                 case WarnAction.Kick:
-                    message += $"{guildUser.GetDisplayName()} has been kicked.";
+                    actionMessage += $"{guildUser.GetDisplayName()} has been kicked.";
                     await guildUser.KickAsync("Maximum Warnings Reached!");
                     break;
                 case WarnAction.Ban:
-                    message += $"{guildUser.GetDisplayName()} has been banned.";
+                    actionMessage += $"{guildUser.GetDisplayName()} has been banned.";
                     await guildUser.BanAsync(0, "Maximum Warnings Reached!");
                     break;
                 default:
-                    message += "default switch statement :(";
+                    actionMessage += "default switch statement :(";
                     break;
             }
-
-            await RespondAsync(message);
         }
-        await SendLogsAsync($"User Warned", $"{Context.User.Mention} warned {guildUser.GetDisplayName()} for: {reason}", ImageLookup.GetImageUrl("LOGGING_IMAGES"));
+
+        await RespondWithEmbedAsync("You have been warned!", $"{preMessage}{guildUser.Mention} you have been warned for: `{reason ?? "no reason"}`!\n" +
+            $"This is warning #`{warn.Count()}` of `{wAction.ActionThreshold}`\n\n" +
+            $"The action is set to: { Enum.GetName(typeof(WarnAction), wAction.Action)}" +
+            $"\n\n{actionMessage}" +
+            $"{postMessage}");
+
+        await SendLogsAsync($"User Warned", $"{Context.User.Mention} warned {guildUser.GetDisplayName()} for: {reason ?? "no reason"}", 
+            ImageLookup.GetImageUrl(nameof(ImageLookup.LOGGING_IMAGES)));
     }
 }
