@@ -181,7 +181,7 @@ public class WarningModule : DiscordBotModuleBase<SocketInteractionContext>
             $"\n\n{actionMessage}" +
             $"{postMessage}");
 
-        await SendLogsAsync($"User Warned", $"{Context.User.Mention} warned {guildUser.GetDisplayName()} for: {reason ?? "no reason"}", 
+        await SendLogsAsync($"User Warned", $"{Context.User.Mention} warned {guildUser.GetDisplayName()} for: `{reason ?? "no reason"}`", 
             ImageLookup.GetImageUrl(nameof(ImageLookup.LOGGING_IMAGES)));
     }
 }

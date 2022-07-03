@@ -30,8 +30,8 @@ namespace DiscordBotLib.Models;
 
 public class Mute
 {
-    public SocketGuild Guild { get; set; }
-    public SocketGuildUser User { get; set; }
-    public IRole Role { get; set; }
+    public SocketGuild Guild { get; set; } = null!;
+    public SocketGuildUser User { get; set; } = null!;
+    public IRole Role { get; set; } = null!;
     public DateTime End { get; set; }
 }

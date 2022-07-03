@@ -32,7 +32,7 @@ namespace DiscordBot.Interactions.SlashCommands.General
     public class Pomodoro
     {
         public SocketGuild? Guild { get; set; }
-        public SocketUser User { get; set; }
+        public SocketUser User { get; set; } = null!;
         public SocketChannel? Channel { get; set; }
         public DateTime End { get; set; }
         public string TimerType { get; set; } = string.Empty;

@@ -70,7 +70,13 @@ public class BannerImageService : IBannerImageService
         avatar = ClipImageToCircle(avatar);
 
         var bitmap = avatar as Bitmap;
-        bitmap?.MakeTransparent();
+        if (bitmap == null)
+        {
+            _logger.LogError("Failed to cast avatar to bitmap");
+            throw new Exception("CreateImage(): Failed to cast avatar to bitmap");
+        }
+
+        bitmap.MakeTransparent();
 
         var banner = CopyRegionIntoImage(bitmap, background);
         banner = DrawTextToImage(banner, $"{user.Username}#{user.Discriminator} joined the server", $"Member #{ user.Guild.MemberCount}");

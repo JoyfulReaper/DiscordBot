@@ -9,6 +9,6 @@ public class UserTimezone
 {
     public long UserTimezoneId{ get; set; }
     public long UserId { get; set; }
-    public string TimeZone { get; set; }
+    public string TimeZone { get; set; } = null!;
     public DateTime DateCreated { get; set; }
 }
