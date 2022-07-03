@@ -84,6 +84,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITimezoneService, TimezoneService>();
         services.AddScoped<IBotSettingRepository, BotSettingRepository>();
         services.AddScoped<IBotSettingService, BotSettingService>();
+        services.AddScoped<IWarningRepository, WarningRepository>();
+        services.AddScoped<IWarningService, WarningService>();
+        
 
 
 

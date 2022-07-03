@@ -23,16 +23,61 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Dapper;
+using DiscordBotLibrary.Models;
+using DiscordBotLibrary.Repositories.Interfaces;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBotLibrary.Repositories;
 
-public class WarningRepository
+public class WarningRepository : IWarningRepository
 {
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
 
+    public WarningRepository(IConfiguration config)
+    {
+        _config = config;
+        _connectionString = _config.GetConnectionString("DiscordBot");
+    }
+
+    public async Task ClearWarningsAsync(long userId, long guildId)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        await connection.ExecuteAsync("spWarning_Clear", new { userId, guildId }, commandType: CommandType.StoredProcedure);
+
+    }
+
+    public async Task<IEnumerable<Warning>> GetWarningsAsync(long userId, long guildId)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        var warnings = await connection.QueryAsync<Warning>("spWarning_Get", new { userId, guildId }, commandType: CommandType.StoredProcedure);
+        return warnings;
+    }
+
+    public async Task AddWarningAsync(Warning warning)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        await connection.ExecuteAsync("spWarning_Add", new 
+            { 
+                UserId = warning.UserId, 
+                GuildId = warning.GuildId,
+                Text = warning.Text                
+            }, commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task<WarningAction?> GetWarningActionAsync(long guildId)
+    { 
+        using var connection = new SqlConnection(_connectionString);
+        var wAction = await connection.QuerySingleOrDefaultAsync<WarningAction>("spWarningAction_Get", new { guildId }, commandType: CommandType.StoredProcedure);
+        return wAction;
+    }
 }

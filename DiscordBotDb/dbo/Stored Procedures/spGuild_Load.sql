@@ -18,5 +18,5 @@ BEGIN
 	FROM
 	[dbo].[Guild]
 	WHERE
-		[DiscordGuildId] = @DiscordGuildId
+		[DiscordGuildId] = @DiscordGuildId;
 END	

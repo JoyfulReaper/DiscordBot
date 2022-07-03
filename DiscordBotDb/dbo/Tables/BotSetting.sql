@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[BotSetting]
 (
 	[BotSettingId] BIGINT NOT NULL PRIMARY KEY IDENTITY, 
-    [Token] VARCHAR(60) NULL, 
+    [Token] VARCHAR(71) NULL, 
     [Game] VARCHAR(100) NULL
 )
