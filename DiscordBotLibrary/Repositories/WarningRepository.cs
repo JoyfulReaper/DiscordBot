@@ -78,6 +78,15 @@ public class WarningRepository : IWarningRepository
     {
         using var connection = new SqlConnection(_connectionString);
         var wAction = await connection.QuerySingleOrDefaultAsync<WarningAction>("spWarningAction_Get", new { guildId }, commandType: CommandType.StoredProcedure);
+        if (wAction == null)
+        {
+            wAction = new WarningAction()
+            {
+                Action = Enums.WarnAction.NoAction,
+                GuildId = guildId,
+                ActionThreshold = 1
+            };
+        }
         return wAction;
     }
 

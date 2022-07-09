@@ -206,4 +206,16 @@ public class WarningModule : DiscordBotModuleBase<SocketInteractionContext>
             await SendLogsAsync("Warn Action Set", message, ImageLookup.GetImageUrl("LOGGING_IMAGES"));
             await RespondWithEmbedAsync("Warn Action Set", $"Warn action set to: `{action}`. Threshold set to: `{maxWarns}`");
     }
+
+    [SlashCommand("displayaction", "Display warning action")]
+    [RequireContext(ContextType.Guild)]
+    public async Task GetWarningActionAsync()
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var guild = await _guildService.LoadGuildAsync(Context.Guild.Id);
+        var warningAction = await _warningService.GetWarningActionAsync(guild.GuildId);
+
+        await RespondWithEmbedAsync("Warning Action", $"Warning Action is currently set to: `{warningAction!.Action}`. Threshold set to: `{warningAction.ActionThreshold}`");
+    }
 }
