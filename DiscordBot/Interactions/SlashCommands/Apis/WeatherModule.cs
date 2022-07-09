@@ -30,7 +30,7 @@ public class WeatherModule : DiscordBotModuleBase<SocketInteractionContext>
 
 
     [SlashCommand("weather", "Get current weather")]
-    public async Task GetWeather()
+    public async Task GetWeather(string place)
     {
         await Context.Channel.TriggerTypingAsync();
 
@@ -38,6 +38,10 @@ public class WeatherModule : DiscordBotModuleBase<SocketInteractionContext>
 
         var client = _httpClient.CreateClient();
         client.BaseAddress = new Uri($"http://api.weatherapi.com/");
-        var test = await client.GetFromJsonAsync<WeatherForecast>($"v1/current.json?key={_config["weatherApi_com_key"]}");
+        //var response = await client.GetAsync($"v1/current.json?key={_config["weatherApi_com_key"]}&q={place}");
+        //var test = await client.GetFromJsonAsync<WeatherForecast>($"v1/current.json?key={_config["weatherApi_com_key"]}");
+        weatherForecast = await client.GetFromJsonAsync<WeatherForecast>($"v1/current.json?key={_config["weatherApi_com_key"]}&q={place}");
+
+        await RespondAsync(weatherForecast.current.temp_f.ToString());
     }
 }
