@@ -66,18 +66,32 @@ public class WarningRepository : IWarningRepository
     public async Task AddWarningAsync(Warning warning)
     {
         using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync("spWarning_Add", new 
-            { 
-                UserId = warning.UserId, 
-                GuildId = warning.GuildId,
-                Text = warning.Text                
-            }, commandType: CommandType.StoredProcedure);
+        await connection.ExecuteAsync("spWarning_Add", new
+        {
+            UserId = warning.UserId,
+            GuildId = warning.GuildId,
+            Text = warning.Text
+        }, commandType: CommandType.StoredProcedure);
     }
 
     public async Task<WarningAction?> GetWarningActionAsync(long guildId)
-    { 
+    {
         using var connection = new SqlConnection(_connectionString);
         var wAction = await connection.QuerySingleOrDefaultAsync<WarningAction>("spWarningAction_Get", new { guildId }, commandType: CommandType.StoredProcedure);
         return wAction;
+    }
+
+    public async Task SetWarningActionAsync(WarningAction action)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        var warnActionId = await connection.QuerySingleAsync<long>("spWarningAction_Upsert", new
+        {
+            WarningActionId = action.WarningActionId,
+            GuildId = action.GuildId,
+            Action = action.Action,
+            ActionThreshold = action.ActionThreshold
+        },
+            commandType: CommandType.StoredProcedure);
+        action.WarningActionId = warnActionId;
     }
 }

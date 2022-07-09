@@ -15,7 +15,7 @@ TODO: Reporting system that reports invalid conditions to the development
 server/channel automaticly
 TODO: Change deleted to DateDeleted in the Note table
 TODO: Capture userId regardless of command type
-
+TODO: Check why new tokens are invalid (valid when manually entered in DB)
 
 Other notes:
 - At this time will not attempt any invite tracking

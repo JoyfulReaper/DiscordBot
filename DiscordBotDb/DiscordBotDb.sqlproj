@@ -84,6 +84,7 @@
     <Build Include="dbo\Stored Procedures\spWarning_Get.sql" />
     <Build Include="dbo\Stored Procedures\spWarning_Add.sql" />
     <Build Include="dbo\Stored Procedures\spWarningAction_Get.sql" />
+    <Build Include="dbo\Stored Procedures\spWarningAction_Upsert.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="DiscordBotDb.refactorlog" />

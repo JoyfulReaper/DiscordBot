@@ -36,5 +36,9 @@ namespace DiscordBotLibrary.Services
         { 
             return _warningRepository.GetWarningActionAsync(guildId);
         }
+        public Task SetWarningActionAsync(WarningAction action)
+        { 
+            return _warningRepository.SetWarningActionAsync(action);
+        }
     }
 }

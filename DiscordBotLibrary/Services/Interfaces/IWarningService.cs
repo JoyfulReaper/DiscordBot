@@ -9,4 +9,5 @@ public interface IWarningService
     Task<IEnumerable<Warning>> GetWarningsAsync(long userId, long guildId);
     Task AddWarningAsync(Warning warning);
     Task<WarningAction?> GetWarningActionAsync(long guildId);
+    Task SetWarningActionAsync(WarningAction action);
 }

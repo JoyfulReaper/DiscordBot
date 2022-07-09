@@ -54,6 +54,6 @@ public static class ColorHelper
 
     public static Color RandomColor()
     {
-        return new Color(_random.Next(256 + 1), _random.Next(256 + 1), _random.Next(256 + 1));
+        return new Color(_random.Next(256), _random.Next(256), _random.Next(256));
     }
 }

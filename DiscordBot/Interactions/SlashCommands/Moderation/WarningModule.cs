@@ -46,7 +46,7 @@ public class WarningModule : DiscordBotModuleBase<SocketInteractionContext>
     private readonly IDiscordClient _discordClient;
     private readonly ILogger<WarningModule> _logger;
 
-    public WarningModule(IGuildService guildService, IUserService userService, 
+    public WarningModule(IGuildService guildService, IUserService userService,
         IWarningService warningService, DiscordSocketClient discordClient, ILogger<WarningModule> logger) : base(guildService)
     {
         _guildService = guildService;
@@ -114,7 +114,7 @@ public class WarningModule : DiscordBotModuleBase<SocketInteractionContext>
 
         var preMessage = "";
         var postMessage = "";
-        
+
         await Context.Channel.TriggerTypingAsync();
 
         if (guildUser.Id == _discordClient.CurrentUser.Id)
@@ -181,7 +181,29 @@ public class WarningModule : DiscordBotModuleBase<SocketInteractionContext>
             $"\n\n{actionMessage}" +
             $"{postMessage}");
 
-        await SendLogsAsync($"User Warned", $"{Context.User.Mention} warned {guildUser.GetDisplayName()} for: `{reason ?? "no reason"}`", 
+        await SendLogsAsync($"User Warned", $"{Context.User.Mention} warned {guildUser.GetDisplayName()} for: `{reason ?? "no reason"}`",
             ImageLookup.GetImageUrl(nameof(ImageLookup.LOGGING_IMAGES)));
+    }
+
+    [SlashCommand("action", "Change the warn action")]
+    [RequireUserPermission(GuildPermission.BanMembers)]
+    [RequireBotPermission(GuildPermission.BanMembers)]
+    [RequireContext(ContextType.Guild)]
+    public async Task WarnActionAsync(WarnAction action, int maxWarns)
+    {
+        await Context.Channel.TriggerTypingAsync();
+
+        var guild = await _guildService.LoadGuildAsync(Context.Guild.Id);
+
+        var message = $"Warn action set to `{action}`, Max Warnings {maxWarns} by {Context.User.GetDisplayName()}";
+        WarningAction warningAction = new WarningAction()
+        {
+            GuildId = guild.GuildId,
+            Action = action,
+            ActionThreshold = maxWarns
+        };
+            await _warningService.SetWarningActionAsync(warningAction);
+            await SendLogsAsync("Warn Action Set", message, ImageLookup.GetImageUrl("LOGGING_IMAGES"));
+            await RespondWithEmbedAsync("Warn Action Set", $"Warn action set to: `{action}`. Threshold set to: `{maxWarns}`");
     }
 }
